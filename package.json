@@ -9,9 +9,20 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "express": "^4.19.2",
     "express-handlebars": "^7.1.3",
     "express-handlebars-sections": "^1.0.2"
+=======
+    "@supabase/supabase-js": "^2.76.1",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "express": "^4.19.2",
+    "express-handlebars": "^7.1.3",
+    "express-handlebars-sections": "^1.0.1",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.16.3"
+>>>>>>> aef1ad41ad750e718d2a00cd5ab4bef315c3c86c
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

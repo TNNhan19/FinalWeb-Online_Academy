@@ -191,17 +191,4 @@ body{
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(13,110,253,0.25);
 }
-/* === Fixed Header Setup === */
-body {
-  padding-top: 80px; /* tùy chiều cao thật của header */
-}
-
-.main-header {
-  position: fixed;   /* thay vì sticky để luôn hiển thị khi cuộn */
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1050;     /* cao hơn nội dung khác */
-}
-
 

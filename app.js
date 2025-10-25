@@ -4,12 +4,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import hbs_sections from "express-handlebars-sections";
 
+import homeRoute from "./routes/home.route.js";
+import authRoutes from "./routes/auth.route.js";  // chỉ 1 lần
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// Cấu hình Handlebars
 app.engine("hbs", engine({
-  extname: "hbs",
+  extname: ".hbs",
   helpers: {
     section: hbs_sections(),
     year: () => new Date().getFullYear()
@@ -18,13 +20,14 @@ app.engine("hbs", engine({
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
 
-// Static files (CSS, JS, Images)
-app.use(express.static(path.join(__dirname, "public")));
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "Public"))); // chữ P hoa
 
-// Route chính
-import homeRoute from "./routes/home.route.js";
+// Routes
 app.use("/", homeRoute);
+app.use("/auth", authRoutes);
 
-// Chạy server
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
