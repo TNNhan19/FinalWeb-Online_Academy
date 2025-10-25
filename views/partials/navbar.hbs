@@ -1,4 +1,4 @@
-<header class="main-header py-3 border-bottom shadow-sm bg-body sticky-top">
+<header class="main-header py-3 border-bottom shadow-sm bg-body fixed-top">
   <div class="container-xxl d-flex align-items-center justify-content-between">
 
     <!-- Khối bên trái: thanh tìm kiếm -->
@@ -21,4 +21,13 @@
       <a href="/auth/register" class="btn btn-primary rounded-pill px-3">Đăng ký</a>
     </div>
   </div>
+  {{!-- <script>
+    function setHeaderSpacer() {
+      const header = document.querySelector('.main-header');
+      const h = header?.offsetHeight || 0;
+      document.documentElement.style.setProperty('--header-h', h + 'px');
+    }
+    window.addEventListener('load', setHeaderSpacer);
+    window.addEventListener('resize', setHeaderSpacer);
+  </script> --}}
 </header>
