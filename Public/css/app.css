@@ -1,0 +1,194 @@
+html {
+  font-size: clamp(15px, 1.2vw + 0.5rem, 18px);
+}
+/* ==== Base / Layout ==== */
+:root{
+  --brand-500:#0d6efd;
+  --brand-600:#0b5ed7;
+  --ink-900:#0f172a;
+  --ink-700:#334155;
+  --muted:#6b7280;
+  --bg:#f4f7fb;
+  --card:#ffffff;
+}
+
+html, body { height: 100%; }
+body{
+  background: var(--bg);
+  color: var(--ink-900);
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* scale font lên trên màn hình lớn để bớt “nhỏ xíu” */
+@media (min-width: 1200px){ html{ font-size: 17px; } }
+@media (min-width: 1400px){ html{ font-size: 18px; } }
+
+/* container rộng giống mockup */
+.container-xxl{ max-width: 1360px; }
+
+/* ==== Hero / Chips ==== */
+.home-hero{
+  background: linear-gradient(180deg,#0E3C6E 0%, #123B60 100%);
+  color:#fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 24px rgba(16,24,40,.08);
+}
+.home-hero h4{ letter-spacing:.3px; }
+.filters .btn{
+  background: rgba(255,255,255,.98);
+  border: 0;
+  border-radius: 999px;
+  padding: .5rem 1rem;
+  box-shadow: 0 4px 12px rgba(16,24,40,.08);
+  white-space: nowrap;
+}
+.filters .btn:focus,
+.filters .btn:hover{ transform: translateY(-1px); }
+
+/* ==== Sidebar cards ==== */
+.top-4{ top: 1rem; }
+.sidebar-card .card-header{
+  background: var(--card);
+  border-bottom: 1px solid #eef2f7;
+}
+.list-group-item{
+  background: var(--card);
+  border: 0;
+  padding: .75rem 1rem;
+}
+.xsmall{ font-size: .8rem; }
+
+/* ==== Course cards (giữa) ==== */
+.object-fit-cover{ object-fit: cover; }
+.course-card{
+  background: var(--card);
+  border: 0;
+  border-radius: 1rem;
+  box-shadow: 0 10px 24px rgba(16,24,40,.08);
+}
+.course-card .two-lines{
+ display: -webkit-box;        /* Cho Safari/Chrome */
+  display: box;                /* Cho spec cũ */
+  -webkit-box-orient: vertical;
+  box-orient: vertical;
+  overflow: hidden;
+
+  /* Chuẩn hiện đại */
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+.badge-lock{
+  background: #e7f1ff;
+  color: var(--brand-600);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: .35rem .75rem;
+}
+}
+.text-muted{ color: var(--muted)!important; }
+.bi-star-fill{ color:#f5a524; }
+
+/* ==== Pager dots ==== */
+.pager-dots .dot{
+  width: 12px; height:12px; border-radius: 50%;
+  background: #cfd6df; display:inline-block;
+}
+.pager-dots .dot.active{ background: var(--brand-500); }
+/* ==== Buttons ==== */
+.btn-brand{
+  background: var(--brand-500);
+  border: 0;
+  color:#fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(13,110,253,.3);
+}
+/* === Ảnh và card tự fit khung === */
+.course-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Đảm bảo ảnh luôn vừa khung */
+.object-fit-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* Cho filter button trượt ngang khi khung nhỏ */
+.filters {
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-snap-type: x mandatory;
+}
+
+.filters .btn {
+  scroll-snap-align: start;
+}
+@media (max-width: 991.98px) {
+  /* Ẩn sidebar phải khi nhỏ hơn tablet */
+  aside.col-xl-3:last-child {
+    display: none;
+  }
+  .home-hero h4 {
+    font-size: 1.1rem;
+  }
+  .filters .btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .home-hero {
+    padding: 1.5rem 1rem;
+  }
+  .course-card h6 {
+    font-size: 0.95rem;
+  }
+  .course-card .btn {
+    font-size: 0.8rem;
+  }
+}
+
+/* === Header & Branding === */
+.main-header {
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+/* Logo nổi bật */
+.brand-logo {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-size: clamp(1.8rem, 2vw + 1rem, 2.6rem);
+  text-transform: uppercase;
+}
+
+.brand-name {
+  color: #0d6efd;
+  text-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.brand-academy {
+  color: #111827;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Nút đăng nhập / đăng ký */
+.main-header .btn {
+  font-weight: 500;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+.main-header .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13,110,253,0.25);
+}
+
