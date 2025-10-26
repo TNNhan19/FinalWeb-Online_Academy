@@ -7,5 +7,7 @@ export const pool = new Pool({
   user: "postgres",            
   password: "ndbcbzxoqstwxhjgwpyj",  
   database: "postgres",  
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false 
+    
+  },
 });
