@@ -1,5 +1,5 @@
 import express from "express";
-import { pool } from "../configs/db.js";
+import db from "../configs/db.js";
 
 const router = express.Router();
 
@@ -14,18 +14,18 @@ function ensureAdmin(req, res, next) {
 // ===================
 router.get("/", ensureAdmin, async (req, res) => {
   const [catCount, courseCount, instructorCount, studentCount] = await Promise.all([
-    pool.query("SELECT COUNT(*) FROM categories"),
-    pool.query("SELECT COUNT(*) FROM courses"),
-    pool.query("SELECT COUNT(*) FROM instructors"),
-    pool.query("SELECT COUNT(*) FROM students"),
+    db.query("SELECT COUNT(*) FROM categories"),
+    db.query("SELECT COUNT(*) FROM courses"),
+    db.query("SELECT COUNT(*) FROM instructors"),
+    db.query("SELECT COUNT(*) FROM students"),
   ]);
   res.render("admin/dashboard", {
     pageTitle: "Bảng điều khiển quản trị",
     stats: {
-      categories: catCount.rows[0].count,
-      courses: courseCount.rows[0].count,
-      instructors: instructorCount.rows[0].count,
-      students: studentCount.rows[0].count,
+      categories: catCount[0].count,
+      courses: courseCount[0].count,
+      instructors: instructorCount[0].count,
+      students: studentCount[0].count,
     },
   });
 });
@@ -34,13 +34,13 @@ router.get("/", ensureAdmin, async (req, res) => {
 // QUẢN LÝ LĨNH VỰC
 // ===================
 router.get("/categories", ensureAdmin, async (req, res) => {
-  const { rows } = await pool.query("SELECT * FROM categories ORDER BY category_id ASC");
+  const rows = await db.query("SELECT * FROM categories ORDER BY category_id ASC");
   res.render("admin/categories", { pageTitle: "Quản lý lĩnh vực", categories: rows });
 });
 
 router.post("/categories", ensureAdmin, async (req, res) => {
   const { name, parent_id } = req.body;
-  await pool.query("INSERT INTO categories (name, parent_id) VALUES ($1, $2)", [
+  await db.query("INSERT INTO categories (name, parent_id) VALUES ($1, $2)", [
     name,
     parent_id || null,
   ]);
@@ -49,17 +49,17 @@ router.post("/categories", ensureAdmin, async (req, res) => {
 
 router.post("/categories/delete/:id", ensureAdmin, async (req, res) => {
   const { id } = req.params;
-  const { rows } = await pool.query("SELECT 1 FROM courses WHERE category_id = $1 LIMIT 1", [id]);
+  const rows = await db.query("SELECT 1 FROM courses WHERE category_id = $1 LIMIT 1", [id]);
   if (rows.length > 0)
     return res.send("❌ Không thể xoá lĩnh vực vì đã có khoá học liên kết.");
-  await pool.query("DELETE FROM categories WHERE category_id = $1", [id]);
+  await db.query("DELETE FROM categories WHERE category_id = $1", [id]);
   res.redirect("/admin/categories");
 });
 
 router.post("/categories/update/:id", ensureAdmin, async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
-  await pool.query("UPDATE categories SET name=$1 WHERE category_id=$2", [name, id]);
+  await db.query("UPDATE categories SET name=$1 WHERE category_id=$2", [name, id]);
   res.redirect("/admin/categories");
 });
 
@@ -74,12 +74,12 @@ router.get("/courses", ensureAdmin, async (req, res) => {
     LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
     LEFT JOIN categories cat ON c.category_id = cat.category_id
     ORDER BY c.course_id DESC`;
-  const { rows } = await pool.query(q);
+  const rows = await db.query(q);
   res.render("admin/courses", { pageTitle: "Quản lý khoá học", courses: rows });
 });
 
 router.post("/courses/delete/:id", ensureAdmin, async (req, res) => {
-  await pool.query("DELETE FROM courses WHERE course_id = $1", [req.params.id]);
+  await db.query("DELETE FROM courses WHERE course_id = $1", [req.params.id]);
   res.redirect("/admin/courses");
 });
 
@@ -87,8 +87,8 @@ router.post("/courses/delete/:id", ensureAdmin, async (req, res) => {
 // QUẢN LÝ NGƯỜI DÙNG
 // ===================
 router.get("/users", ensureAdmin, async (req, res) => {
-  const instructors = (await pool.query("SELECT * FROM instructors")).rows;
-  const students = (await pool.query("SELECT * FROM students")).rows;
+  const instructors = await db.query("SELECT * FROM instructors");
+  const students = await db.query("SELECT * FROM students");
   res.render("admin/users", {
     pageTitle: "Danh sách người dùng",
     instructors,

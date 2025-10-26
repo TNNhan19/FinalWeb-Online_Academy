@@ -1,5 +1,5 @@
 import express from "express";
-import { pool } from "../configs/db.js";
+import db from "../configs/db.js";
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get("/dashboard", ensureInstructor, async (req, res) => {
     JOIN instructors i ON c.instructor_id = i.instructor_id
     WHERE i.account_id = $1
     ORDER BY c.created_at DESC`;
-  const { rows } = await pool.query(q, [account_id]);
+  const rows = await db.query(q, [account_id]);
   res.render("instructor/dashboard", { pageTitle: "Khoá học của tôi", courses: rows });
 });
 
@@ -34,7 +34,7 @@ router.get("/new", ensureInstructor, (req, res) => {
 
 router.post("/new", ensureInstructor, async (req, res) => {
   const { account_id } = req.user;
-  const { rows: inst } = await pool.query(
+  const inst = await db.query(
     "SELECT instructor_id FROM instructors WHERE account_id = $1",
     [account_id]
   );
@@ -42,7 +42,7 @@ router.post("/new", ensureInstructor, async (req, res) => {
 
   const { title, description, image_url, category_id, total_hours, total_lectures, current_price, original_price } = req.body;
 
-  await pool.query(
+  await db.query(
     `INSERT INTO courses (title, description, image_url, instructor_id, category_id, total_hours, total_lectures, current_price, original_price)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
     [title, description, image_url, inst[0].instructor_id, category_id || null, total_hours || 0, total_lectures || 0, current_price, original_price]
@@ -63,19 +63,19 @@ router.get("/edit/:id", ensureInstructor, async (req, res) => {
     FROM courses c
     JOIN instructors i ON c.instructor_id = i.instructor_id
     WHERE c.course_id = $1 AND i.account_id = $2`;
-  const { rows } = await pool.query(q, [id, account_id]);
+  const rows = await db.query(q, [id, account_id]);
   if (!rows[0]) return res.status(404).send("Không tìm thấy khoá học.");
 
   const course = rows[0];
-  const sections = (await pool.query("SELECT * FROM course_sections WHERE course_id = $1 ORDER BY order_index", [id])).rows;
-  const lectures = (await pool.query(
+  const sections = await db.query("SELECT * FROM course_sections WHERE course_id = $1 ORDER BY order_index", [id]);
+  const lectures = await db.query(
     `SELECT l.*, s.title AS section_title 
      FROM lectures l 
      JOIN course_sections s ON s.section_id = l.section_id 
      WHERE s.course_id = $1 
      ORDER BY s.order_index, l.order_index`,
     [id]
-  )).rows;
+  );
 
   res.render("instructor/course_form", { pageTitle: "Cập nhật khoá học", course, sections, lectures });
 });
@@ -84,7 +84,7 @@ router.post("/edit/:id", ensureInstructor, async (req, res) => {
   const { id } = req.params;
   const { title, description, image_url, total_hours, total_lectures, current_price, original_price } = req.body;
 
-  await pool.query(
+  await db.query(
     `UPDATE courses SET title=$1, description=$2, image_url=$3,
      total_hours=$4, total_lectures=$5, current_price=$6, original_price=$7
      WHERE course_id=$8`,
@@ -99,7 +99,7 @@ router.post("/edit/:id", ensureInstructor, async (req, res) => {
 router.post("/section/:course_id", ensureInstructor, async (req, res) => {
   const { course_id } = req.params;
   const { title, order_index } = req.body;
-  await pool.query(
+  await db.query(
     "INSERT INTO course_sections (course_id, title, order_index) VALUES ($1,$2,$3)",
     [course_id, title, order_index || 1]
   );
@@ -109,7 +109,7 @@ router.post("/section/:course_id", ensureInstructor, async (req, res) => {
 router.post("/lecture/:section_id", ensureInstructor, async (req, res) => {
   const { section_id } = req.params;
   const { title, video_url, duration, is_preview, order_index } = req.body;
-  await pool.query(
+  await db.query(
     `INSERT INTO lectures (section_id, title, video_url, duration, is_preview, order_index)
      VALUES ($1,$2,$3,$4,$5,$6)`,
     [section_id, title, video_url, duration, is_preview === "on", order_index || 1]
@@ -122,14 +122,14 @@ router.post("/lecture/:section_id", ensureInstructor, async (req, res) => {
 // ====================
 router.get("/profile", ensureInstructor, async (req, res) => {
   const { account_id } = req.user;
-  const { rows } = await pool.query("SELECT * FROM instructors WHERE account_id = $1", [account_id]);
+  const rows = await db.query("SELECT * FROM instructors WHERE account_id = $1", [account_id]);
   res.render("instructor/profile", { pageTitle: "Hồ sơ giảng viên", profile: rows[0] });
 });
 
 router.post("/profile", ensureInstructor, async (req, res) => {
   const { account_id } = req.user;
   const { name, bio } = req.body;
-  await pool.query(
+  await db.query(
     `UPDATE instructors SET name=$1, bio=$2 WHERE account_id=$3`,
     [name, bio, account_id]
   );
