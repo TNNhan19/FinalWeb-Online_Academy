@@ -1,0 +1,29 @@
+<h4 class="mb-3">📚 Quản lý lĩnh vực</h4>
+
+<form method="POST" class="row g-2 mb-4">
+  <div class="col-md-6"><input name="name" class="form-control" placeholder="Tên lĩnh vực mới" required></div>
+  <div class="col-md-3"><input name="parent_id" type="number" class="form-control" placeholder="ID cha (nếu có)"></div>
+  <div class="col-md-3"><button class="btn btn-primary w-100">Thêm</button></div>
+</form>
+
+<table class="table table-striped">
+  <thead><tr><th>ID</th><th>Tên</th><th>Cha</th><th>Hành động</th></tr></thead>
+  <tbody>
+    {{#each categories}}
+    <tr>
+      <td>{{category_id}}</td>
+      <td>{{name}}</td>
+      <td>{{parent_id}}</td>
+      <td>
+        <form method="POST" action="/admin/categories/update/{{category_id}}" class="d-inline">
+          <input name="name" placeholder="Tên mới" class="form-control d-inline w-auto" required>
+          <button class="btn btn-sm btn-outline-success">Sửa</button>
+        </form>
+        <form method="POST" action="/admin/categories/delete/{{category_id}}" class="d-inline">
+          <button class="btn btn-sm btn-outline-danger">Xoá</button>
+        </form>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

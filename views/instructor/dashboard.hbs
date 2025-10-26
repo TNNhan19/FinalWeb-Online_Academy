@@ -1,0 +1,21 @@
+<h4 class="mb-3">📚 Khoá học của tôi</h4>
+<div class="text-end mb-3">
+  <a href="/instructor/new" class="btn btn-primary">+ Đăng khoá học mới</a>
+</div>
+
+<table class="table table-hover align-middle">
+  <thead>
+    <tr><th>Tiêu đề</th><th>Danh mục</th><th>Giá</th><th>Ngày tạo</th><th></th></tr>
+  </thead>
+  <tbody>
+    {{#each courses}}
+    <tr>
+      <td>{{title}}</td>
+      <td>{{category_name}}</td>
+      <td>{{current_price}}$</td>
+      <td>{{created_at}}</td>
+      <td><a href="/instructor/edit/{{course_id}}" class="btn btn-sm btn-outline-primary">Sửa</a></td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

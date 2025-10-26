@@ -1,0 +1,77 @@
+{{#section "head"}}
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js"></script>
+{{/section}}
+
+<h4 class="mb-3">{{#if isNew}}Đăng khóa học mới{{else}}Chỉnh sửa khóa học{{/if}}</h4>
+
+<form method="POST">
+  <div class="row g-3">
+    <div class="col-md-8">
+      <label class="form-label">Tiêu đề</label>
+      <input name="title" class="form-control" value="{{course.title}}" required>
+
+      <label class="form-label mt-2">Mô tả ngắn</label>
+      <textarea name="short_desc" class="form-control" rows="2">{{course.short_desc}}</textarea>
+
+      <label class="form-label mt-2">Nội dung chi tiết</label>
+      <textarea id="editor" name="detail_html">{{course.detail_html}}</textarea>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Ảnh đại diện</label>
+      <input name="hero_image_url" class="form-control" value="{{course.hero_image_url}}">
+
+      <label class="form-label mt-2">Giá</label>
+      <input type="number" name="price" class="form-control" value="{{course.price_cents}}">
+
+      <label class="form-label mt-2">Giá khuyến mãi</label>
+      <input type="number" name="promo_price" class="form-control" value="{{course.promo_price_cents}}">
+
+      {{#unless isNew}}
+      <label class="form-label mt-2">Trạng thái</label>
+      <select name="status" class="form-select">
+        <option value="incomplete" {{#if (eq course.status "incomplete")}}selected{{/if}}>Chưa hoàn thành</option>
+        <option value="complete" {{#if (eq course.status "complete")}}selected{{/if}}>Đã hoàn thành</option>
+      </select>
+
+      <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" name="is_published" id="pub" {{#if course.is_published}}checked{{/if}}>
+        <label for="pub">Xuất bản</label>
+      </div>
+      {{/unless}}
+
+      <button class="btn btn-primary mt-3 w-100">Lưu</button>
+    </div>
+  </div>
+</form>
+
+{{#unless isNew}}
+<hr class="my-4">
+<h5>🎬 Thêm chương</h5>
+<form method="POST" action="/instructor/section/{{course.id}}" class="row g-2">
+  <div class="col-md-6"><input name="title" placeholder="Tên chương" class="form-control"></div>
+  <div class="col-md-2"><input name="ord" type="number" min="1" value="1" class="form-control"></div>
+  <div class="col-md-4"><button class="btn btn-outline-primary w-100">Thêm</button></div>
+</form>
+
+{{#each sections}}
+<div class="card mt-3">
+  <div class="card-header fw-semibold">{{title}}</div>
+  <div class="card-body">
+    <form method="POST" action="/instructor/lecture/{{id}}" class="row g-2 align-items-center">
+      <div class="col-md-3"><input name="title" placeholder="Bài giảng" class="form-control" required></div>
+      <div class="col-md-4"><input name="video_url" placeholder="URL video" class="form-control"></div>
+      <div class="col-md-2"><input name="duration" type="number" placeholder="Giây" class="form-control"></div>
+      <div class="col-md-1 text-center"><input type="checkbox" name="is_preview"> Xem thử</div>
+      <div class="col-md-2"><button class="btn btn-outline-success w-100">Thêm bài</button></div>
+    </form>
+  </div>
+</div>
+{{/each}}
+{{/unless}}
+
+{{#section "js"}}
+<script>
+  tinymce.init({ selector: '#editor', height: 400, menubar: false });
+</script>
+{{/section}}

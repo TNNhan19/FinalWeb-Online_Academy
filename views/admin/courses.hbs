@@ -1,0 +1,20 @@
+<h4 class="mb-3">🎓 Quản lý khoá học</h4>
+<table class="table table-bordered table-hover align-middle">
+  <thead><tr><th>ID</th><th>Tiêu đề</th><th>Giảng viên</th><th>Lĩnh vực</th><th>Giá</th><th>Hành động</th></tr></thead>
+  <tbody>
+    {{#each courses}}
+    <tr>
+      <td>{{course_id}}</td>
+      <td>{{title}}</td>
+      <td>{{instructor}}</td>
+      <td>{{category}}</td>
+      <td>{{current_price}}$</td>
+      <td>
+        <form method="POST" action="/admin/courses/delete/{{course_id}}" class="d-inline">
+          <button class="btn btn-sm btn-outline-danger">Gỡ bỏ</button>
+        </form>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
