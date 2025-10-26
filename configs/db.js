@@ -1,14 +1,13 @@
 import pg from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
 const { Pool } = pg;
 
 export const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: "aws-1-ap-southeast-1.pooler.supabase.com",      
+  port: 5432,                  
+  user: "postgres.ndbcbzxoqstwxhjgwpyj",            
+  password: "dbwebdev123",  
+  database: "postgres",  
   ssl: { rejectUnauthorized: false },
 });
+
+export default pool;

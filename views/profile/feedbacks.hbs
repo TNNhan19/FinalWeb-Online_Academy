@@ -1,0 +1,57 @@
+{{> navbar}}
+
+<div class="container mt-4">
+    <h3 class="mb-3">Đánh giá khóa học</h3>
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    {{#if addMode}}
+    <form action="/feedbacks/add" method="POST">
+        <input type="hidden" name="course_id" value="{{courseId}}">
+        <div class="mb-3">
+            <label for="rating" class="form-label">Đánh giá (1–5 sao)</label>
+            <select class="form-select" name="rating" id="rating">
+                <option value="5">⭐⭐⭐⭐⭐ - Tuyệt vời</option>
+                <option value="4">⭐⭐⭐⭐ - Tốt</option>
+                <option value="3">⭐⭐⭐ - Bình thường</option>
+                <option value="2">⭐⭐ - Cần cải thiện</option>
+                <option value="1">⭐ - Kém</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <textarea name="comment" class="form-control" rows="4" placeholder="Nhận xét của bạn..."></textarea>
+        </div>
+        <button class="btn btn-success">Gửi đánh giá</button>
+    </form>
+    {{else}}
+    {{#if feedbacks.length}}
+    <div class="row">
+        {{#each feedbacks}}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="{{this.thumbnail}}" alt="thumb" width="60" class="me-2 rounded">
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{this.course_title}}</h6>
+                            <small class="text-muted">{{this.created_at}}</small>
+                        </div>
+                    </div>
+                    <p class="text-warning mb-1">
+                        {{#each (range 0 this.rating)}}⭐{{/each}}
+                    </p>
+                    <p>{{this.comment}}</p>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    {{else}}
+    <p class="text-muted">Bạn chưa có đánh giá nào.</p>
+    {{/if}}
+    {{/if}}
+</div>
+
+{{> footer}}

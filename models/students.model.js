@@ -1,6 +1,6 @@
 // models/students.model.js
 import db from "../configs/db.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const TABLE = "students";
 

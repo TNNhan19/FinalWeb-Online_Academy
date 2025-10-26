@@ -28,6 +28,27 @@ app.use(express.static(path.join(__dirname, "Public"))); // chữ P hoa
 app.use("/", homeRoute);
 app.use("/auth", authRoutes);
 
+// Học viên
+import profileRoute from "./routes/profile.route.js";
+import watchlistRoute from "./routes/watchlist.route.js";
+import myCoursesRoute from "./routes/my-courses.route.js";
+import feedbacksRoute from "./routes/feedbacks.route.js";
+import learnRoute from "./routes/learn.route.js";
+
+app.use("/profile", profileRoute);
+app.use("/watchlist", watchlistRoute);
+app.use("/my-courses", myCoursesRoute);
+app.use("/feedbacks", feedbacksRoute);
+app.use("/learn", learnRoute);
+
+
+app.use(async (req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
+
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
