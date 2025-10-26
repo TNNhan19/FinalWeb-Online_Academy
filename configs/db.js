@@ -1,14 +1,22 @@
 import pg from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
 const { Pool } = pg;
 
-export const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+// 🟢 Kết nối Supabase
+const pool = new Pool({
+  host: "db.ndbcbzxoqstwxhjgwpyj.supabase.co",
+  port: 5432,
+  user: "postgres",
+  password: "ndbcbzxoqstwxhjgwpyj", // ⚠️ bạn nên đổi mật khẩu thật, không dùng ref ID làm password
+  database: "postgres",
   ssl: { rejectUnauthorized: false },
 });
+
+// 🟢 Export default cho file testdb.js import được
+const db = {
+  async query(text, params) {
+    const res = await pool.query(text, params);
+    return res.rows;
+  },
+};
+
+export default db;

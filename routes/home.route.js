@@ -4,6 +4,7 @@ const router = express.Router();
 router.get("/", (req, res) => {
   res.render("home/index", {
     pageTitle: "Trang chủ",
+    user: req.session.user,
     filters: [
       { id: "dev", label: "Phát triển web" },
       { id: "design", label: "Thiết kế" },
@@ -11,19 +12,19 @@ router.get("/", (req, res) => {
       { id: "music", label: "Âm nhạc" },
       { id: "ai", label: "Trí tuệ nhân tạo" },
       { id: "marketing", label: "Marketing" },
-      { id: "finance", label: "Tài chính" },
+      { id: "finance", label: "Tài chính" }
     ],
     topViewed: miniList(),
     newest: miniList(),
     sections: [
-      { title: "THẮC KHẠO PYTHON", courses: bigCards() },
-      { title: "THẮC KHÓAC HỌC", courses: bigCards() },
+      { title: "THẮC KHẢO PYTHON", courses: bigCards() },
+      { title: "THẮC KHÓA HỌC", courses: bigCards() }
     ],
     pagination: {
       prev: 1,
       next: 3,
-      dots: [{ active: true }, {}, {}, {}],
-    },
+      dots: [{ active: true }, {}, {}, {}]
+    }
   });
 });
 
@@ -31,7 +32,7 @@ function miniList() {
   return Array.from({ length: 10 }).map((_, i) => ({
     thumb: "sample",
     title: `Khoá #${i + 1}`,
-    rating: (4 + Math.random()).toFixed(1),
+    rating: (4 + Math.random()).toFixed(1)
   }));
 }
 
@@ -46,7 +47,7 @@ function bigCards() {
     lessons: 36 + i,
     duration: "30:00",
     price: "$19.99",
-    promo_price: i % 3 === 0 ? "$12.99" : null,
+    promo_price: i % 3 === 0 ? "$12.99" : null
   }));
 }
 
