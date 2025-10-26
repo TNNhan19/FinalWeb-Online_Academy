@@ -1,83 +1,232 @@
-{{#section "head"}}<meta name="description" content="Trang chủ - Online Academy">{{/section}}
-
-<div class="home-hero p-4 p-md-5 mb-4">
-  <h4 class="text-center mb-3 fw-semibold">DANH MỤC PHỔ BIẾN NHẤT TUẦN QUA</h4>
-  <div class="filters d-flex gap-2 gap-md-3 flex-nowrap overflow-auto justify-content-center">
-    {{#each filters}}
-      <a href="/courses?category={{id}}" class="btn rounded-pill">{{label}}</a>
-    {{/each}}
-  </div>
-</div>
-
-<div class="row g-4">
-  <!-- Left -->
-  <aside class="col-xl-3 col-lg-4 col-md-12 order-2 order-lg-1 mb-3 mb-lg-0">
-        <div class="card sidebar-card shadow-sm sticky-top top-4">
-      <div class="card-header fw-semibold">10 KHÓA HỌC ĐƯỢC XEM NHIỀU NHẤT</div>
-      <div class="list-group list-group-flush">
-        {{#each topViewed}}{{> mini-course-item}}{{/each}}
-      </div>
-    </div>
-  </aside>
-
-  <!-- Center -->
-  <section class="col-xl-6 col-lg-8 col-md-12 order-1 order-lg-2">
-    {{#each sections}}
-      <div class="mb-4">
-        <h5 class="fw-semibold mb-3">{{title}}</h5>
-        <div class="row row-cols-1 row-cols-sm-2 g-3">
-          {{#each courses}}
-            <div class="col">
-              <div class="card course-card h-100 position-relative">
-                <div class="position-relative">
-                  <div class="ratio ratio-16x9">
-                    <img src="/images/{{hero_image_url}}.jpg" class="w-100 h-100 object-fit-cover rounded-top" alt="{{title}}">
-                  </div>
-                  <span class="badge-lock position-absolute top-0 end-0 m-2">LOCK</span>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Course Academy - Học Trực Tuyến</title>
+    <link rel="stylesheet" href="/Public/main.css">
+    <link rel="stylesheet" href="/Public/responsive.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <h1>Online Academy</h1>
                 </div>
-                <div class="card-body d-flex flex-column">
-                  <h6 class="mb-1 text-truncate">{{title}}</h6>
-                  <div class="small two-lines mb-2">{{subtitle}}</div>
-                  <div class="d-flex align-items-center gap-2 small text-muted mb-2">
-                    <i class="bi bi-star-fill"></i><span class="fw-semibold">{{rating}}</span>
-                    <span>•</span><span>{{students}} hv</span>
-                    <span>•</span><span>{{lessons}} bài</span>
-                    <span>•</span><span>{{duration}}</span>
-                  </div>
-                  <div class="mt-auto d-flex justify-content-between align-items-center">
-                    {{#if promo_price}}
-                      <div><span class="fw-bold">{{promo_price}}</span>
-                        <span class="text-decoration-line-through text-muted small">{{price}}</span>
-                      </div>
-                    {{else}}
-                      <div class="fw-bold">{{price}}</div>
-                    {{/if}}
-                    <a href="/courses/course-detail/{{id}}" class="btn btn-outline-primary btn-sm">Xem</a>
-                  </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#home" class="nav-link active">Trang chủ</a></li>
+                    <li><a href="#courses" class="nav-link">Khóa học</a></li>
+                    <li><a href="#categories" class="nav-link">Danh mục</a></li>
+                    <li><a href="#about" class="nav-link">Giới thiệu</a></li>
+                    <li><a href="#contact" class="nav-link">Liên hệ</a></li>
+                </ul>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
-              </div>
-            </div>
-          {{/each}}
+            </nav>
         </div>
-      </div>
-    {{/each}}
+    </header>
 
-    <div class="d-flex justify-content-center align-items-center gap-3 my-4">
-      <a class="btn btn-outline-secondary rounded-pill px-4" href="?page={{pagination.prev}}">LÙI</a>
-      <div class="pager-dots d-flex gap-2">
-        {{#each pagination.dots}}<span class="dot {{#if active}}active{{/if}}"></span>{{/each}}
-      </div>
-      <a class="btn btn-outline-secondary rounded-pill px-4" href="?page={{pagination.next}}">LỚN</a>
-    </div>
-  </section>
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Học Trực Tuyến<br>Phát Triển Kỹ Năng</h1>
+                <p class="hero-subtitle">Khám phá hàng nghìn khóa học chất lượng cao từ các giảng viên hàng đầu. Học mọi lúc, mọi nơi với Online Academy.</p>
+                <div class="hero-actions">
+                    <button class="btn-primary btn-large" id="exploreBtn">Khám phá khóa học</button>
+                    <button class="btn-outline btn-large" id="learnMoreBtn">Tìm hiểu thêm</button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Học viên</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 id="totalCourses">0</h3>
+                        <p>Khóa học</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 id="totalInstructors">6</h3>
+                        <p>Giảng viên</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <!-- Right -->
-  <aside class="col-xl-3 col-lg-12 col-md-12 order-3">
-    <div class="card sidebar-card shadow-sm sticky-top top-4">
-      <div class="card-header fw-semibold">10 KHÓA HỌC MỚI NHẤT</div>
-      <div class="list-group list-group-flush">
-        {{#each newest}}{{> mini-course-item}}{{/each}}
-      </div>
+    <section class="categories" id="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Danh Mục Khóa Học</h2>
+                <p class="section-subtitle">Chọn lĩnh vực bạn muốn học và bắt đầu hành trình của mình</p>
+            </div>
+            <div class="categories-grid" id="categoriesGrid">
+                <div class="loading">Đang tải...</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="courses" id="courses">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Khóa Học Phổ Biến</h2>
+                <p class="section-subtitle">Các khóa học được yêu thích nhất từ cộng đồng học viên</p>
+            </div>
+            <div class="filter-bar">
+                <button class="filter-btn active" data-category="all">Tất cả</button>
+                <div id="categoryFilters"></div>
+            </div>
+            <div class="courses-grid" id="coursesGrid">
+                <div class="loading">Đang tải...</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="about">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Tại Sao Chọn Online Academy?</h2>
+                <p class="section-subtitle">Những lợi ích vượt trội khi học tập cùng chúng tôi</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Khóa học đa dạng</h3>
+                    <p>Hàng nghìn khóa học từ cơ bản đến nâng cao trong nhiều lĩnh vực khác nhau</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👨‍🏫</div>
+                    <h3>Giảng viên chuyên nghiệp</h3>
+                    <p>Học từ những chuyên gia hàng đầu với kinh nghiệm thực tế phong phú</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Học linh hoạt</h3>
+                    <p>Học theo tốc độ của bạn, mọi lúc mọi nơi với thiết bị di động hoặc máy tính</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎓</div>
+                    <h3>Chứng chỉ hoàn thành</h3>
+                    <p>Nhận chứng chỉ được công nhận sau khi hoàn thành khóa học</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Hỗ trợ 24/7</h3>
+                    <p>Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc của bạn</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Giá cả phải chăng</h3>
+                    <p>Chi phí hợp lý với chất lượng đào tạo cao cấp</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta" id="contact">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Bắt Đầu Hành Trình Học Tập Ngay Hôm Nay</h2>
+                <p>Đăng ký tài khoản miễn phí và khám phá hàng nghìn khóa học chất lượng</p>
+                <button class="btn-primary btn-large" id="ctaRegisterBtn">Đăng ký miễn phí</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Online Academy</h3>
+                    <p>Nền tảng học trực tuyến hàng đầu với hàng nghìn khóa học chất lượng cao.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liên kết</h4>
+                    <ul>
+                        <li><a href="#home">Trang chủ</a></li>
+                        <li><a href="#courses">Khóa học</a></li>
+                        <li><a href="#categories">Danh mục</a></li>
+                        <li><a href="#about">Giới thiệu</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Hỗ trợ</h4>
+                    <ul>
+                        <li><a href="#contact">Liên hệ</a></li>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="#">Điều khoản dịch vụ</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Theo dõi chúng tôi</h4>
+                    <ul>
+                        <li><a href="#">Facebook</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">Instagram</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="modal-close" id="loginClose">&times;</span>
+            <h2>Đăng Nhập</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mật khẩu</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Đăng nhập</button>
+            </form>
+            <p class="modal-footer">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+        </div>
     </div>
-  </aside>
-</div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="modal-close" id="registerClose">&times;</span>
+            <h2>Đăng Ký</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Mật khẩu</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Xác nhận mật khẩu</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Đăng ký</button>
+            </form>
+            <p class="modal-footer">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+        </div>
+    </div>
+
+    <div class="modal course-modal" id="courseModal">
+        <div class="modal-content course-modal-content">
+            <span class="modal-close" id="courseClose">&times;</span>
+            <div id="courseDetails">
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/main.js"></script>
+</body>
+</html>
