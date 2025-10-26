@@ -8,7 +8,8 @@ import dotenv from "dotenv";
 
 import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
-
+import instructorRoutes from "./routes/instructor.route.js";
+import adminRoutes from "./routes/admin.route.js";
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,6 +39,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "Public")));
 
+// Mock giảng viên để test (xóa khi có auth)
+app.use((req, res, next) => {
+  req.user = {
+    account_id: 1,      // ID thật của giảng viên trong bảng instructors
+    role: "instructor", // đúng vai trò
+    name: "John Doe"
+  };
+  next();
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
@@ -50,9 +61,10 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
-
+app.use("/admin", adminRoutes);
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
+app.use("/instructor", instructorRoutes);
 
 app.get("/home", (req, res) => res.redirect("/"));
 

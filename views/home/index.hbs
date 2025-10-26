@@ -57,33 +57,99 @@
         </div>
     </section>
 
-    <section class="categories" id="categories">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Danh Mục Khóa Học</h2>
-                <p class="section-subtitle">Chọn lĩnh vực bạn muốn học và bắt đầu hành trình của mình</p>
+    <section class="categories py-5 bg-light" id="categories">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="section-title fw-bold">Danh Mục Khóa Học</h2>
+      <p class="section-subtitle text-muted">
+        Chọn lĩnh vực bạn muốn học và bắt đầu hành trình của mình
+      </p>
+    </div>
+
+        {{#if categories}}
+        <div class="row g-4 justify-content-center">
+            {{#each categories}}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="category-card text-center p-4 bg-white border rounded-4 shadow-sm h-100 hover-scale">
+                <div class="category-icon mb-3">
+                    <i class="bi bi-book-half fs-2 text-primary"></i>
+                </div>
+                <h6 class="fw-semibold mb-1 text-dark">{{this.category_name}}</h6>
+                {{#if this.parent_name}}
+                    <p class="text-muted small mb-0">{{this.parent_name}}</p>
+                {{/if}}
+                </div>
             </div>
-            <div class="categories-grid" id="categoriesGrid">
-                <div class="loading">Đang tải...</div>
+            {{/each}}
+        </div>
+        {{else}}
+        <div class="text-center text-muted">Chưa có danh mục nào để hiển thị.</div>
+        {{/if}}
+    </div>
+    </section>
+
+    <section class="courses py-5" id="courses">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+            <h2 class="section-title fw-bold">Khóa Học Phổ Biến</h2>
+            <p class="section-subtitle text-muted">
+                Các khóa học được yêu thích nhất từ cộng đồng học viên
+            </p>
+            </div>
+
+            <!-- Thanh lọc danh mục -->
+            <div class="filter-bar d-flex flex-wrap justify-content-center gap-2 mb-4">
+            <button class="filter-btn active btn btn-outline-primary rounded-pill px-3 py-1" data-category="all">
+                Tất cả
+            </button>
+            {{#each categories}}
+                <button class="filter-btn btn btn-outline-secondary rounded-pill px-3 py-1" data-category="{{this.category_name}}">
+                {{this.category_name}}
+                </button>
+            {{/each}}
+            </div>
+
+            <!-- Lưới hiển thị khóa học -->
+            <div class="row g-4">
+            {{#each popularCourses}}
+            <div class="col-12 col-sm-6 col-lg-3 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 h-100 w-100">
+                <img src="{{this.image_url}}" alt="{{this.title}}" 
+                    class="card-img-top"
+                    style="height:180px;object-fit:cover;border-top-left-radius:1rem;border-top-right-radius:1rem;">
+
+                <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-light text-primary mb-2">{{this.category_name}}</span>
+                    <h6 class="fw-semibold mb-1 text-dark">{{this.title}}</h6>
+                    <p class="text-muted small mb-3" style="min-height:40px;overflow:hidden;">
+                    {{this.description}}
+                    </p>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center mb-2">
+                    <span class="small text-dark">{{this.instructor_name}}</span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span class="fw-semibold small">4.8</span>
+                        <span class="text-muted small ms-1">12.5k học viên</span>
+                    </div>
+                    <span class="fw-bold text-primary">${{this.current_price}}</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+
+            {{/each}}
             </div>
         </div>
     </section>
 
-    <section class="courses" id="courses">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Khóa Học Phổ Biến</h2>
-                <p class="section-subtitle">Các khóa học được yêu thích nhất từ cộng đồng học viên</p>
-            </div>
-            <div class="filter-bar">
-                <button class="filter-btn active" data-category="all">Tất cả</button>
-                <div id="categoryFilters"></div>
-            </div>
-            <div class="courses-grid" id="coursesGrid">
-                <div class="loading">Đang tải...</div>
-            </div>
-        </div>
-    </section>
+
+
 
     <section class="features" id="about">
         <div class="container">
