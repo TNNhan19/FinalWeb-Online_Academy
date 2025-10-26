@@ -6,7 +6,11 @@ const pool = new Pool({
   host: "db.ndbcbzxoqstwxhjgwpyj.supabase.co",
   port: 5432,
   user: "postgres",
+<<<<<<< HEAD
   password: "dbwebdev123", 
+=======
+  password: "dbwebdev123", // ⚠️ bạn nên đổi mật khẩu thật, không dùng ref ID làm password
+>>>>>>> origin/Emi
   database: "postgres",
   ssl: { rejectUnauthorized: false },
 });
