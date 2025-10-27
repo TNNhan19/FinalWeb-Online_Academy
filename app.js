@@ -75,7 +75,7 @@ app.engine(
         const seconds = totalSeconds % 60;
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       },
-      firstLetter: (str) => str ? str.charAt(0).toUpperCase() : '?'
+      firstLetter: (str) => str ? str.charAt(0).toUpperCase() : '?',
       eq: function (a, b) {
         return a === b;
       },
