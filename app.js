@@ -22,6 +22,7 @@ app.engine(
     extname: ".hbs",
     helpers: {
       section: hbs_sections(),
+      eq: (a, b) => String(a) === String(b),
       year: () => new Date().getFullYear(),
       ifEquals: function (a, b, options) {
         return a === b ? options.fn(this) : options.inverse(this);
