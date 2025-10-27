@@ -1,0 +1,73 @@
+<div class="text-center mb-5">
+  <h3 class="fw-bold">Xin chào, {{admin.name}}!</h3>
+  <p class="text-muted">
+    Chào mừng bạn đến với <strong>Bảng điều khiển Quản trị viên</strong> của Online Academy.
+  </p>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center p-4">
+      <div class="display-5 mb-3 text-primary">📊</div>
+      <h5 class="fw-semibold">Bảng điều khiển</h5>
+      <p class="text-muted">Thống kê tổng quan hệ thống.</p>
+      <a href="/admin/dashboard" class="btn btn-outline-primary w-100 mt-2">Xem thống kê</a>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center p-4">
+      <div class="display-5 mb-3 text-success">📚</div>
+      <h5 class="fw-semibold">Quản lý lĩnh vực</h5>
+      <p class="text-muted">Thêm, sửa hoặc xóa danh mục lĩnh vực.</p>
+      <a href="/admin/categories" class="btn btn-outline-success w-100 mt-2">Quản lý lĩnh vực</a>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center p-4">
+      <div class="display-5 mb-3 text-warning">🎓</div>
+      <h5 class="fw-semibold">Quản lý khóa học</h5>
+      <p class="text-muted">Xem danh sách và gỡ bỏ khóa học.</p>
+      <a href="/admin/courses" class="btn btn-outline-warning w-100 mt-2">Quản lý khóa học</a>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center p-4">
+      <div class="display-5 mb-3 text-info">👥</div>
+      <h5 class="fw-semibold">Người dùng</h5>
+      <p class="text-muted">Danh sách học viên và giảng viên.</p>
+      <a href="/admin/users" class="btn btn-outline-info w-100 mt-2">Quản lý người dùng</a>
+    </div>
+  </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row text-center">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm p-4">
+      <h6 class="fw-semibold text-secondary mb-2">Tổng lĩnh vực</h6>
+      <div class="display-6 fw-bold text-primary">{{stats.categories}}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm p-4">
+      <h6 class="fw-semibold text-secondary mb-2">Tổng khóa học</h6>
+      <div class="display-6 fw-bold text-success">{{stats.courses}}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm p-4">
+      <h6 class="fw-semibold text-secondary mb-2">Giảng viên</h6>
+      <div class="display-6 fw-bold text-warning">{{stats.instructors}}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm p-4">
+      <h6 class="fw-semibold text-secondary mb-2">Học viên</h6>
+      <div class="display-6 fw-bold text-info">{{stats.students}}</div>
+    </div>
+  </div>
+</div>
