@@ -11,7 +11,7 @@ import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
-import courseRoute from './routes/courses.route.js';
+import courseRoutes from './routes/courses.route.js';
 
 dotenv.config();
 
@@ -122,12 +122,17 @@ app.use((req, res, next) => {
 });
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
-app.use("/courses", courseRoute); // 3. Register course route
+app.use("/courses", coursesRoute); // 3. Register course route
 app.use("/instructor", instructorRoutes);
 app.use("/admin", adminRoutes);
 
 // Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
+
+import categoryRoute from "./routes/category.route.js";
+app.use("/category", categoryRoute);
+
+app.use(express.static("Public"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
