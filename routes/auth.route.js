@@ -74,7 +74,9 @@ router.post("/verify", async (req, res) => {
 router.get("/login", (req, res) => {
   res.render("auth/login", { pageTitle: "Đăng nhập" });
 });
-
+router.get("/signup", (req, res) => {
+  res.render("auth/signup", { pageTitle: "Sign Up | Online Academy" });
+});
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;

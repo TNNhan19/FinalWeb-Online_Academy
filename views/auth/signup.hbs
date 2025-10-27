@@ -1,0 +1,63 @@
+<section class="auth-hero">
+  <div class="auth-container">
+    <div class="brand">
+      <div class="brand-icon"><i class="bi bi-mortarboard"></i></div>
+      <h1 class="brand-title">Online Academy</h1>
+      <p class="brand-sub">Learn and teach with passion</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab" onclick="location.href='/auth/login'">Login</button>
+        <button class="tab active">Sign Up</button>
+      </div>
+
+      <form class="pane show" method="post" action="/auth/register">
+        {{#if error}}<div class="alert alert-danger small text-center mb-3">{{error}}</div>{{/if}}
+
+        <label class="label">I am a</label>
+        <div class="role-select">
+          <input type="radio" id="role-student" name="role" value="student" {{#unless role}}checked{{/unless}} {{#if (eq role "student")}}checked{{/if}}>
+          <label for="role-student" class="role-box">
+            <i class="bi bi-tablet"></i><span>Student</span>
+          </label>
+
+          <input type="radio" id="role-instructor" name="role" value="instructor" {{#if (eq role "instructor")}}checked{{/if}}>
+          <label for="role-instructor" class="role-box">
+            <i class="bi bi-mortarboard"></i><span>Instructor</span>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Full Name</span>
+          <div class="control">
+            <i class="bi bi-person"></i>
+            <input type="text" name="fullname" placeholder="Enter your full name" required value="{{fullname}}">
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Email</span>
+          <div class="control">
+            <i class="bi bi-envelope"></i>
+            <input type="email" name="email" placeholder="Enter your email" required value="{{email}}">
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="control">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password" placeholder="Enter your password" minlength="6" required>
+          </div>
+        </label>
+
+        <button class="btn-primary" type="submit">Create Account</button>
+      </form>
+
+      <div class="small center mt-3">
+        Already have an account? <a href="/auth/login">Login</a>
+      </div>
+    </div>
+  </div>
+</section>
