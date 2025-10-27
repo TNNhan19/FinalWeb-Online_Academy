@@ -10,6 +10,7 @@ import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
+
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -63,6 +64,8 @@ app.use("/auth", authRoute);
 app.use("/instructor", instructorRoutes);
 
 app.get("/home", (req, res) => res.redirect("/"));
+app.use("/admin", adminRoutes);
+app.use("/instructor", instructorRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -1,5 +1,5 @@
 import express from "express";
-import { pool } from "../configs/db.js";
+import db from "../configs/db.js";
 
 const router = express.Router();
 
@@ -163,6 +163,7 @@ router.get("/edit/:id", requireInstructor, async (req, res) => {
     ORDER BY s.order_index, l.order_index
     `,
     [id]
+  );
   );
 
   res.render("instructor/course_form", {
