@@ -15,10 +15,18 @@ import {
 
 const router = express.Router();
 
+// Ensure `req.user` is populated from session or res.locals so routes can use it
+router.use((req, res, next) => {
+  if (!req.user) {
+    req.user = req.session?.user || res.locals.user || null;
+  }
+  next();
+});
+
 // 🧩 Xem hồ sơ
 router.get("/", async (req, res) => {
   const user = req.user;
-  if (!user) return res.redirect("/auth/signin");
+  if (!user) return res.redirect("/auth/login");
 
   const profile = await getProfileById(user.account_id);
   console.log("User:", user);
@@ -32,7 +40,7 @@ router.get("/", async (req, res) => {
 // 🧩 Trang chỉnh sửa hồ sơ
 // Trang chỉnh sửa hồ sơ
 router.get("/edit", async (req, res) => {
-  if (!req.user) return res.redirect("/auth/signin");
+  if (!req.user) return res.redirect("/auth/login");
 
   // Kiểm tra session có verified chưa
   if (!req.session.isVerified) {
@@ -85,7 +93,7 @@ router.get("/edit", async (req, res) => {
 
 // Xác thực OTP
 router.post("/verify-otp", async (req, res) => {
-  if (!req.user) return res.redirect("/auth/signin");
+  if (!req.user) return res.redirect("/auth/login");
 
   const { otp } = req.body;
   const profile = await getProfileById(req.user.account_id);
@@ -106,7 +114,7 @@ router.post("/verify-otp", async (req, res) => {
 
 // Gửi lại OTP
 router.post("/resend-otp", async (req, res) => {
-  if (!req.user) return res.redirect("/auth/signin");
+  if (!req.user) return res.redirect("/auth/login");
 
     try {
       const profile = await getProfileById(req.user.account_id);
@@ -147,7 +155,7 @@ router.post("/resend-otp", async (req, res) => {
 
 // Cập nhật thông tin
 router.post("/update", async (req, res) => {
-  if (!req.user) return res.redirect("/auth/signin");
+  if (!req.user) return res.redirect("/auth/login");
   if (!req.session.isVerified) return res.redirect("/profile/edit");
 
   const { full_name, old_password, new_password, confirm_password } = req.body;
@@ -246,7 +254,7 @@ router.post("/watchlist/remove/:id", async (req, res) => {
 // 🧩 Danh sách khóa học đã đăng ký
 router.get("/enrolled", async (req, res) => {
   const user = req.user;
-  if (!user) return res.redirect("/auth/signin");
+  if (!user) return res.redirect("/auth/login");
 
   try {
     // Lấy danh sách khóa học đã đăng ký
