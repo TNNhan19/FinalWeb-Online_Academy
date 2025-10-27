@@ -95,11 +95,12 @@ router.post("/login", async (req, res) => {
       return res.render("auth/login", { error: "Mật khẩu không chính xác!" });
     }
 
+    // Lưu thông tin cần thiết vào session
     req.session.user = {
-      id: user.account_id,
-      full_name: user.full_name,
+      account_id: user.account_id,
       email: user.email,
       role: user.role,
+      full_name: user.full_name
     };
 
     res.redirect("/");

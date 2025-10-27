@@ -1,0 +1,44 @@
+{{#section 'css'}}
+<style>
+  .otp-form {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+</style>
+{{/section}}
+
+<div class="container py-5">
+  <div class="otp-form">
+    <h3 class="mb-4 text-center">Xác thực tài khoản</h3>
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    <div class="card">
+      <div class="card-body">
+        <p class="text-muted mb-4">
+          Mã xác thực đã được gửi đến email <strong>{{email}}</strong>.<br>
+          Vui lòng nhập mã để tiếp tục.
+        </p>
+
+        <form action="/profile/verify-otp" method="POST">
+          <div class="mb-3">
+            <label class="form-label">Mã xác thực (OTP)</label>
+            <input type="text" name="otp" class="form-control" required maxlength="6" pattern="[0-9]{6}">
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Xác nhận</button>
+          </div>
+
+          <div class="text-center mt-3">
+            <form action="/profile/resend-otp" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-link">Gửi lại mã</button>
+            </form>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
