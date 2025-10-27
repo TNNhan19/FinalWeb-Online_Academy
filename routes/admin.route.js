@@ -1,11 +1,28 @@
 import express from "express";
 import { pool } from "../configs/db.js";
+import { requireAdmin } from "../middlewares/authAdmin.js";
+
+
 
 const router = express.Router();
+router.use(requireAdmin);
+
 
 // Trang tổng quan chung của quản trị viên
 router.get("/", async (req, res) => {
   try {
+    // Lấy account_id của admin hiện tại
+    const accountId = req.session.user.id;
+
+    // Truy vấn tên admin từ bảng accounts
+    const { rows: adminRows } = await pool.query(
+      "SELECT full_name FROM accounts WHERE account_id = $1",
+      [accountId]
+    );
+
+    const adminName = adminRows[0]?.full_name || "Quản trị viên hệ thống";
+
+    // Lấy thống kê cơ bản
     const [cat, course, instructor, student] = await Promise.all([
       pool.query("SELECT COUNT(*) FROM categories"),
       pool.query("SELECT COUNT(*) FROM courses"),
@@ -13,6 +30,7 @@ router.get("/", async (req, res) => {
       pool.query("SELECT COUNT(*) FROM accounts WHERE role = 'student'"),
     ]);
 
+    // Render ra trang admin
     res.render("admin/index", {
       layout: "main",
       stats: {
@@ -21,13 +39,14 @@ router.get("/", async (req, res) => {
         instructors: instructor.rows[0].count,
         students: student.rows[0].count,
       },
-      admin: { name: "Quản trị viên hệ thống" },
+      admin: { name: adminName },
     });
   } catch (err) {
-    console.error("Lỗi khi tải trang admin:", err);
+    console.error("❌ Lỗi khi tải trang admin:", err);
     res.status(500).send("Không thể tải trang quản trị viên");
   }
 });
+
 
 
 //Dashboard

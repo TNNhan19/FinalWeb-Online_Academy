@@ -95,6 +95,7 @@ router.post("/login", async (req, res) => {
       return res.render("auth/login", { error: "Mật khẩu không chính xác!" });
     }
 
+    // ✅ Lưu session
     req.session.user = {
       id: user.account_id,
       full_name: user.full_name,
@@ -102,7 +103,14 @@ router.post("/login", async (req, res) => {
       role: user.role,
     };
 
-    res.redirect("/");
+    // ✅ Điều hướng theo role
+    if (user.role === "instructor") {
+      return res.redirect("/instructor");
+    } else if (user.role === "admin") {
+      return res.redirect("/admin");
+    } else {
+      return res.redirect("/");
+    }
   } catch (error) {
     console.error("❌ Lỗi khi đăng nhập:", error);
     res.render("auth/login", {
