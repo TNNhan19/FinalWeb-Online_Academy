@@ -1,27 +1,44 @@
-<div class="container mt-5" style="max-width: 450px;">
-  <h3 class="text-center mb-4">Đăng nhập</h3>
-
-  {{#if error}}
-  <div class="alert alert-danger">{{error}}</div>
-  {{/if}}
-
-  {{#if success}}
-  <div class="alert alert-success">{{success}}</div>
-  {{/if}}
-
-  <form action="/auth/login" method="POST">
-    <div class="mb-3">
-      <label class="form-label">Email</label>
-      <input type="email" name="email" class="form-control" required>
+<section class="auth-hero">
+  <div class="auth-container">
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon"><i class="bi bi-mortarboard"></i></div>
+      <h1 class="brand-title">Online Academy</h1>
+      <p class="brand-sub">Learn and teach with passion</p>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Mật khẩu</label>
-      <input type="password" name="password" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-success w-100">Đăng nhập</button>
-  </form>
 
-  <div class="mt-3 text-center">
-    <a href="/auth/register">Chưa có tài khoản? Đăng ký ngay</a>
+    <!-- Card -->
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active">Login</button>
+        <button class="tab" onclick="location.href='/auth/signup'">Sign Up</button>
+      </div>
+
+      <form class="pane show" method="post" action="/auth/login">
+        {{#if error}}<div class="alert alert-danger small text-center mb-3">{{error}}</div>{{/if}}
+
+        <label class="field">
+          <span>Email</span>
+          <div class="control">
+            <i class="bi bi-envelope"></i>
+            <input type="email" name="email" placeholder="Enter your email" required value="{{email}}">
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="control">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password" placeholder="Enter your password" required>
+          </div>
+        </label>
+
+        <button class="btn-primary" type="submit">Login</button>
+      </form>
+
+      <div class="small center mt-3">
+        Don't have an account? <a href="/auth/signup">Sign Up</a>
+      </div>
+    </div>
   </div>
-</div>
+</section>

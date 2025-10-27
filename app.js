@@ -28,9 +28,13 @@ app.engine(
     extname: ".hbs",
     helpers: {
       section: hbs_sections(),
+      eq: (a, b) => String(a) === String(b),
       year: () => new Date().getFullYear(),
       ifEquals: function (a, b, options) {
         return a === b ? options.fn(this) : options.inverse(this);
+      },
+      eq: function (a, b) {
+        return a === b;
       },
     },
     layoutsDir: path.join(__dirname, "views", "layouts"),
@@ -46,6 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "Public")));
 
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
@@ -56,9 +61,11 @@ app.use(
 
 // Đọc session user và lưu vào res.locals để template có thể truy cập
 app.use((req, res, next) => {
-  res.locals.user = req.user = req.session.user || null;
+  res.locals.user = req.session?.user || null;
   next();
 });
+
+
 app.use("/admin", adminRoutes);
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
