@@ -8,6 +8,26 @@
         <span class="fs-4 fw-bold text-dark ms-1">Academy</span>
       </a>
 
+    <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-3">
+      {{#if user}}
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle px-2 py-1"
+          data-bs-toggle="dropdown">
+          <span class="fw-semibold text-dark">{{user.full_name}}</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+          <li><a class="dropdown-item" href="/profile">Hồ sơ cá nhân</a></li>
+          <li><a class="dropdown-item" href="/profile/enrolled">Khóa học của tôi</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item text-danger" href="/auth/logout">Đăng xuất</a></li>
+        </ul>
+      </div>
+      {{else}}
+      <a href="/auth/login" class="btn btn-outline-primary rounded-pill px-3">Đăng nhập</a>
+      <a href="/auth/register" class="btn btn-primary rounded-pill px-3">Đăng ký</a>
+      {{/if}}
       <!-- ===== Search (ẩn trên mobile) ===== -->
       <form class="d-none d-md-flex align-items-center flex-grow-1 mx-md-3" role="search" style="max-width: 380px;">
         <div class="input-group">

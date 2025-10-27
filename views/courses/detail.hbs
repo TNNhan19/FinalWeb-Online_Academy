@@ -1,3 +1,20 @@
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="fw-bold">{{course.title}}</h1>
+
+    {{#if isFavorite}}
+    <form action="/courses/{{course.id}}/unfavorite" method="POST">
+        <button class="btn btn-outline-danger">
+            <i class="bi bi-heart-fill"></i> Bỏ yêu thích
+        </button>
+    </form>
+    {{else}}
+    <form action="/courses/{{course.id}}/favorite" method="POST">
+        <button class="btn btn-outline-primary">
+            <i class="bi bi-heart"></i> Thêm vào yêu thích
+        </button>
+    </form>
+    {{/if}}
+</div>
 <hr class="my-4">
 <h5>👨‍🏫 Giảng viên</h5>
 <div class="mt-3">

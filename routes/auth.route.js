@@ -99,10 +99,10 @@ router.post("/login", async (req, res) => {
 
     // ✅ Lưu session
     req.session.user = {
-      id: user.account_id,
-      full_name: user.full_name,
+      account_id: user.account_id,
       email: user.email,
       role: user.role,
+      full_name: user.full_name
     };
 
     // ✅ Điều hướng theo role
