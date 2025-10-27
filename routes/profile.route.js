@@ -220,21 +220,64 @@ router.get("/watchlist", async (req, res) => {
   });
 });
 
-// 🧩 Xóa khóa yêu thích
+// 🧩 Thêm/Xóa khóa học yêu thích (API endpoints)
+router.post("/watchlist/add/:id", async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    await addToWatchlist(req.user.account_id, req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error adding to watchlist:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.post("/watchlist/remove/:id", async (req, res) => {
-  const user = req.user;
-  await removeFromWatchlist(user.account_id, req.params.id);
-  res.redirect("/profile/watchlist");
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    await removeFromWatchlist(req.user.account_id, req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error removing from watchlist:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // 🧩 Danh sách khóa học đã đăng ký
 router.get("/enrolled", async (req, res) => {
   const user = req.user;
-  const list = await getEnrolledCourses(user.account_id);
-  res.render("profile/enrolled", {
-    title: "Khoá học của tôi",
-    courses: list,
-  });
+  if (!user) return res.redirect("/auth/signin");
+
+  try {
+    // Lấy danh sách khóa học đã đăng ký
+    const enrolledCourses = await getEnrolledCourses(user.account_id);
+    
+    // Lấy danh sách khóa học yêu thích
+    const watchlistCourses = await getWatchlist(user.account_id);
+    
+    // Đánh dấu các khóa học có trong watchlist
+    const enrolledWithWatchlist = await Promise.all(enrolledCourses.map(async course => ({
+      ...course,
+      is_in_watchlist: await isInWatchlist(user.account_id, course.course_id)
+    })));
+
+    res.render("profile/enrolled", {
+      title: "Khoá học của tôi",
+      courses: enrolledWithWatchlist,
+      watchlistCourses: watchlistCourses,
+      helpers: {
+        formatDate: function(date) {
+          return new Date(date).toLocaleDateString('vi-VN');
+        },
+        formatPrice: function(price) {
+          return new Intl.NumberFormat('vi-VN').format(price);
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).send("Có lỗi xảy ra khi tải danh sách khóa học");
+  }
 });
 
 export default router;

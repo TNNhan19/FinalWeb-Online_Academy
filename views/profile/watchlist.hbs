@@ -9,7 +9,7 @@
                     <h5 class="card-title">{{this.title}}</h5>
                     <p class="card-text text-danger">{{this.discount_price}} ₫ <span
                             class="text-muted text-decoration-line-through">{{this.price}} ₫</span></p>
-                    <form method="POST" action="/profile/watchlist/remove/{{this.id}}">
+                    <form method="POST" action="/profile/watchlist/remove/{{this.course_id}}">
                         <button class="btn btn-outline-danger btn-sm">Xóa khỏi danh sách</button>
                     </form>
                 </div>
