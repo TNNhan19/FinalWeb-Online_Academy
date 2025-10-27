@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 
 import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
+import coursesRoutes from "./routes/courses.route.js";
 
 dotenv.config();
 
@@ -53,8 +54,15 @@ app.use((req, res, next) => {
 
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
+app.use(express.static(path.join(__dirname, "Public")));
+app.use("/courses", coursesRoutes);
 
 app.get("/home", (req, res) => res.redirect("/"));
+
+import categoryRoute from "./routes/category.route.js";
+app.use("/category", categoryRoute);
+
+app.use(express.static("Public"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

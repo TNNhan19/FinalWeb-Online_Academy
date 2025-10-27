@@ -1,0 +1,105 @@
+<section class="py-5 bg-light category-page">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="fw-bold text-primary">{{categoryName}}</h2>
+      <p class="text-muted">Danh sách khóa học thuộc danh mục này</p>
+    </div>
+
+    {{#if courses.length}}
+      <div class="row g-4 justify-content-center">
+        {{#each courses}}
+          <div class="col-6 col-md-4 col-lg-3 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow course-card"
+                 data-id="{{this.course_id}}" data-category="{{this.category_name}}"
+                 style="cursor:pointer; transition:transform 0.2s ease, box-shadow 0.2s ease;">
+              
+              <img src="{{this.image_url}}" alt="{{this.title}}"
+                   class="card-img-top"
+                   style="height:180px; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+              
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <span class="badge bg-light text-primary mb-2">{{this.category_name}}</span>
+                  <h6 class="fw-semibold mb-1 text-dark">{{this.title}}</h6>
+                  <p class="text-muted small mb-3" style="min-height:40px; overflow:hidden;">
+                    {{this.description}}
+                  </p>
+                </div>
+                <div>
+                  <div class="d-flex align-items-center mb-2">
+                    <span class="small text-dark">{{this.instructor_name}}</span>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <i class="bi bi-star-fill text-warning"></i>
+                      <span class="fw-semibold small">4.8</span>
+                      <span class="text-muted small ms-1">12.5k học viên</span>
+                    </div>
+                    <span class="fw-bold text-primary">${{this.current_price}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="text-center text-muted mt-5">
+        <p>Không có khóa học nào trong danh mục này.</p>
+        <a href="/" class="btn btn-primary mt-3">Quay lại Trang chủ</a>
+      </div>
+    {{/if}}
+  </div>
+</section>
+
+<!-- 🔽 Thêm đoạn này ngay dưới cùng -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cards = document.querySelectorAll(".category-page .course-card");
+  if (!cards.length) return;
+
+  cards.forEach(card => {
+    card.addEventListener("click", async () => {
+      const id = card.dataset.id;
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/courses/detail/${id}`);
+        if (!res.ok) throw new Error("Không thể tải chi tiết khóa học");
+        const course = await res.json();
+
+        const modalBody = document.getElementById("modalContent");
+        modalBody.innerHTML = `
+          <div class="row g-4 align-items-center">
+            <div class="col-md-5">
+              <img src="{{this.image_url}}" alt="{{this.title}}" 
+                  class="card-img-top course-img"
+                  style="height:180px; width:100%; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+            </div>
+            <div class="col-md-7">
+              <h5 class="fw-bold mb-2">${course.title}</h5>
+              <div class="text-muted small mb-2">
+                <i class="bi bi-person-circle text-primary"></i> ${course.instructor_name || "Không rõ"} 
+                &nbsp;•&nbsp; <i class="bi bi-star-fill text-warning"></i> 4.8 (12.5k học viên)
+              </div>
+              <p class="text-secondary mb-4">${course.description || "Không có mô tả."}</p>
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <span class="price">$${course.current_price}</span>
+                <div class="d-flex gap-2">
+                  <a href="/courses/${course.course_id}" class="btn btn-outline-primary px-3 py-2 rounded-3">Xem chi tiết</a>
+                  <button class="btn btn-primary px-3 py-2 rounded-3">Đăng ký học</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        const modal = new bootstrap.Modal(document.getElementById("courseModal"));
+        modal.show();
+      } catch (err) {
+        console.error("❌ Lỗi khi hiển thị chi tiết:", err);
+        alert("Không thể tải thông tin chi tiết khóa học.");
+      }
+    });
+  });
+});
+</script>
