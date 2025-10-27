@@ -72,28 +72,98 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===================== 2️⃣ NÚT LỌC KHÓA HỌC (FILTER) =====================
-  const filterButtons = document.querySelectorAll(".filter-btn");
-  const courseCards = document.querySelectorAll(".course-card");
+  // ===================== 2️⃣ NÚT LỌC KHÓA HỌC (FILTER - DÙNG API) =====================
+const filterButtons = document.querySelectorAll(".filter-btn");
+const popularGrid = document.getElementById("popularCoursesGrid");
 
-  if (filterButtons.length && courseCards.length) {
-    filterButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const selectedCategory = btn.dataset.category;
+if (filterButtons.length && popularGrid) {
+  filterButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const selectedCategory = btn.dataset.category;
 
-        filterButtons.forEach(b => b.classList.remove("active", "btn-primary"));
-        btn.classList.add("active", "btn-primary");
+      // Đổi màu nút đang chọn
+      filterButtons.forEach(b => b.classList.remove("active", "btn-outline-primary"));
+      filterButtons.forEach(b => b.classList.add("btn-outline-secondary"));
+      btn.classList.add("active", "btn-outline-primary");
+      btn.classList.remove("btn-outline-secondary");
 
-        courseCards.forEach(card => {
-          const cardCategory = card.dataset.category;
-          card.style.display =
-            selectedCategory === "all" || cardCategory === selectedCategory
-              ? "flex"
-              : "none";
-        });
-      });
+      // Hiển thị loading
+      popularGrid.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+        </div>
+      `;
+
+      try {
+        // 🧠 Gọi API
+        const res = await fetch(`/category/api/${encodeURIComponent(selectedCategory)}`);
+        if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
+
+        const courses = await res.json();
+        console.log("📦 Dữ liệu khóa học theo danh mục:", courses);
+
+        // 🧹 Làm sạch lưới
+        popularGrid.innerHTML = "";
+
+        if (!courses.length) {
+          popularGrid.innerHTML = `
+            <div class="col-12 text-center text-muted py-5">
+              <p>Không có khóa học nào trong danh mục này.</p>
+            </div>`;
+          return;
+        }
+
+        // 🔧 Sinh HTML hiển thị
+        const html = courses
+          .map(
+            c => `
+            <div class="col-12 col-sm-6 col-lg-3 d-flex course-card" 
+                 data-id="${c.course_id}" data-category="${c.category_name}">
+              <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow">
+                <img src="${c.image_url}" alt="${c.title}" 
+                     class="card-img-top course-img"
+                     style="height:180px; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+                <div class="card-body d-flex flex-column justify-content-between">
+                  <div>
+                    <span class="badge bg-light text-primary mb-2">${c.category_name}</span>
+                    <h6 class="fw-semibold mb-1 text-dark">${c.title}</h6>
+                    <p class="text-muted small mb-3" style="min-height:40px; overflow:hidden;">
+                      ${c.description || ""}
+                    </p>
+                  </div>
+                  <div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="small text-dark">${c.instructor_name || "Giảng viên ẩn danh"}</span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span class="fw-semibold small">4.8</span>
+                        <span class="text-muted small ms-1">12.5k học viên</span>
+                      </div>
+                      <span class="fw-bold text-primary">$${c.current_price || "0.00"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`
+          )
+          .join("");
+
+        popularGrid.innerHTML = html;
+      } catch (error) {
+        console.error("❌ Lỗi khi tải khóa học:", error);
+        popularGrid.innerHTML = `
+          <div class="col-12 text-center text-danger py-5">
+            <p>Không thể tải danh sách khóa học. Vui lòng thử lại!</p>
+          </div>`;
+      }
     });
-  }
+  });
+}
+
 
   // ===================== 3️⃣ HIỂN THỊ CHI TIẾT KHÓA HỌC (CẢ HOME & CATEGORY) =====================
   document.addEventListener("click", async (e) => {

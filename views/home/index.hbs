@@ -20,19 +20,19 @@
                 <p class="hero-subtitle">Khám phá hàng nghìn khóa học chất lượng cao từ các giảng viên hàng đầu. Học mọi lúc, mọi nơi với Online Academy.</p>
                 <div class="hero-actions">
                     <button class="btn-primary btn-large" id="exploreBtn">Khám phá khóa học</button>
-                    <button class="btn-outline btn-large" id="learnMoreBtn">Tìm hiểu thêm</button>
+                    <button class="btn-primary btn-large" id="learnMoreBtn">Tìm hiểu thêm</button>
                 </div>
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <h3 id="totalStudents">0</h3> {{!-- Value should be dynamic --}}
+                        <h3 id="totalStudents">{{stats.students}}</h3>
                         <p>Học viên</p>
-                    </div>
+                     </div>
                     <div class="stat-item">
-                        <h3 id="totalCourses">0</h3> {{!-- Value should be dynamic --}}
+                        <h3 id="totalCourses">{{stats.courses}}</h3>
                         <p>Khóa học</p>
-                    </div>
+                     </div>
                     <div class="stat-item">
-                        <h3 id="totalInstructors">6</h3> {{!-- Value should be dynamic --}}
+                        <h3 id="totalInstructors">{{stats.instructors}}</h3>
                         <p>Giảng viên</p>
                     </div>
                 </div>
