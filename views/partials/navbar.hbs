@@ -1,3 +1,6 @@
+{{!-- Original Top Row --}}
+<header class="main-header py-3 border-bottom shadow-sm bg-body sticky-top">
+  <div class="container-xxl d-flex align-items-center justify-content-between">
 <header class="main-header sticky-top bg-white shadow-sm border-bottom py-2">
   <div class="container-xxl">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -58,4 +61,33 @@
       </div>
     </div>
   </div>
+</header>
+
+{{!-- ✨ Second Navigation Row ✨ --}}
+<nav class="navbar navbar-expand-lg bg-light border-bottom" style="--bs-navbar-padding-y: 0.25rem;">
+  <div class="container-xxl">
+    <div class="collapse navbar-collapse justify-content-center" id="mainNavLinks">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">Trang chủ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/#courses">Khóa học</a> 
+        </li>
+        {{!-- 👇 MODIFIED THIS LIST ITEM 👇 --}}
+        <li class="nav-item">
+          {{!-- Replaced dropdown with direct link --}}
+          <a class="nav-link" href="/#categories">Danh mục</a> 
+        </li>
+        {{!-- Removed the <ul> dropdown menu that was here --}}
+        <li class="nav-item">
+          <a class="nav-link" href="/#about">Giới thiệu</a> 
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/#contact">Liên hệ</a> 
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
 </header>

@@ -6,6 +6,14 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
+    // Queries to get the counts (New)
+    const [courseCount, studentCount, instructorCount] = await Promise.all([
+      db.query("SELECT COUNT(*) FROM courses"),
+      db.query("SELECT COUNT(*) FROM students"),
+      db.query("SELECT COUNT(*) FROM instructors"),
+    ]);
+
+    // Your existing queries
     const categories = await db.query(`
       SELECT c1.category_id, c1.name AS category_name, c2.name AS parent_name
       FROM categories c1
@@ -23,6 +31,12 @@ router.get("/", async (req, res) => {
       popularCourses,
       newestCourses,
       user: req.session.user || null,
+      // Pass the new stats object to the view (New)
+      stats: {
+        courses: courseCount[0].count || 0,
+        students: studentCount[0].count || 0,
+        instructors: instructorCount[0].count || 0,
+      },
     });
   } catch (error) {
     console.error("❌ Lỗi khi tải trang chủ:", error);

@@ -4,32 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Course Academy - Học Trực Tuyến</title>
-    <link rel="stylesheet" href="/Public/main.css">
-    <link rel="stylesheet" href="/Public/responsive.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/main.css">
+
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <nav class="navbar">
-                <div class="logo">
-                    <h1>Online Academy</h1>
-                </div>
-                <ul class="nav-menu" id="navMenu">
-                    <li><a href="#home" class="nav-link active">Trang chủ</a></li>
-                    <li><a href="#courses" class="nav-link">Khóa học</a></li>
-                    <li><a href="#categories" class="nav-link">Danh mục</a></li>
-                    <li><a href="#about" class="nav-link">Giới thiệu</a></li>
-                    <li><a href="#contact" class="nav-link">Liên hệ</a></li>
-                </ul>
-                <div class="hamburger" id="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </nav>
-        </div>
-    </header>
+    {{!-- Assuming you have a navbar partial, otherwise integrate it --}}
+    {{!-- {{> navbar}} --}}
 
+    {{!-- Hero Section --}}
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
@@ -37,19 +20,19 @@
                 <p class="hero-subtitle">Khám phá hàng nghìn khóa học chất lượng cao từ các giảng viên hàng đầu. Học mọi lúc, mọi nơi với Online Academy.</p>
                 <div class="hero-actions">
                     <button class="btn-primary btn-large" id="exploreBtn">Khám phá khóa học</button>
-                    <button class="btn-outline btn-large" id="learnMoreBtn">Tìm hiểu thêm</button>
+                    <button class="btn-primary btn-large" id="learnMoreBtn">Tìm hiểu thêm</button>
                 </div>
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <h3 id="totalStudents">0</h3>
+                        <h3 id="totalStudents">{{stats.students}}</h3>
                         <p>Học viên</p>
-                    </div>
+                     </div>
                     <div class="stat-item">
-                        <h3 id="totalCourses">0</h3>
+                        <h3 id="totalCourses">{{stats.courses}}</h3>
                         <p>Khóa học</p>
-                    </div>
+                     </div>
                     <div class="stat-item">
-                        <h3 id="totalInstructors">6</h3>
+                        <h3 id="totalInstructors">{{stats.instructors}}</h3>
                         <p>Giảng viên</p>
                     </div>
                 </div>
@@ -57,20 +40,26 @@
         </div>
     </section>
 
+        
     <section class="categories py-5 bg-light" id="categories">
-  <div class="container">
-    <div class="section-header text-center mb-5">
-      <h2 class="section-title fw-bold">Danh Mục Khóa Học</h2>
-      <p class="section-subtitle text-muted">
-        Chọn lĩnh vực bạn muốn học và bắt đầu hành trình của mình
-      </p>
-    </div>
+        <div class="container">
+            <!-- Tiêu đề -->
+            <div class="section-header text-center mb-5">
+            <h2 class="section-title fw-bold">Danh Mục Khóa Học</h2>
+            <p class="section-subtitle text-muted">
+                Chọn lĩnh vực bạn muốn học và bắt đầu hành trình của mình
+            </p>
+            </div>
 
-        {{#if categories}}
-        <div class="row g-4 justify-content-center">
+            <!-- Danh sách danh mục -->
+            {{#if categories}}
+            <div class="categories-grid" id="categoryList">
             {{#each categories}}
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="category-card text-center p-4 bg-white border rounded-4 shadow-sm h-100 hover-scale">
+                <div
+                class="category-card text-center p-4 bg-white border rounded-4 shadow-sm h-100 hover-scale"
+                data-category="{{this.category_name}}"
+                style="cursor:pointer; transition:transform 0.2s ease, box-shadow 0.2s ease;"
+                >
                 <div class="category-icon mb-3">
                     <i class="bi bi-book-half fs-2 text-primary"></i>
                 </div>
@@ -79,17 +68,29 @@
                     <p class="text-muted small mb-0">{{this.parent_name}}</p>
                 {{/if}}
                 </div>
-            </div>
             {{/each}}
+            </div>
+            {{else}}
+            <div class="text-center text-muted">Chưa có danh mục nào để hiển thị.</div>
+            {{/if}}
+
+            <!-- Khu vực hiển thị khóa học (ẩn ban đầu) -->
+            <div id="courseContainer" class="mt-5" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 id="categoryTitle" class="fw-bold text-primary"></h4>
+                <button class="btn btn-outline-secondary" id="backToCategories">
+                ← Quay lại danh mục
+                </button>
+            </div>
+            <div class="row g-4" id="courseGrid"></div>
+            </div>
+            
         </div>
-        {{else}}
-        <div class="text-center text-muted">Chưa có danh mục nào để hiển thị.</div>
-        {{/if}}
-    </div>
     </section>
 
     <section class="courses py-5" id="courses">
         <div class="container">
+            <!-- Tiêu đề -->
             <div class="section-header text-center mb-5">
             <h2 class="section-title fw-bold">Khóa Học Phổ Biến</h2>
             <p class="section-subtitle text-muted">
@@ -110,189 +111,175 @@
             </div>
 
             <!-- Lưới hiển thị khóa học -->
-            <div class="row g-4">
+            <div class="row g-4" id="popularCoursesGrid">
             {{#each popularCourses}}
-            <div class="col-12 col-sm-6 col-lg-3 d-flex">
-            <div class="card shadow-sm border-0 rounded-4 h-100 w-100">
-                <img src="{{this.image_url}}" alt="{{this.title}}" 
-                    class="card-img-top"
-                    style="height:180px;object-fit:cover;border-top-left-radius:1rem;border-top-right-radius:1rem;">
-
-                <div class="card-body d-flex flex-column justify-content-between">
-                <div>
-                    <span class="badge bg-light text-primary mb-2">{{this.category_name}}</span>
-                    <h6 class="fw-semibold mb-1 text-dark">{{this.title}}</h6>
-                    <p class="text-muted small mb-3" style="min-height:40px;overflow:hidden;">
-                    {{this.description}}
-                    </p>
-                </div>
-                <div>
-                    <div class="d-flex align-items-center mb-2">
-                    <span class="small text-dark">{{this.instructor_name}}</span>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between">
+                <div class="col-12 col-sm-6 col-lg-3 d-flex course-card" data-id="{{this.course_id}}" data-category="{{this.category_name}}">
+                <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow">
+                    <img src="{{this.image_url}}" alt="{{this.title}}" 
+                        class="card-img-top course-img"
+                        style="height:180px; width:100%; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+                    <div class="card-body d-flex flex-column justify-content-between">
                     <div>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <span class="fw-semibold small">4.8</span>
-                        <span class="text-muted small ms-1">12.5k học viên</span>
+                        <span class="badge bg-light text-primary mb-2">{{this.category_name}}</span>
+                        <h6 class="fw-semibold mb-1 text-dark">{{this.title}}</h6>
+                        <p class="text-muted small mb-3" style="min-height:40px;overflow:hidden;">
+                        {{this.description}}
+                        </p>
                     </div>
-                    <span class="fw-bold text-primary">${{this.current_price}}</span>
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                        <span class="small text-dark">{{this.instructor_name}}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span class="fw-semibold small">4.8</span>
+                            <span class="text-muted small ms-1">12.5k học viên</span>
+                        </div>
+                        <span class="fw-bold text-primary">${{this.current_price}}</span>
+                        </div>
+                    </div>
                     </div>
                 </div>
                 </div>
-            </div>
-            </div>
-
             {{/each}}
             </div>
         </div>
     </section>
 
 
-
-
     <section class="features" id="about">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Tại Sao Chọn Online Academy?</h2>
-                <p class="section-subtitle">Những lợi ích vượt trội khi học tập cùng chúng tôi</p>
+            <div class="section-header text-center mb-5">
+                <h2 class="section-title fw-bold">Tại Sao Chọn Online Academy?</h2>
+                <p class="section-subtitle text-muted">Những lợi ích vượt trội khi học tập cùng chúng tôi</p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📚</div>
-                    <h3>Khóa học đa dạng</h3>
-                    <p>Hàng nghìn khóa học từ cơ bản đến nâng cao trong nhiều lĩnh vực khác nhau</p>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4 d-flex">
+                    <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
+                        <div class="feature-icon fs-1 text-primary mb-3">📚</div>
+                        <h5 class="fw-semibold mb-2">Khóa học đa dạng</h5>
+                        <p class="text-muted small">Hàng nghìn khóa học từ cơ bản đến nâng cao trong nhiều lĩnh vực khác nhau</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">👨‍🏫</div>
-                    <h3>Giảng viên chuyên nghiệp</h3>
-                    <p>Học từ những chuyên gia hàng đầu với kinh nghiệm thực tế phong phú</p>
+                <div class="col-md-6 col-lg-4 d-flex">
+                     <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
+                        <div class="feature-icon fs-1 text-primary mb-3">👨‍🏫</div>
+                        <h5 class="fw-semibold mb-2">Giảng viên chuyên nghiệp</h5>
+                        <p class="text-muted small">Học từ những chuyên gia hàng đầu với kinh nghiệm thực tế phong phú</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⏰</div>
-                    <h3>Học linh hoạt</h3>
-                    <p>Học theo tốc độ của bạn, mọi lúc mọi nơi với thiết bị di động hoặc máy tính</p>
+                <div class="col-md-6 col-lg-4 d-flex">
+                     <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
+                        <div class="feature-icon fs-1 text-primary mb-3">⏰</div>
+                        <h5 class="fw-semibold mb-2">Học linh hoạt</h5>
+                        <p class="text-muted small">Học theo tốc độ của bạn, mọi lúc mọi nơi với thiết bị di động hoặc máy tính</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎓</div>
-                    <h3>Chứng chỉ hoàn thành</h3>
-                    <p>Nhận chứng chỉ được công nhận sau khi hoàn thành khóa học</p>
+                <div class="col-md-6 col-lg-4 d-flex">
+                     <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
+                        <div class="feature-icon fs-1 text-primary mb-3">🎓</div>
+                        <h5 class="fw-semibold mb-2">Chứng chỉ hoàn thành</h5>
+                        <p class="text-muted small">Nhận chứng chỉ được công nhận sau khi hoàn thành khóa học</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💬</div>
-                    <h3>Hỗ trợ 24/7</h3>
-                    <p>Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc của bạn</p>
+                 <div class="col-md-6 col-lg-4 d-flex">
+                     <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
+                        <div class="feature-icon fs-1 text-primary mb-3">💬</div>
+                        <h5 class="fw-semibold mb-2">Hỗ trợ 24/7</h5>
+                        <p class="text-muted small">Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc của bạn</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>Giá cả phải chăng</h3>
-                    <p>Chi phí hợp lý với chất lượng đào tạo cao cấp</p>
+                 <div class="col-md-6 col-lg-4 d-flex">
+                     <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
+                        <div class="feature-icon fs-1 text-primary mb-3">💰</div>
+                        <h5 class="fw-semibold mb-2">Giá cả phải chăng</h5>
+                        <p class="text-muted small">Chi phí hợp lý với chất lượng đào tạo cao cấp</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="cta" id="contact">
+    {{!-- CTA Section --}}
+    <section class="cta py-5 text-white" id="contact" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container">
-            <div class="cta-content">
-                <h2>Bắt Đầu Hành Trình Học Tập Ngay Hôm Nay</h2>
-                <p>Đăng ký tài khoản miễn phí và khám phá hàng nghìn khóa học chất lượng</p>
-                <button class="btn-primary btn-large" id="ctaRegisterBtn">Đăng ký miễn phí</button>
+            <div class="cta-content text-center">
+                <h2 class="fw-bold">Bắt Đầu Hành Trình Học Tập Ngay Hôm Nay</h2>
+                <p class="lead mb-4">Đăng ký tài khoản miễn phí và khám phá hàng nghìn khóa học chất lượng</p>
+                <a href="/auth/register" class="btn btn-light btn-lg rounded-pill px-4" id="ctaRegisterBtn">Đăng ký miễn phí</a>
             </div>
         </div>
     </section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Online Academy</h3>
-                    <p>Nền tảng học trực tuyến hàng đầu với hàng nghìn khóa học chất lượng cao.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Liên kết</h4>
-                    <ul>
-                        <li><a href="#home">Trang chủ</a></li>
-                        <li><a href="#courses">Khóa học</a></li>
-                        <li><a href="#categories">Danh mục</a></li>
-                        <li><a href="#about">Giới thiệu</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Hỗ trợ</h4>
-                    <ul>
-                        <li><a href="#contact">Liên hệ</a></li>
-                        <li><a href="#">Câu hỏi thường gặp</a></li>
-                        <li><a href="#">Điều khoản dịch vụ</a></li>
-                        <li><a href="#">Chính sách bảo mật</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Theo dõi chúng tôi</h4>
-                    <ul>
-                        <li><a href="#">Facebook</a></li>
-                        <li><a href="#">Twitter</a></li>
-                        <li><a href="#">Instagram</a></li>
-                        <li><a href="#">LinkedIn</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Online Academy. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    {{!-- Footer should be in main.hbs layout --}}
+    {{!-- {{> footer}} --}}
 
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <span class="modal-close" id="loginClose">&times;</span>
-            <h2>Đăng Nhập</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
+    {{!-- Modals (Consider moving to main layout if used globally) --}}
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đăng Nhập</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="form-group">
-                    <label for="loginPassword">Mật khẩu</label>
-                    <input type="password" id="loginPassword" required>
+                <div class="modal-body">
+                    <form id="loginForm"> {{!-- Needs proper action/method for server-side --}}
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                    </form>
                 </div>
-                <button type="submit" class="btn-primary btn-block">Đăng nhập</button>
-            </form>
-            <p class="modal-footer">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
-        </div>
-    </div>
-
-    <div class="modal" id="registerModal">
-        <div class="modal-content">
-            <span class="modal-close" id="registerClose">&times;</span>
-            <h2>Đăng Ký</h2>
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" required>
+                <div class="modal-footer justify-content-center">
+                    <p class="mb-0 small">Chưa có tài khoản? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Đăng ký ngay</a></p>
                 </div>
-                <div class="form-group">
-                    <label for="registerPassword">Mật khẩu</label>
-                    <input type="password" id="registerPassword" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerConfirmPassword">Xác nhận mật khẩu</label>
-                    <input type="password" id="registerConfirmPassword" required>
-                </div>
-                <button type="submit" class="btn-primary btn-block">Đăng ký</button>
-            </form>
-            <p class="modal-footer">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
-        </div>
-    </div>
-
-    <div class="modal course-modal" id="courseModal">
-        <div class="modal-content course-modal-content">
-            <span class="modal-close" id="courseClose">&times;</span>
-            <div id="courseDetails">
             </div>
         </div>
     </div>
 
-    <script type="module" src="/js/main.js"></script>
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đăng Ký</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                 <div class="modal-body">
+                    <form id="registerForm"> {{!-- Needs proper action/method for server-side --}}
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="registerPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                   <p class="mb-0 small">Đã có tài khoản? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Đăng nhập</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{!-- Course Detail Modal Placeholder (Remove if using separate page) --}}
+    {{!-- <div class="modal fade course-modal" id="courseModal" tabindex="-1" aria-hidden="true"> ... </div> --}}
+
+    {{!-- Include Bootstrap JS if not already in main.hbs --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{!-- Your custom JS --}}
+    <script type="module" src="/js/main.js"></script> {{!-- Check path --}}
 </body>
 </html>
