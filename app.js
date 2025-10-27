@@ -11,7 +11,7 @@ import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
-import courseRoutes from './routes/courses.route.js';
+import coursesRoutes from './routes/courses.route.js';
 
 dotenv.config();
 
@@ -122,7 +122,7 @@ app.use((req, res, next) => {
 });
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
-app.use("/courses", coursesRoute); // 3. Register course route
+app.use("/courses", coursesRoutes); // 3. Register course route
 app.use("/instructor", instructorRoutes);
 app.use("/admin", adminRoutes);
 
