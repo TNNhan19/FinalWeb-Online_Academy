@@ -1,12 +1,71 @@
-<h4 class="mb-3">👤 Hồ sơ giảng viên</h4>
-<form method="POST">
-  <div class="mb-3">
-    <label class="form-label">Tên</label>
-    <input name="name" value="{{profile.name}}" class="form-control" required>
+<h4 class="mb-4">Hồ sơ giảng viên</h4>
+
+<div class="row">
+  <div class="col-md-5">
+    <form method="POST" action="/instructor/profile/update" class="card border-0 shadow-sm p-4">
+      <div class="text-center mb-3">
+        <img src="/images/default-avatar.png" alt="Avatar" width="120" class="rounded-circle mb-2">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Họ và tên</label>
+        <input name="name" class="form-control" value="{{profile.name}}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Email</label>
+        <input type="email" class="form-control" value="{{profile.email}}" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Giới thiệu bản thân</label>
+        <textarea name="bio" class="form-control" rows="4">{{profile.bio}}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Tổng học viên</label>
+        <input type="text" class="form-control" value="{{profile.total_students}}" readonly>
+      </div>
+
+      <div class="text-end">
+        <button class="btn btn-primary px-4">Cập nhật</button>
+      </div>
+    </form>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Giới thiệu</label>
-    <textarea name="bio" rows="5" class="form-control">{{profile.bio}}</textarea>
+
+  <div class="col-md-7">
+    <div class="card border-0 shadow-sm p-4">
+      <h5 class="fw-semibold mb-3">Các khóa học của tôi</h5>
+      {{#if courses.length}}
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Tên khóa học</th>
+            <th>Danh mục</th>
+            <th>Giá ($)</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each courses}}
+          <tr>
+            <td><a href="/instructor/edit/{{course_id}}" class="text-decoration-none">{{title}}</a></td>
+            <td>{{category_name}}</td>
+            <td>{{current_price}}</td>
+            <td>
+              {{#if (eq status "complete")}}
+              <span class="badge bg-success">Hoàn thành</span>
+              {{else}}
+              <span class="badge bg-warning text-dark">Chưa hoàn thành</span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{else}}
+      <p class="text-muted">Chưa có khóa học nào được tạo.</p>
+      {{/if}}
+    </div>
   </div>
-  <button class="btn btn-primary">Lưu</button>
-</form>
+</div>

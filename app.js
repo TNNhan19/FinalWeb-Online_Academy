@@ -1,10 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+
 import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import hbs_sections from "express-handlebars-sections";
 import session from "express-session";
-import dotenv from "dotenv";
 import { format } from 'date-fns';
 
 import homeRoute from "./routes/home.route.js";
@@ -13,7 +16,10 @@ import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import coursesRoutes from './routes/courses.route.js';
 
-dotenv.config();
+import profileRoutes from "./routes/profile.route.js";
+import courseRoutes from "./routes/courses.route.js";
+
+import categoryRoute from "./routes/category.route.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -24,6 +30,7 @@ app.engine(
     extname: ".hbs",
     helpers: {
       section: hbs_sections(),
+      eq: (a, b) => String(a) === String(b),
       year: () => new Date().getFullYear(),
       ifEquals: function (a, b, options) {
         return a === b ? options.fn(this) : options.inverse(this);
@@ -69,6 +76,9 @@ app.engine(
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       },
       firstLetter: (str) => str ? str.charAt(0).toUpperCase() : '?'
+      eq: function (a, b) {
+        return a === b;
+      },
     },
     layoutsDir: path.join(__dirname, "views", "layouts"),
     partialsDir: path.join(__dirname, "views", "partials"),
@@ -83,15 +93,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "Public")));
 
-// Mock giảng viên để test (xóa khi có auth)
-// app.use((req, res, next) => {
-//   req.user = {
-//     account_id: 1,      // ID thật của giảng viên trong bảng instructors
-//     role: "instructor", // đúng vai trò
-//     name: "John Doe"
-//   };
-//   next();
-// });
 
 app.use(
   session({
@@ -102,19 +103,13 @@ app.use(
   })
 );
 
+// Đọc session user và lưu vào res.locals để template có thể truy cập
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.isAuthenticated = !!req.session.user;
   next();
 });
 
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET || "supersecretkey",
-//     resave: false,
-//     saveUninitialized: false,
-//   })
-// );
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -129,10 +124,13 @@ app.use("/admin", adminRoutes);
 // Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
 
-import categoryRoute from "./routes/category.route.js";
+;
 app.use("/category", categoryRoute);
 
 app.use(express.static("Public"));
+
+app.use("/profile", profileRoutes);
+app.use("/courses", courseRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
