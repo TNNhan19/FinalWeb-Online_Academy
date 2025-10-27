@@ -1,0 +1,57 @@
+<h4 class="mb-4">👁️ Chi tiết khóa học</h4>
+
+<div class="card border-0 shadow-sm p-4 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-4">
+            <img src="{{course.image_url}}" alt="{{course.title}}" class="img-fluid rounded shadow-sm">
+        </div>
+        <div class="col-md-8">
+            <h3 class="fw-bold">{{course.title}}</h3>
+            <p class="text-muted">{{course.category_name}}</p>
+            <p>{{course.description}}</p>
+            <p><strong>Thời lượng:</strong> {{course.total_hours}} giờ</p>
+            <p><strong>Tổng bài giảng:</strong> {{course.total_lectures}}</p>
+            <p><strong>Giá:</strong> <span
+                    class="text-decoration-line-through text-secondary">${{course.original_price}}</span> <span
+                    class="text-danger fw-semibold">${{course.current_price}}</span></p>
+            <p><strong>Trạng thái:</strong>
+                {{#if (eq course.status "complete")}}
+                <span class="badge bg-success">Hoàn thành</span>
+                {{else}}
+                <span class="badge bg-warning text-dark">Chưa hoàn thành</span>
+                {{/if}}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Giới thiệu giảng viên -->
+<div class="card border-0 shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Giảng viên</h5>
+    <p><strong>{{course.instructor_name}}</strong></p>
+    <p class="text-muted">{{course.instructor_bio}}</p>
+</div>
+
+<!-- Danh sách chương và bài giảng -->
+<div class="card border-0 shadow-sm p-4">
+    <h5 class="fw-bold mb-3">Nội dung khóa học</h5>
+
+    {{#each sections}}
+    <div class="mb-3">
+        <div class="fw-semibold mb-2">{{title}}</div>
+        {{#each ../lectures}}
+        {{#if (eq section_id ../section_id)}}
+        <div class="ps-3 text-muted">
+            {{title}} — {{duration}} phút
+            {{#if is_preview}}<span class="badge bg-info text-dark ms-2">Xem thử</span>{{/if}}
+        </div>
+        {{/if}}
+        {{/each}}
+    </div>
+    {{/each}}
+</div>
+
+<div class="mt-4 text-end">
+    <a href="/instructor/dashboard" class="btn btn-outline-secondary">Quay lại</a>
+    <a href="/instructor/edit/{{course.course_id}}" class="btn btn-primary"> Chỉnh sửa</a>
+</div>

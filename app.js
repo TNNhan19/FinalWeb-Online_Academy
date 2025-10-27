@@ -25,6 +25,9 @@ app.engine(
       ifEquals: function (a, b, options) {
         return a === b ? options.fn(this) : options.inverse(this);
       },
+      eq: function (a, b) {
+        return a === b;
+      },
     },
     layoutsDir: path.join(__dirname, "views", "layouts"),
     partialsDir: path.join(__dirname, "views", "partials"),
@@ -39,15 +42,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "Public")));
 
-// Mock giảng viên để test (xóa khi có auth)
-app.use((req, res, next) => {
-  req.user = {
-    account_id: 1,      // ID thật của giảng viên trong bảng instructors
-    role: "instructor", // đúng vai trò
-    name: "John Doe"
-  };
-  next();
-});
 
 app.use(
   session({

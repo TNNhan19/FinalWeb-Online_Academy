@@ -5,7 +5,14 @@
 
 <table class="table table-hover align-middle">
   <thead>
-    <tr><th>Tiêu đề</th><th>Danh mục</th><th>Giá</th><th>Ngày tạo</th><th></th></tr>
+    <tr>
+      <th>Tiêu đề</th>
+      <th>Danh mục</th>
+      <th>Giá</th>
+      <th>Ngày tạo</th>
+      <th>Trạng thái</th>
+      <th></th>
+    </tr>
   </thead>
   <tbody>
     {{#each courses}}
@@ -14,7 +21,19 @@
       <td>{{category_name}}</td>
       <td>{{current_price}}$</td>
       <td>{{created_at}}</td>
-      <td><a href="/instructor/edit/{{course_id}}" class="btn btn-sm btn-outline-primary">Sửa</a></td>
+      <td>
+        {{#ifEquals status "complete"}}
+        <span class="badge bg-success">Hoàn thành</span>
+        {{else}}
+        <span class="badge bg-warning text-dark">Chưa hoàn thành</span>
+        {{/ifEquals}}
+      </td>
+      <td>
+      <td class="text-end">
+        <a href="/instructor/detail/{{course_id}}" class="btn btn-sm btn-outline-secondary">Xem</a>
+        <a href="/instructor/edit/{{course_id}}" class="btn btn-sm btn-outline-primary">Sửa</a>
+      </td>
+      </td>
     </tr>
     {{/each}}
   </tbody>
