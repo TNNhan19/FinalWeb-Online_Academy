@@ -1,21 +1,86 @@
-<h4 class="mb-4">👥 Danh sách người dùng</h4>
+<h4 class="mb-4 fw-bold">Danh sách người dùng</h4>
 
-<h5>Giảng viên</h5>
-<table class="table table-sm table-hover">
-  <thead><tr><th>ID</th><th>Tên</th><th>Email</th><th>Tổng học viên</th></tr></thead>
+<!-- ==== GIẢNG VIÊN ==== -->
+<h5 class="fw-semibold text-primary mb-3">📘 Giảng viên đã đăng ký</h5>
+<table class="table table-hover align-middle border shadow-sm">
+  <thead class="table-light">
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Tên</th>
+      <th scope="col">Email</th>
+      <th scope="col">Tổng học viên</th>
+    </tr>
+  </thead>
   <tbody>
-    {{#each instructors}}
-    <tr><td>{{instructor_id}}</td><td>{{name}}</td><td>{{account_id}}</td><td>{{total_students}}</td></tr>
-    {{/each}}
+    {{#if instructors.length}}
+      {{#each instructors}}
+      <tr>
+        <td>{{instructor_id}}</td>
+        <td>{{name}}</td>
+        <td>{{email}}</td>
+        <td>{{total_students}}</td>
+      </tr>
+      {{/each}}
+    {{else}}
+      <tr><td colspan="4" class="text-center text-muted py-3">Chưa có giảng viên nào trong hệ thống</td></tr>
+    {{/if}}
   </tbody>
 </table>
 
-<h5 class="mt-4">Học viên</h5>
-<table class="table table-sm table-hover">
-  <thead><tr><th>ID</th><th>Tên</th><th>Email</th></tr></thead>
+<!-- ==== GIẢNG VIÊN CHƯA ĐĂNG KÝ ==== -->
+{{#if unregistered.length}}
+<h5 class="fw-semibold text-danger mt-5 mb-3">Giảng viên chưa có trong danh sách</h5>
+<p class="text-muted mb-3">Những tài khoản có vai trò <strong>instructor</strong> nhưng chưa có hồ sơ giảng viên.</p>
+
+<table class="table table-bordered align-middle border shadow-sm">
+  <thead class="table-light">
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Tên</th>
+      <th scope="col">Email</th>
+      <th scope="col" class="text-center">Hành động</th>
+    </tr>
+  </thead>
   <tbody>
-    {{#each students}}
-    <tr><td>{{student_id}}</td><td>{{name}}</td><td>{{account_id}}</td></tr>
+    {{#each unregistered}}
+    <tr>
+      <td>{{account_id}}</td>
+      <td>{{name}}</td>
+      <td>{{email}}</td>
+      <td class="text-center">
+        <form method="POST" action="/admin/users/add-instructor/{{account_id}}" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-success">
+            Thêm vào danh sách giảng viên
+          </button>
+        </form>
+      </td>
+    </tr>
     {{/each}}
+  </tbody>
+</table>
+{{/if}}
+
+<!-- ==== HỌC VIÊN ==== -->
+<h5 class="fw-semibold text-success mt-5 mb-3">🎓 Học viên</h5>
+<table class="table table-hover align-middle border shadow-sm">
+  <thead class="table-light">
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Tên</th>
+      <th scope="col">Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#if students.length}}
+      {{#each students}}
+      <tr>
+        <td>{{student_id}}</td>
+        <td>{{name}}</td>
+        <td>{{email}}</td>
+      </tr>
+      {{/each}}
+    {{else}}
+      <tr><td colspan="3" class="text-center text-muted py-3">Chưa có học viên nào đăng ký</td></tr>
+    {{/if}}
   </tbody>
 </table>

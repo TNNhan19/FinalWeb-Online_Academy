@@ -3,7 +3,7 @@ import { pool } from "../configs/db.js";
 
 const router = express.Router();
 
-// 🚫 Tạm thời bỏ kiểm tra đăng nhập/role
+//Tạm thời bỏ kiểm tra đăng nhập/role
 const ensureInstructor = (req, res, next) => next();
 
 router.get("/", (req, res) => {
@@ -14,9 +14,7 @@ router.get("/", (req, res) => {
   });
 });
 
-// ====================
-// 1️⃣ DASHBOARD
-// ====================
+//DASHBOARD
 router.get("/dashboard", ensureInstructor, async (req, res) => {
   const { rows } = await pool.query(`
     SELECT c.*, cat.name AS category_name
@@ -27,9 +25,7 @@ router.get("/dashboard", ensureInstructor, async (req, res) => {
   res.render("instructor/dashboard", { pageTitle: "Khoá học của tôi", courses: rows });
 });
 
-// ====================
-// 2️⃣ ĐĂNG KHÓA HỌC MỚI
-// ====================
+//ĐĂNG KHÓA HỌC MỚI
 router.get("/new", ensureInstructor, async (req, res) => {
   const { rows: categories } = await pool.query("SELECT * FROM categories ORDER BY name ASC");
   res.render("instructor/course_form", { pageTitle: "Đăng khoá học mới", isNew: true, categories });
@@ -51,10 +47,7 @@ router.post("/new", ensureInstructor, async (req, res) => {
   res.redirect("/instructor/dashboard");
 });
 
-
-// ====================
-// 3️⃣ CHỈNH SỬA KHÓA HỌC
-// ====================
+//CHỈNH SỬA KHÓA HỌC
 router.get("/edit/:id", ensureInstructor, async (req, res) => {
   const { id } = req.params;
   const { rows: courses } = await pool.query(`
@@ -102,9 +95,7 @@ router.post("/edit/:id", ensureInstructor, async (req, res) => {
   res.redirect("/instructor/dashboard");
 });
 
-// ====================
-// 🧩 Thêm chương mới
-// ====================
+// Thêm chương mới
 router.post("/section/:course_id", async (req, res) => {
   const { course_id } = req.params;
   const { title, order_index } = req.body;
@@ -132,14 +123,12 @@ router.post("/section/:course_id", async (req, res) => {
 
     res.redirect(`/instructor/edit/${course_id}`);
   } catch (err) {
-    console.error("❌ Lỗi khi thêm chương:", err);
+    console.error("Lỗi khi thêm chương:", err);
     res.status(500).send("Lỗi máy chủ");
   }
 });
 
-// ====================
-// 🎥 Thêm bài giảng mới
-// ====================
+//Thêm bài giảng mới
 router.post("/lecture/:section_id", async (req, res) => {
   const { section_id } = req.params;
   const { title, video_url, duration, is_preview, order_index } = req.body;
@@ -174,7 +163,7 @@ router.post("/lecture/:section_id", async (req, res) => {
 
     res.redirect(`/instructor/edit/${course_id}`);
   } catch (err) {
-    console.error("❌ Lỗi khi thêm bài giảng:", err);
+    console.error("Lỗi khi thêm bài giảng:", err);
     res.status(500).send("Lỗi máy chủ");
   }
 });
@@ -253,7 +242,7 @@ router.post("/update-structure/:id", async (req, res) => {
   }
 });
 
-// 📄 Trang hồ sơ giảng viên
+//Trang hồ sơ giảng viên
 router.get("/profile", async (req, res) => {
   try {
     // Tạm thời cố định instructor có account_id = 16 (user Nhan)
@@ -290,12 +279,12 @@ router.get("/profile", async (req, res) => {
       courses: courseRows,
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải hồ sơ:", err);
+    console.error("Lỗi khi tải hồ sơ:", err);
     res.status(500).send("Lỗi khi tải hồ sơ giảng viên");
   }
 });
 
-// 🧩 Cập nhật hồ sơ
+//Cập nhật hồ sơ
 router.post("/profile/update", async (req, res) => {
   try {
     const accountId = 16; // test tạm
@@ -308,10 +297,9 @@ router.post("/profile/update", async (req, res) => {
 
     res.redirect("/instructor/profile");
   } catch (err) {
-    console.error("❌ Lỗi khi cập nhật hồ sơ:", err);
+    console.error("Lỗi khi cập nhật hồ sơ:", err);
     res.status(500).send("Cập nhật hồ sơ thất bại!");
   }
 });
-
 
 export default router;
