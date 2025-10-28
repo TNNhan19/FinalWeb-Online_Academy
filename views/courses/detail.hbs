@@ -21,21 +21,14 @@
         </ol>
       </nav>
 
-      {{!-- Course Title & Short Description --}}
       <h1 class="h2 fw-bold mb-2">{{course.title}}</h1>
       <p class="lead text-muted mb-3">{{course.description}}</p>
 
-      {{!-- Meta Bar (Rating, Enrollment, Instructor, etc.) --}}
+      {{!-- Meta Bar --}}
+      {{!-- ... --}}
       <div class="d-flex flex-wrap align-items-center gap-3 small text-muted mb-4">
-        {{#if course.is_bestseller}}
-          <span class="badge bg-warning text-dark">Bestseller</span>
-        {{/if}}
-        <div>
-          <span class="text-warning me-1">
-            <i class="bi bi-star-fill"></i> {{course.average_rating}}
-          </span>
-          <span class="fw-semibold">({{course.total_reviews}} đánh giá)</span>
-        </div>
+        {{#if course.is_bestseller}}<span class="badge bg-warning text-dark">Bestseller</span>{{/if}}
+        <div><span class="text-warning me-1"><i class="bi bi-star-fill"></i> {{course.average_rating}}</span><span class="fw-semibold">({{course.total_reviews}} đánh giá)</span></div>
         <span><i class="bi bi-people-fill"></i> {{course.enrollment_count}} học viên</span>
         <span>Tạo bởi <a href="#instructor" class="text-decoration-none">{{course.instructor_name}}</a></span>
         <span><i class="bi bi-calendar-check"></i> Cập nhật: {{formatDate course.created_at}}</span>
@@ -46,108 +39,103 @@
       <img src="{{course.image_url}}" alt="{{course.title}}" class="img-fluid rounded-3 mb-4 shadow-sm" style="max-height: 450px; width: 100%; object-fit: cover;">
 
 
-      {{!-- Image Gallery (Optional) --}}
+      {{!-- Image Gallery --}}
       {{#if galleryImages.length}}
       <div class="mb-4">
           <h5 class="fw-semibold mb-3">Hình ảnh khác</h5>
           <div class="row g-2 row-cols-2 row-cols-md-3 row-cols-lg-4">
-              {{#each galleryImages}}
-                  <div class="col">
-                      <a href="{{this.image_url}}" target="_blank">
-                      <img src="{{this.image_url}}" alt="{{this.description}}" class="img-fluid rounded shadow-sm" style="height: 120px; width: 100%; object-fit: cover;">
-                      </a>
-                  </div>
-              {{/each}}
+              {{#each galleryImages}}<div class="col"><a href="{{this.image_url}}" target="_blank"><img src="{{this.image_url}}" alt="{{this.description}}" class="img-fluid rounded shadow-sm" style="height: 120px; width: 100%; object-fit: cover;"></a></div>{{/each}}
           </div>
       </div>
       {{/if}}
 
-      {{!-- Detailed Description (Currently commented out in original file) --}}
-      {{!-- <div class="card card-body border-0 bg-light mb-4 p-4">
-        <h5 class="fw-semibold mb-3">Bạn sẽ học được gì?</h5>
-        {{{course.detail_html}}}
-      </div> --}}
+      {{!-- DETAILED DESCRIPTION --}}
+      <div class="card card-body border-0 bg-light mb-4 p-4 shadow-sm">
+        <h5 class="fw-semibold mb-3">Chi tiết khóa học</h5>
+        {{{course.detail_html}}} {{!-- Triple braces to render HTML --}}
+      </div>
 
-      {{!-- Course Outline (Sections & Lectures) --}}
-      <h4 class="fw-bold mb-3">Nội dung khóa học</h4>
-      <div class="text-muted small mb-3">
-        {{sections.length}} chương • {{course.total_lectures}} bài học • {{course.total_hours}} giờ tổng thời lượng
-      </div>
-      <div class="accordion accordion-flush border rounded-3 mb-4 shadow-sm" id="courseAccordion">
-        {{#each sections}}
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="heading-{{section_id}}">
-            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{section_id}}">
-              Chương {{order_index}}: {{title}}
-              <span class="ms-auto small text-muted me-3">{{lectures.length}} bài</span>
-            </button>
-          </h2>
-          <div id="collapse-{{section_id}}" class="accordion-collapse collapse" data-bs-parent="#courseAccordion">
-            <div class="accordion-body p-0">
-              <ul class="list-group list-group-flush">
-                {{#each lectures}}
-                <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
-                  <div class="text-truncate me-3">
-                    <i class="bi bi-play-circle me-2 text-secondary"></i>
-                    <span>{{title}}</span>
-                  </div>
-                  <div class="text-nowrap">
-                    {{#if is_preview}}
-                      {{!-- Allow preview for everyone --}}
-                      <a href="{{video_url}}" target="_blank" class="badge text-bg-primary text-decoration-none me-2">Xem thử</a>
-                      <span class="small text-muted">({{formatDuration duration}})</span>
-                    {{else}}
-                      {{!-- Not previewable, show lock/duration based on login --}}
-                      {{#if @root.user}} {{!-- Check if user is logged in --}}
-                        <span class="small text-muted">({{formatDuration duration}})</span>
-                      {{else}}
-                         <i class="bi bi-lock-fill text-muted me-2" title="Cần đăng nhập/mua khóa học"></i>
-                         <span class="small text-muted">({{formatDuration duration}})</span>
-                      {{/if}}
-                    {{/if}}
-                  </div>
-                </li>
-                {{/each}}
-              </ul>
-            </div>
-          </div>
+      {{!-- COURSE OUTLINE (HIDDEN FOR ANONYMOUS) --}}
+      {{#if user}}
+        <h4 class="fw-bold mb-3">Nội dung khóa học</h4>
+        <div class="text-muted small mb-3">
+          {{sections.length}} chương • {{course.total_lectures}} bài học • {{course.total_hours}} giờ tổng thời lượng
         </div>
-        {{else}}
-         <div class="p-3 text-muted">Nội dung khóa học đang được cập nhật.</div>
-        {{/each}}
-      </div>
+        <div class="accordion accordion-flush border rounded-3 mb-4 shadow-sm" id="courseAccordion">
+          {{#each sections}}
+             <div class="accordion-item">
+               <h2 class="accordion-header" id="heading-{{section_id}}">
+                 <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{section_id}}">
+                   Chương {{order_index}}: {{title}}
+                   <span class="ms-auto small text-muted me-3">{{lectures.length}} bài</span>
+                 </button>
+               </h2>
+               <div id="collapse-{{section_id}}" class="accordion-collapse collapse" data-bs-parent="#courseAccordion">
+                 <div class="accordion-body p-0">
+                   <ul class="list-group list-group-flush">
+                     {{#each lectures}}
+                     <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                       <div class="text-truncate me-3">
+                         <i class="bi bi-play-circle me-2 text-secondary"></i>
+                         <span>{{title}}</span>
+                       </div>
+                       <div class="text-nowrap">
+                         {{#if is_preview}}
+                           <a href="{{video_url}}" target="_blank" class="badge text-bg-primary text-decoration-none me-2">Xem thử</a>
+                           <span class="small text-muted">({{formatDuration duration}})</span>
+                         {{else}}
+                           {{#if @root.user}}
+                             <span class="small text-muted">({{formatDuration duration}})</span>
+                           {{else}}
+                              <i class="bi bi-lock-fill text-muted me-2" title="Cần đăng nhập/mua khóa học"></i>
+                              <span class="small text-muted">({{formatDuration duration}})</span>
+                           {{/if}}
+                         {{/if}}
+                       </div>
+                     </li>
+                     {{/each}}
+                   </ul>
+                 </div>
+               </div>
+             </div>
+          {{else}}
+           <div class="p-3 text-muted">Nội dung khóa học đang được cập nhật.</div>
+          {{/each}}
+        </div>
+      {{else}} {{!-- Message for anonymous users --}}
+        <h4 class="fw-bold mb-3">Nội dung khóa học</h4>
+        <div class="alert alert-secondary">
+          <i class="bi bi-lock-fill me-1"></i> Bạn cần <a href="/auth/login?redirect={{@root.req.originalUrl}}" class="alert-link">đăng nhập</a> hoặc đăng ký khóa học để xem nội dung chi tiết.
+        </div>
+      {{/if}}
+      {{!-- END COURSE OUTLINE --}}
 
       {{!-- Instructor Info --}}
-      <h4 class="fw-bold mb-3" id="instructor">Thông tin giảng viên</h4>
+       <h4 class="fw-bold mb-3" id="instructor">Thông tin giảng viên</h4>
       <div class="mb-4 p-3 bg-light rounded-3">
         <h5 class="fw-semibold text-primary mb-1">{{course.instructor_name}}</h5>
-        {{!-- <p class="small text-muted mb-2">Chức danh giảng viên (nếu có)</p> --}}
         <div class="d-flex align-items-center gap-3 small mb-2">
            <img src="https://placehold.co/60x60/7F8C8D/FFFFFF&text={{firstLetter course.instructor_name}}" class="rounded-circle" alt="{{course.instructor_name}}">
            <div class="vstack">
-             {{!-- Placeholder stats - fetch real ones if needed --}}
              <div><i class="bi bi-star-fill text-warning me-1"></i> 4.7 Đánh giá giảng viên</div>
              <div><i class="bi bi-people-fill text-success me-1"></i> {{course.instructor_total_students}} Học viên</div>
-             {{!-- <div><i class="bi bi-collection-play-fill text-danger me-1"></i> X Khóa học</div> --}}
            </div>
         </div>
         <p class="text-muted small">{{course.instructor_bio}}</p>
       </div>
+
 
       {{!-- Student Feedback / Reviews --}}
       <h4 class="fw-bold mb-3">Đánh giá của học viên</h4>
        <div class="d-flex align-items-baseline mb-3 p-3 bg-light rounded-3">
            <span class="display-4 fw-bold text-warning me-3">{{course.average_rating}}</span>
            <div class="lh-1">
-             <div class="text-warning"> {{!-- Render Stars --}}
-                {{#each (stars course.average_rating)}}
-                     <i class="bi {{this}}"></i>
-                {{/each}}
+             <div class="text-warning">
+                {{#each (stars course.average_rating)}}<i class="bi {{this}}"></i>{{/each}}
              </div>
              <div class="small text-muted">Đánh giá trung bình ({{course.total_reviews}} lượt)</div>
            </div>
        </div>
-
       <div>
         {{#each reviews}}
          <div class="border-top py-3">
@@ -159,9 +147,7 @@
                  <span class="small text-muted">{{formatDate created_at}}</span>
               </div>
               <div class="small text-warning mb-1">
-                 {{#each (stars rating)}}
-                    <i class="bi {{this}}"></i>
-                {{/each}}
+                 {{#each (stars rating)}}<i class="bi {{this}}"></i>{{/each}}
               </div>
               <p class="mb-0 small">{{feedback}}</p>
             </div>
@@ -181,12 +167,12 @@
         {{!-- Purchase Card --}}
         <div class="card shadow border-0 mb-4 overflow-hidden">
           {{!-- Video Preview Placeholder --}}
-          <div class="ratio ratio-16x9">
+           <div class="ratio ratio-16x9">
               <iframe src="https://www.youtube.com/embed/xBrD8dgfvBg?si=tUHdDxh7lD3a7q4g" title="Mock video preview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
           </div>
           <div class="card-body p-3">
             {{!-- Price Display --}}
-            <div class="mb-3">
+             <div class="mb-3">
               {{#if (isDiscount course.current_price course.original_price)}}
                  <span class="h2 fw-bold me-2">${{course.current_price}}</span>
                 <span class="text-decoration-line-through text-muted">${{course.original_price}}</span>
@@ -207,40 +193,37 @@
                  <a href="/auth/login?redirect=/courses/{{course.course_id}}" class="btn btn-danger btn-lg">Đăng nhập để mua</a>
                {{/if}}
 
-               {{!-- Favorite Button Section --}}
+               {{!-- ⭐ FAVORITE BUTTON SECTION (with Container & IDs) --}}
                <div id="favorite-button-container">
                   {{#if isFavorite}}
                     <form action="/courses/{{course.course_id}}/unfavorite" method="POST" id="unfavorite-form">
-                      <button type="submit" class="btn btn-outline-danger w-100"> {{!-- Added w-100 for consistency --}}
+                      <button type="submit" class="btn btn-outline-danger w-100">
                           <i class="bi bi-heart-fill me-1"></i> Bỏ yêu thích
                       </button>
                     </form>
                   {{else}}
                     <form action="/courses/{{course.course_id}}/favorite" method="POST" id="favorite-form">
-                      <button type="submit" class="btn btn-outline-secondary w-100"> {{!-- Changed to secondary, Added w-100 --}}
+                      <button type="submit" class="btn btn-outline-secondary w-100">
                           <i class="bi bi-heart me-1"></i> Thêm vào yêu thích
                       </button>
                     </form>
                   {{/if}}
                </div>
+               {{!-- END FAVORITE BUTTON SECTION --}}
+
             </div>
             <p class="small text-center text-muted mb-3">Đảm bảo hoàn tiền trong 30 ngày</p>
 
             {{!-- Course Includes List --}}
-            <h6 class="fw-semibold small">Khóa học này bao gồm:</h6>
+             <h6 class="fw-semibold small">Khóa học này bao gồm:</h6>
             <ul class="list-unstyled small text-muted mb-0">
               <li class="mb-1"><i class="bi bi-camera-video me-2 text-primary"></i> {{course.total_hours}} giờ video theo yêu cầu</li>
               <li class="mb-1"><i class="bi bi-journal-text me-2 text-primary"></i> {{course.total_lectures}} bài học</li>
-              {{!-- Add more items like articles, downloadable resources if available in DB --}}
               <li class="mb-1"><i class="bi bi-phone me-2 text-primary"></i> Truy cập trên di động và TV</li>
               <li class="mb-1"><i class="bi bi-infinity me-2 text-primary"></i> Truy cập trọn đời</li>
               <li class="mb-1"><i class="bi bi-patch-check me-2 text-primary"></i> Chứng chỉ hoàn thành</li>
             </ul>
-             {{!-- Optional Share/Gift buttons (commented out in original) --}}
-             {{!-- <div class="d-flex justify-content-center gap-2 mt-3">
-                <button class="btn btn-sm btn-outline-secondary">Chia sẻ</button>
-                <button class="btn btn-sm btn-outline-secondary">Tặng khóa học</button>
-             </div> --}}
+
           </div>
         </div>
 
@@ -272,20 +255,16 @@
 
 {{!-- Section for JavaScript --}}
 {{#section "js"}}
-  {{!-- Helpers for stars (if needed) --}}
-  {{!-- ... --}}
-
 <script>
+  // Script for instant favorite button update
   document.addEventListener('DOMContentLoaded', () => {
-    console.log("✅ Detail page JS loaded."); // Check if script runs
+    // console.log("✅ Detail page JS loaded."); // Optional: Keep for debugging
 
     const favoriteContainer = document.getElementById('favorite-button-container');
 
-    // Ensure the container exists before adding listener
     if (favoriteContainer) {
-      console.log("✅ Favorite container (#favorite-button-container) found.");
+      // console.log("✅ Favorite container (#favorite-button-container) found."); // Optional
 
-      // --- Get courseId (no changes needed here) ---
       const initialForm = favoriteContainer.querySelector('form');
       let courseId = null;
       if (initialForm && initialForm.action) {
@@ -300,19 +279,16 @@
            }
            console.warn("⚠️ Falling back to Handlebars variable for course ID:", courseId);
       }
-      console.log("➡️ Course ID for favorite logic:", courseId);
-      // --- End courseId extraction ---
+      // console.log("➡️ Course ID for favorite logic:", courseId); // Optional
 
 
       // Function to update button appearance instantly
       const updateButtonAppearance = (isNowFavorite) => {
-        console.log("🔄 Updating button appearance. Is now favorite:", isNowFavorite);
-        // Add a temporary disabled state while processing
-        favoriteContainer.style.opacity = '0.5';
+        // console.log("🔄 Updating button appearance. Is now favorite:", isNowFavorite); // Optional
+        favoriteContainer.style.opacity = '0.5'; // Dim while processing
         favoriteContainer.style.pointerEvents = 'none';
 
         if (isNowFavorite) {
-          // Replace with unfavorite form
           favoriteContainer.innerHTML = `
             <form action="/courses/${courseId}/unfavorite" method="POST" id="unfavorite-form">
               <button type="submit" class="btn btn-outline-danger w-100">
@@ -321,7 +297,6 @@
             </form>
           `;
         } else {
-          // Replace with favorite form
           favoriteContainer.innerHTML = `
             <form action="/courses/${courseId}/favorite" method="POST" id="favorite-form">
               <button type="submit" class="btn btn-outline-secondary w-100">
@@ -330,49 +305,74 @@
             </form>
           `;
         }
-        console.log("✅ Button HTML updated.");
-        // Re-enable after a short delay to prevent rapid clicking issues
-        setTimeout(() => {
+        // console.log("✅ Button HTML updated."); // Optional
+        setTimeout(() => { // Re-enable after short delay
             favoriteContainer.style.opacity = '1';
             favoriteContainer.style.pointerEvents = 'auto';
-        }, 300); // 300ms delay
+        }, 300);
       };
 
       // Use event delegation on the container for form submissions
       favoriteContainer.addEventListener('submit', async (event) => {
-         // --- PREVENT THE DEFAULT FORM SUBMISSION ---
-         event.preventDefault();
-         // Make sure the event target is one of our forms
-         if (event.target.matches('#favorite-form, #unfavorite-form')) {
-              const form = event.target;
-              const url = form.action; // Get URL from the form that was clicked
-              const method = form.method.toUpperCase(); // Get method (POST)
+         event.preventDefault(); // Prevent default form submission
+         // console.log("🚫 Default form submission prevented."); // Optional
 
+         if (event.target.matches('#favorite-form, #unfavorite-form')) {
+              // console.log('🖱️ Submit event detected on form:', event.target.id); // Optional
+
+              const form = event.target;
+              const url = form.action;
+              const method = form.method.toUpperCase();
               let isAddingFavorite = (form.id === 'favorite-form');
+
+              // Show loading state / disable button immediately
+              const submitButton = form.querySelector('button');
+              if(submitButton) submitButton.disabled = true;
+              favoriteContainer.style.opacity = '0.5';
+              favoriteContainer.style.pointerEvents = 'none';
+
+
               // --- MANUALLY SEND REQUEST USING FETCH ---
               try {
+                  // console.log(`📡 Sending ${method} request to: ${url}`); // Optional
                   const response = await fetch(url, {
                       method: method,
-                      headers: {
-                          'Content-Type': 'application/json' // Adjust if needed
-                      },
+                      headers: { 'Accept': 'application/json' }, // Tell server we prefer JSON
                   });
-                  if (response.ok) {
-                      console.log(`✅ Request to ${url} successful.`);
-                      updateButtonAppearance(isAddingFavorite);
 
+                  // console.log(`🚦 Server response status: ${response.status}`); // Optional
+
+                  if (response.ok) {
+                      // console.log(`✅ Request to ${url} successful.`); // Optional
+                      // Update button appearance AFTER successful request
+                      updateButtonAppearance(isAddingFavorite);
                   } else {
-                      // Handle server errors (e.g., 403 Forbidden, 500 Internal Server Error)
+                      // Handle server errors
                       console.error(`❌ Request to ${url} failed with status ${response.status}.`);
-                      alert(`Lỗi ${response.status}: Không thể cập nhật danh sách yêu thích. Vui lòng thử lại.`);
+                      alert(`Lỗi ${response.status}: Không thể cập nhật danh sách yêu thích. Trang sẽ được tải lại.`);
+                      window.location.reload(); // Reload page on error to reset state
                   }
               } catch (error) {
-                  // Handle network errors (fetch failed to send)
+                  // Handle network errors
                   console.error(`❌ Network error during fetch to ${url}:`, error);
-                  alert("Lỗi mạng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.");
+                  alert("Lỗi mạng: Không thể kết nối. Trang sẽ được tải lại.");
+                  window.location.reload(); // Reload page on error to reset state
+              } finally {
+                  // Re-enable button/container in case update failed visually but request went through
+                  // (updateButtonAppearance already handles re-enabling on success)
+                 if(submitButton) submitButton.disabled = false;
+                 // Ensure container is re-enabled if updateButtonAppearance didn't run on error
+                 favoriteContainer.style.opacity = '1';
+                 favoriteContainer.style.pointerEvents = 'auto';
               }
-          } 
+          } else {
+              // console.warn("⚠️ Submit event detected, but not on recognized form."); // Optional
+          }
       });
+      // console.log("✅ Submit listener (using fetch) attached."); // Optional
+
+    } else {
+      console.error("❌ ERROR: Favorite button container (#favorite-button-container) was NOT found.");
     }
   });
 </script>
