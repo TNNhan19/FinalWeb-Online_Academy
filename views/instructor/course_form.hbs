@@ -1,15 +1,13 @@
 {{#section "head"}}
-<script
-  src="https://cdn.tiny.cloud/1/85smk8b6yiwa040bb9wgiz48khuw8tkx41hxez1g4hfsx7ff/tinymce/6/tinymce.min.js"
-  referrerpolicy="origin"
-></script>
+<script src="https://cdn.tiny.cloud/1/85smk8b6yiwa040bb9wgiz48khuw8tkx41hxez1g4hfsx7ff/tinymce/6/tinymce.min.js"
+  referrerpolicy="origin"></script>
 {{/section}}
 
 <h4 class="mb-4">
   {{#if isNew}}Đăng khóa học mới{{else}}Cập nhật khóa học{{/if}}
 </h4>
 
-<form method="POST" action="" class="row g-4">
+<form method="POST" action="" enctype="multipart/form-data" class="row g-4">
   <div class="col-lg-8">
     <div class="card border-0 shadow-sm p-4">
       <div class="mb-3">
@@ -19,7 +17,8 @@
 
       <div class="mb-3">
         <label class="form-label fw-semibold">Mô tả ngắn</label>
-        <textarea name="description" class="form-control" rows="2" placeholder="Tóm tắt ngắn gọn về khóa học">{{course.description}}</textarea>
+        <textarea name="description" class="form-control" rows="2"
+          placeholder="Tóm tắt ngắn gọn về khóa học">{{course.description}}</textarea>
       </div>
 
       <div class="mb-3">
@@ -58,9 +57,15 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label fw-semibold">Ảnh đại diện (URL)</label>
-        <input name="image_url" class="form-control" value="{{course.image_url}}" placeholder="https://...">
+        <label class="form-label fw-semibold">Ảnh đại diện</label>
+        {{#if course.image_url}}
+        <div class="mb-2 text-center">
+          <img src="{{course.image_url}}" alt="Preview" class="img-fluid rounded shadow-sm" style="max-height:200px;">
+        </div>
+        {{/if}}
+        <input type="file" name="image_file" accept="image/*" class="form-control">
       </div>
+
 
       <div class="mb-3">
         <label class="form-label fw-semibold">Tổng thời lượng (giờ)</label>
@@ -87,8 +92,8 @@
       <div class="mt-3">
         <label class="form-label fw-semibold">Trạng thái khóa học</label>
         <select name="status" class="form-select">
-          <option value="incomplete" {{#if (eq course.status "incomplete")}}selected{{/if}}>Chưa hoàn thành</option>
-          <option value="complete" {{#if (eq course.status "complete")}}selected{{/if}}>Đã hoàn thành</option>
+          <option value="incomplete" {{#if (eq course.status "incomplete" )}}selected{{/if}}>Chưa hoàn thành</option>
+          <option value="complete" {{#if (eq course.status "complete" )}}selected{{/if}}>Đã hoàn thành</option>
         </select>
       </div>
       {{/unless}}
@@ -113,17 +118,20 @@
       </div>
       <div class="card-body lectures-container">
         {{#each ../lectures}}
-          {{#if (eq section_id ../section_id)}}
-          <div class="d-flex align-items-center gap-2 mb-2 lecture-item" data-lecture-id="{{lecture_id}}">
-            <input class="form-control form-control-sm flex-fill lecture-title" value="{{title}}" placeholder="Tên bài giảng">
-            <input class="form-control form-control-sm flex-fill lecture-video" value="{{video_url}}" placeholder="Video URL">
-            <input class="form-control form-control-sm lecture-duration" type="number" value="{{duration}}" placeholder="Thời lượng (s)">
-            <div class="form-check">
-              <input class="form-check-input lecture-preview" type="checkbox" {{#if is_preview}}checked{{/if}}>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-lecture">🗑️</button>
+        {{#if (eq section_id ../section_id)}}
+        <div class="d-flex align-items-center gap-2 mb-2 lecture-item" data-lecture-id="{{lecture_id}}">
+          <input class="form-control form-control-sm flex-fill lecture-title" value="{{title}}"
+            placeholder="Tên bài giảng">
+          <input class="form-control form-control-sm flex-fill lecture-video" value="{{video_url}}"
+            placeholder="Video URL">
+          <input class="form-control form-control-sm lecture-duration" type="number" value="{{duration}}"
+            placeholder="Thời lượng (s)">
+          <div class="form-check">
+            <input class="form-check-input lecture-preview" type="checkbox" {{#if is_preview}}checked{{/if}}>
           </div>
-          {{/if}}
+          <button type="button" class="btn btn-sm btn-outline-danger remove-lecture">🗑️</button>
+        </div>
+        {{/if}}
         {{/each}}
         <button type="button" class="btn btn-sm btn-outline-success mt-2 add-lecture">+ Thêm bài giảng</button>
       </div>
@@ -144,39 +152,39 @@
 
 {{#section "js"}}
 <script>
-tinymce.init({
-  selector: '#editor',
-  height: 400,
-  menubar: false,
-  branding: false,
-  plugins: 'lists link image media table code help wordcount',
-  toolbar:
-    'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
-});
+  tinymce.init({
+    selector: '#editor',
+    height: 400,
+    menubar: false,
+    branding: false,
+    plugins: 'lists link image media table code help wordcount',
+    toolbar:
+      'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
+  });
 
-// === Quản lý thêm/xóa chương và bài giảng ===
-document.getElementById("addSectionBtn")?.addEventListener("click", () => {
-  const title = document.getElementById("newSectionTitle").value.trim();
-  if (!title) return alert("Vui lòng nhập tên chương!");
-  const div = document.createElement("div");
-  div.className = "card mb-4 border-0 shadow-sm section-item";
-  div.innerHTML = `
+  // === Quản lý thêm/xóa chương và bài giảng ===
+  document.getElementById("addSectionBtn")?.addEventListener("click", () => {
+    const title = document.getElementById("newSectionTitle").value.trim();
+    if (!title) return alert("Vui lòng nhập tên chương!");
+    const div = document.createElement("div");
+    div.className = "card mb-4 border-0 shadow-sm section-item";
+    div.innerHTML = `
     <div class="card-header bg-light">
       <input class="form-control form-control-sm fw-semibold section-title" value="${title}">
     </div>
     <div class="card-body lectures-container">
       <button type="button" class="btn btn-sm btn-outline-success mt-2 add-lecture">+ Thêm bài giảng</button>
     </div>`;
-  document.getElementById("sectionsContainer").appendChild(div);
-  document.getElementById("newSectionTitle").value = "";
-});
+    document.getElementById("sectionsContainer").appendChild(div);
+    document.getElementById("newSectionTitle").value = "";
+  });
 
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("add-lecture")) {
-    const container = e.target.closest(".lectures-container");
-    const div = document.createElement("div");
-    div.className = "d-flex align-items-center gap-2 mb-2 lecture-item";
-    div.innerHTML = `
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("add-lecture")) {
+      const container = e.target.closest(".lectures-container");
+      const div = document.createElement("div");
+      div.className = "d-flex align-items-center gap-2 mb-2 lecture-item";
+      div.innerHTML = `
       <input class="form-control form-control-sm flex-fill lecture-title" placeholder="Tên bài giảng">
       <input class="form-control form-control-sm flex-fill lecture-video" placeholder="Video URL">
       <input class="form-control form-control-sm lecture-duration" type="number" placeholder="Thời lượng (s)">
@@ -184,37 +192,37 @@ document.addEventListener("click", (e) => {
         <input class="form-check-input lecture-preview" type="checkbox">
       </div>
       <button type="button" class="btn btn-sm btn-outline-danger remove-lecture">🗑️</button>`;
-    container.insertBefore(div, e.target);
-  }
+      container.insertBefore(div, e.target);
+    }
 
-  if (e.target.classList.contains("remove-lecture")) {
-    e.target.closest(".lecture-item").remove();
-  }
-});
-
-// === Gửi tất cả thay đổi ===
-document.getElementById("structureForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const courseId = e.target.querySelector("[name='course_id']").value;
-  const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
-    section_id: section.dataset.sectionId || null,
-    title: section.querySelector(".section-title").value,
-    lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({
-      lecture_id: lec.dataset.lectureId || null,
-      title: lec.querySelector(".lecture-title").value,
-      video_url: lec.querySelector(".lecture-video").value,
-      duration: lec.querySelector(".lecture-duration").value,
-      is_preview: lec.querySelector(".lecture-preview").checked,
-    })),
-  }));
-
-  const res = await fetch(`/instructor/update-structure/${courseId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ sections }),
+    if (e.target.classList.contains("remove-lecture")) {
+      e.target.closest(".lecture-item").remove();
+    }
   });
-  const data = await res.json();
-  alert(data.message || "Đã lưu thay đổi!");
-});
+
+  // === Gửi tất cả thay đổi ===
+  document.getElementById("structureForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const courseId = e.target.querySelector("[name='course_id']").value;
+    const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
+      section_id: section.dataset.sectionId || null,
+      title: section.querySelector(".section-title").value,
+      lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({
+        lecture_id: lec.dataset.lectureId || null,
+        title: lec.querySelector(".lecture-title").value,
+        video_url: lec.querySelector(".lecture-video").value,
+        duration: lec.querySelector(".lecture-duration").value,
+        is_preview: lec.querySelector(".lecture-preview").checked,
+      })),
+    }));
+
+    const res = await fetch(`/instructor/update-structure/${courseId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sections }),
+    });
+    const data = await res.json();
+    alert(data.message || "Đã lưu thay đổi!");
+  });
 </script>
 {{/section}}
