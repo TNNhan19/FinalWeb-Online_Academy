@@ -1,5 +1,5 @@
 import express from "express";
-import db from "../configs/db.js";
+import { pool } from "../configs/db.js";
 
 const router = express.Router();
 
@@ -164,7 +164,6 @@ router.get("/edit/:id", requireInstructor, async (req, res) => {
     `,
     [id]
   );
-  );
 
   res.render("instructor/course_form", {
     pageTitle: "Cập nhật khoá học",
@@ -175,7 +174,6 @@ router.get("/edit/:id", requireInstructor, async (req, res) => {
     lectures,
   });
 });
-
 // ====================
 // TRANG HỒ SƠ GIẢNG VIÊN
 // ====================
