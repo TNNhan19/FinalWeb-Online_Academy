@@ -15,11 +15,9 @@ import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import coursesRoutes from './routes/courses.route.js';
-
 import profileRoutes from "./routes/profile.route.js";
-import courseRoutes from "./routes/courses.route.js";
-
-import categoryRoute from "./routes/category.route.js"
+import categoryRoute from "./routes/category.route.js";
+import enrollmentRoutes from "./routes/enrollment.route.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -103,34 +101,27 @@ app.use(
   })
 );
 
-// Đọc session user và lưu vào res.locals để template có thể truy cập
+// Authentication middleware
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  res.locals.isAuthenticated = !!req.session.user;
+  const user = req.session.user || null;
+  // Gán user vào cả req.user và res.locals.user
+  req.user = user;
+  res.locals.user = user;
+  res.locals.isAuthenticated = !!user;
   next();
 });
-
-
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
-});
+// Đăng ký các routes
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
-app.use("/courses", coursesRoutes); // 3. Register course route
+app.use("/courses", coursesRoutes);
 app.use("/instructor", instructorRoutes);
 app.use("/admin", adminRoutes);
+app.use("/profile", profileRoutes);
+app.use("/category", categoryRoute);
+app.use("/enrollment", enrollmentRoutes);
 
 // Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
-
-;
-app.use("/category", categoryRoute);
-
-app.use(express.static("Public"));
-
-app.use("/profile", profileRoutes);
-app.use("/courses", courseRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

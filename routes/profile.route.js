@@ -7,10 +7,12 @@ import {
   getProfileById,
   updateProfile,
   getWatchlist,
+  addToWatchlist,
   removeFromWatchlist,
   getEnrolledCourses,
   createOTP,
   verifyOTP,
+  isInWatchlist,
 } from "../models/profileModel.js";
 
 const router = express.Router();

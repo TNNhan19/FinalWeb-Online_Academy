@@ -192,18 +192,88 @@
               {{/if}}
             </div>
 
-            {{! --- Action Buttons (Needs Logic) ---}}
+            {{! --- Action Buttons ---}}
             <div class="d-grid gap-2 mb-3">
                {{#if user}}
-                  {{!-- TODO: Check enrollment status --}}
-                 {{!-- <button class="btn btn-success btn-lg disabled">Đã đăng ký</button> --}}
-                 <button class="btn btn-danger btn-lg">Thêm vào giỏ hàng</button>
-                 <button class="btn btn-outline-dark">Mua ngay</button>
+                  {{#if isEnrolled}}
+                    <button class="btn btn-success btn-lg" disabled>Đã đăng ký</button>
+                  {{else}}
+                    <button class="btn btn-primary btn-lg" id="enrollButton" onclick="enrollCourse()">Đăng ký học</button>
+                  {{/if}}
+                  
+                  {{#if isInWatchlist}}
+                    <button class="btn btn-outline-danger" id="toggleWatchlist">
+                      <i class="bi bi-heart-fill me-1"></i> Bỏ khỏi yêu thích
+                    </button>
+                  {{else}}
+                    <button class="btn btn-outline-secondary" id="toggleWatchlist">
+                      <i class="bi bi-heart me-1"></i> Thêm vào yêu thích
+                    </button>
+                  {{/if}}
                {{else}}
-                 <a href="/auth/login?redirect=/courses/{{course.course_id}}" class="btn btn-danger btn-lg">Đăng nhập để mua</a>
+                 <a href="/auth/login?redirect=/courses/{{course.course_id}}" class="btn btn-primary btn-lg">Đăng nhập để học</a>
                {{/if}}
-              <button class="btn btn-outline-secondary"><i class="bi bi-heart me-1"></i> Thêm vào yêu thích</button> {{!-- TODO: Watchlist logic --}}
             </div>
+
+            <script>
+            async function enrollCourse() {
+              try {
+                const response = await fetch(`/courses/{{course.course_id}}/enroll`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'same-origin' // Include cookies for authentication
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                  alert('Đăng ký khóa học thành công!');
+                  window.location.href = data.redirect;
+                } else {
+                  alert(data.error || 'Có lỗi xảy ra');
+                  if (data.error === 'Vui lòng đăng nhập để đăng ký khóa học') {
+                    window.location.href = '/auth/login?redirect=/courses/{{course.course_id}}';
+                  }
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi đăng ký khóa học');
+              }
+            };
+
+            document.getElementById('toggleWatchlist')?.addEventListener('click', async () => {
+              try {
+                const action = {{#if isInWatchlist}}'unfavorite'{{else}}'favorite'{{/if}};
+                console.log('Updating watchlist - Action:', action);
+                const response = await fetch(`/courses/{{course.course_id}}/${action}`, {
+                  method: 'POST',
+                  headers: { 
+                    'Content-Type': 'application/json'
+                  },
+                  credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  const text = await response.text();
+                  console.error('Server response:', text);
+                  try {
+                    const data = JSON.parse(text);
+                    if (data.error === 'Vui lòng đăng nhập') {
+                      window.location.href = '/auth/login?redirect=/courses/{{course.id}}';
+                    } else {
+                      alert(data.error || 'Có lỗi xảy ra khi cập nhật danh sách yêu thích');
+                    }
+                  } catch (e) {
+                    alert('Có lỗi xảy ra khi cập nhật danh sách yêu thích');
+                  }
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra');
+              }
+            });
+            </script>
             <p class="small text-center text-muted mb-3">Đảm bảo hoàn tiền trong 30 ngày</p>
 
             <h6 class="fw-semibold small">Khóa học này bao gồm:</h6>
