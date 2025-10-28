@@ -740,20 +740,15 @@ body {
     text-align: center;
 }
 
-/* ===============================
-   🧩 CARD KHOÁ HỌC – CHUẨN UDEMY STYLE
-   =============================== */
 
-/* Ảnh khoá học */
 .course-img {
   width: 100%;
-  height: 180px;             /* Cố định chiều cao ảnh */
-  object-fit: cover;         /* Ảnh được cắt gọn mà không méo */
+  height: 180px;             
+  object-fit: cover;         
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
 }
 
-/* Cấu trúc thẻ card */
 .course-card {
   display: flex;
   flex-direction: column;
@@ -766,7 +761,6 @@ body {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Nội dung card */
 .course-card .card-body {
   flex-grow: 1;
   display: flex;
@@ -774,7 +768,6 @@ body {
   justify-content: space-between;
 }
 
-/* Tiêu đề (giới hạn 2 dòng) */
 .course-card h6 {
   min-height: 42px;
   overflow: hidden;
@@ -784,7 +777,6 @@ body {
   -webkit-box-orient: vertical;
 }
 
-/* Mô tả (giới hạn 2 dòng) */
 .course-card p {
   min-height: 38px;
   overflow: hidden;
@@ -794,7 +786,6 @@ body {
   -webkit-box-orient: vertical;
 }
 
-/* Bảo đảm các card đều cao bằng nhau trong 1 hàng */
 .row.g-4 > [class*="col-"] {
   display: flex;
 }
@@ -803,9 +794,6 @@ body {
   flex: 1;
 }
 
-/* ===============================
-   🎨 MODAL CHI TIẾT KHOÁ HỌC
-   =============================== */
 
 #courseModal .btn {
   min-width: 120px;
@@ -813,7 +801,6 @@ body {
   border-radius: 0.5rem;
 }
 
-/* Nút Xem chi tiết */
 #courseModal .btn-outline-primary {
   border-width: 1.8px;
   color: #2563eb;
@@ -826,7 +813,6 @@ body {
   color: #fff;
 }
 
-/* Nút Đăng ký học */
 #courseModal .btn-primary {
   background-color: #2563eb;
   border-color: #2563eb;
@@ -838,9 +824,6 @@ body {
   border-color: #1e40af;
 }
 
-/* ===============================
-   ✨ HIỆU ỨNG CHUNG
-   =============================== */
 .course-card img {
   transition: transform 0.3s ease;
 }
@@ -848,3 +831,100 @@ body {
 .course-card:hover img {
   transform: scale(1.03);
 }
+
+.btn-floating {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 0;
+  width: 100%;
+  color: #fff !important;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.btn-floating:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.btn-gradient {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 0;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: all 0.25s ease;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+.btn-blue {
+  background: linear-gradient(90deg, #2979ff 0%, #1e40ff 100%);
+}
+.btn-green {
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+}
+.btn-cyan {
+  background: linear-gradient(90deg, #06b6d4 0%, #0ea5e9 100%);
+}
+
+.table-clean td, .table-clean th { padding: 14px 16px; vertical-align: middle; }
+.td-title { max-width: 460px; white-space: normal; overflow-wrap: anywhere; }
+.td-category { max-width: 220px; white-space: normal; overflow-wrap: anywhere; }
+.td-price { width: 110px; }
+.td-date { max-width: 360px; white-space: normal; overflow-wrap: anywhere; }
+.td-status { width: 190px; }
+.td-actions { width: 210px; }
+.btn-compact { display: inline-flex; align-items: center; gap: 6px; }
+
+.badge-status {
+  min-width: 150px;
+  justify-content: center;
+  text-align: center;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, #64748b 0%, #475569 100%);
+  color: #fff !important;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  transition: all 0.25s ease;
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+a.btn-back,
+a.btn-gradient {
+  text-decoration: none !important;
+}
+
+a.btn-back:hover,
+a.btn-gradient:hover {
+  text-decoration: none !important;
+}
+

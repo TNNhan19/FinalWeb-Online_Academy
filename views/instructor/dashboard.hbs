@@ -1,44 +1,63 @@
-<h4 class="mb-3">Khoá học của tôi</h4>
-<div class="text-end mb-3">
-  <a href="/instructor/new" class="btn btn-primary">+ Đăng khoá học mới</a>
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-2">
+    <a href="/instructor" class="btn-back">
+      <i class="bi bi-arrow-left"></i> Quay lại bảng điều khiển
+    </a>
+  </div>
+  <a href="/instructor/new" class="btn-gradient btn-blue d-inline-flex" style="width:auto;padding:10px 16px;border-radius:12px;">
+    <i class="bi bi-plus-lg me-2"></i>Đăng khoá học mới
+  </a>
 </div>
 
-<table class="table table-hover align-middle">
-  <thead>
-    <tr>
-      <th>Tiêu đề</th>
-      <th>Danh mục</th>
-      <th>Giá</th>
-      <th>Ngày tạo</th>
-      <th>Trạng thái</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each courses}}
-    <tr>
-      <td>{{title}}</td>
-      <td>{{category_name}}</td>
-      <td>{{current_price}}$</td>
-      <td>{{created_at}}</td>
-      <td>
-        {{#ifEquals status "complete"}}
-        <span class="badge bg-success">Hoàn thành</span>
-        {{else}}
-        <span class="badge bg-warning text-dark">Chưa hoàn thành</span>
-        {{/ifEquals}}
-      </td>
-      <td>
-      <td class="text-end">
-        <a href="/instructor/detail/{{course_id}}" class="btn btn-sm btn-outline-secondary">Xem</a>
-        <a href="/instructor/edit/{{course_id}}" class="btn btn-sm btn-outline-primary">Sửa</a>
-        <form method="POST" action="/instructor/courses/delete/{{course_id}}"
-          onsubmit="return confirm('Bạn có chắc muốn xóa khóa học này không?');" class="d-inline">
-          <button type="submit" class="btn btn-sm btn-outline-danger">🗑 Xóa</button>
-        </form>
-      </td>
-      </td>
-    </tr>
-    {{/each}}
-  </tbody>
-</table>
+<div class="card border-0 shadow-sm rounded-4">
+  <div class="table-responsive">
+    <table class="table table-clean align-middle mb-0">
+      <thead class="bg-light">
+        <tr>
+          <th class="text-secondary fw-semibold">Tiêu đề</th>
+          <th class="text-secondary fw-semibold">Danh mục</th>
+          <th class="text-secondary fw-semibold">Giá</th>
+          <th class="text-secondary fw-semibold">Ngày tạo</th>
+          <th class="text-secondary fw-semibold text-center">Trạng thái</th>
+          <th class="text-end text-secondary fw-semibold">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each courses}}
+        <tr>
+          <td class="fw-medium td-title">{{title}}</td>
+          <td class="td-category">{{category_name}}</td>
+          <td class="td-price">{{current_price}}$</td>
+          <td class="text-muted td-date">{{created_at}}</td>
+          <td class="text-center">
+            {{#ifEquals status "complete"}}
+              <span class="badge badge-status bg-success d-inline-flex align-items-center gap-1">
+                <i class="bi bi-check-circle"></i> Hoàn thành
+              </span>
+            {{else}}
+              <span class="badge badge-status bg-warning text-dark d-inline-flex align-items-center gap-1">
+                <i class="bi bi-exclamation-circle"></i> Chưa hoàn thành
+              </span>
+            {{/ifEquals}}
+          </td>
+          <td class="text-end text-nowrap td-actions">
+            <div class="btn-group" role="group" aria-label="actions">
+              <a href="/instructor/detail/{{course_id}}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 me-1">
+                <i class="bi bi-eye"></i> Xem
+              </a>
+              <a href="/instructor/edit/{{course_id}}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 me-1">
+                <i class="bi bi-pencil-square"></i> Sửa
+              </a>
+              <form method="POST" action="/instructor/courses/delete/{{course_id}}" onsubmit="return confirm('Bạn có chắc muốn xóa khóa học này không?');" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1">
+                  <i class="bi bi-trash3"></i> Xóa
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

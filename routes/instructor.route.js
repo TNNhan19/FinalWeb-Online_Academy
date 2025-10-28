@@ -159,8 +159,8 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
     } = req.body;
 
     const image_url = req.file
-      ? `/uploads/${req.file.filename}`  
-      : req.body.image_url || null;      
+      ? `/uploads/${req.file.filename}`
+      : req.body.image_url || null;
 
     await pool.query(
       `
@@ -445,6 +445,7 @@ router.get("/detail/:id", requireInstructor, async (req, res) => {
 
     const course = courseRows[0];
 
+
     const { rows: sections } = await pool.query(
       "SELECT * FROM course_sections WHERE course_id = $1 ORDER BY order_index",
       [courseId]
@@ -538,13 +539,12 @@ router.post("/update-structure/:courseId", requireInstructor, async (req, res) =
   }
 });
 
-// 🗑 XÓA KHÓA HỌC (Giảng viên)
+// Xoá khoá học
 router.post("/courses/delete/:id", requireInstructor, async (req, res) => {
   const { id } = req.params;
   const accountId = req.session.user.account_id;
 
   try {
-    // Lấy instructor_id của giảng viên đăng nhập
     const { rows: instRows } = await pool.query(
       "SELECT instructor_id FROM instructors WHERE account_id = $1",
       [accountId]
@@ -554,7 +554,6 @@ router.post("/courses/delete/:id", requireInstructor, async (req, res) => {
       return res.status(403).send("Không tìm thấy thông tin giảng viên.");
     }
 
-    // Kiểm tra quyền sở hữu khóa học
     const { rowCount } = await pool.query(
       "DELETE FROM courses WHERE course_id = $1 AND instructor_id = $2",
       [id, instructorId]
@@ -564,10 +563,10 @@ router.post("/courses/delete/:id", requireInstructor, async (req, res) => {
       return res.status(403).send("Không thể xóa khóa học này (không thuộc quyền sở hữu).");
     }
 
-    console.log(`✅ Giảng viên ${instructorId} đã xóa khóa học ${id}`);
+    console.log(`Giảng viên ${instructorId} đã xóa khóa học ${id}`);
     res.redirect("/instructor/dashboard");
   } catch (err) {
-    console.error("❌ Lỗi khi xóa khóa học:", err.message);
+    console.error("Lỗi khi xóa khóa học:", err.message);
     res.status(500).send("Không thể xóa khóa học. Vui lòng thử lại.");
   }
 });
