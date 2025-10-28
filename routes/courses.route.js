@@ -1,92 +1,117 @@
-import express from 'express';
-import { isInWatchlist, addToWatchlist, removeFromWatchlist } from '../models/profileModel.js';
-import { pool } from "../configs/db.js";
+// routes/courses.route.js
+import express from "express";
+import { isInWatchlist, addToWatchlist, removeFromWatchlist } from "../models/profileModel.js";
+import db from "../configs/db.js";
 import { findById, getCourseDetailsById } from "../models/courseModel.js";
+
 const router = express.Router();
 
-
-
-// 🟢 Lấy chi tiết khóa học
+/* ===========================================================
+   🧠 1️⃣ API: Lấy chi tiết khóa học + tăng lượt xem (dành cho modal / AJAX)
+   =========================================================== */
 router.get("/detail/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const course = await findById(id);
-    if (!course) {
-      return res.status(404).json({ error: "Không tìm thấy khóa học" });
+    const courseId = parseInt(req.params.id);
+
+    if (isNaN(courseId)) {
+      return res.status(400).json({ error: "ID khóa học không hợp lệ" });
     }
+
+    // 1️⃣ Tăng view trong bảng "courses"
+    await db.query("UPDATE courses SET view = view + 1 WHERE course_id = $1", [courseId]);
+
+    // 2️⃣ Ghi log lượt xem vào bảng "course_views"
+    await db.query(
+      "INSERT INTO course_views (course_id, viewed_at) VALUES ($1, NOW())",
+      [courseId]
+    );
+
+    // 3️⃣ Lấy lại thông tin chi tiết khóa học
+    const course = await findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: "Khóa học không tồn tại" });
+    }
+
+    // ✅ Trả dữ liệu JSON cho front-end (dùng trong modal)
     res.json(course);
   } catch (error) {
-    console.error("❌ Lỗi khi lấy chi tiết khóa học:", error.message);
-    res.status(500).json({ error: "Lỗi khi tải chi tiết khóa học." });
+    console.error("❌ Lỗi khi tải chi tiết khóa học:", error);
+    res.status(500).json({ error: "Không thể tải dữ liệu khóa học." });
   }
 });
 
-// --- ROUTE 2: FOR THE FULL DETAIL PAGE (From your branch) ---
-// This renders the full HTML page when "Xem chi tiết" is clicked
-router.get('/:id', async (req, res, next) => {
+/* ===========================================================
+   🧱 2️⃣ Trang chi tiết đầy đủ (hiển thị giao diện .hbs)
+   =========================================================== */
+router.get("/:id", async (req, res, next) => {
   try {
-    const courseId = req.params.id;
+    const courseId = parseInt(req.params.id);
     if (isNaN(courseId)) {
-       return res.status(400).render('error', {
-         layout: 'main',
-         pageTitle: "ID không hợp lệ",
-         message: "ID khóa học không hợp lệ."
-       });
-    }
-
-    // Use the NEW function to get all details
-    const courseDetails = await getCourseDetailsById(courseId);
-
-    if (!courseDetails || !courseDetails.course) {
-      return res.status(404).render('error', {
-        layout: 'main',
-        pageTitle: "Không tìm thấy",
-        message: "Xin lỗi, không tìm thấy khóa học bạn yêu cầu."
+      return res.status(400).render("error", {
+        layout: "main",
+        pageTitle: "ID không hợp lệ",
+        message: "ID khóa học không hợp lệ.",
       });
     }
 
-    // Render the full detail page
-    res.render('courses/detail', { // Renders views/courses/detail.hbs
-      layout: 'main',
+    // 🧠 Lấy toàn bộ chi tiết (instructor, section, review, gallery,…)
+    const courseDetails = await getCourseDetailsById(courseId);
+
+    if (!courseDetails || !courseDetails.course) {
+      return res.status(404).render("error", {
+        layout: "main",
+        pageTitle: "Không tìm thấy",
+        message: "Xin lỗi, không tìm thấy khóa học bạn yêu cầu.",
+      });
+    }
+
+    // ✅ Render ra trang chi tiết khóa học
+    res.render("courses/detail", {
+      layout: "main",
       pageTitle: courseDetails.course.title,
       ...courseDetails,
-      user: req.session.user
+      user: req.session.user || null,
     });
-
   } catch (error) {
     console.error("❌ Lỗi khi lấy chi tiết khóa học (PAGE):", error);
-    next(error); // Pass to central error handler
+    next(error);
   }
 });
 
-// 🩷 Thêm khóa học vào watchlist
-router.post('/:id/favorite', async (req, res) => {
+/* ===========================================================
+   💖 3️⃣ Thêm khóa học vào danh sách yêu thích (Watchlist)
+   =========================================================== */
+router.post("/:id/favorite", async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.session.user;
     const courseId = req.params.id;
-  if (!user) return res.redirect('/auth/login');
+
+    if (!user) return res.redirect("/auth/login");
 
     await addToWatchlist(user.account_id, courseId);
     return res.redirect(`/courses/${courseId}`);
   } catch (err) {
-    console.error('❌ Lỗi add watchlist:', err);
-    return res.status(500).send('Lỗi server');
+    console.error("❌ Lỗi add watchlist:", err);
+    return res.status(500).send("Lỗi server");
   }
 });
 
-// 💔 Bỏ khóa học khỏi watchlist
-router.post('/:id/unfavorite', async (req, res) => {
+/* ===========================================================
+   💔 4️⃣ Xóa khóa học khỏi danh sách yêu thích (Watchlist)
+   =========================================================== */
+router.post("/:id/unfavorite", async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.session.user;
     const courseId = req.params.id;
-  if (!user) return res.redirect('/auth/login');
+
+    if (!user) return res.redirect("/auth/login");
 
     await removeFromWatchlist(user.account_id, courseId);
     return res.redirect(`/courses/${courseId}`);
   } catch (err) {
-    console.error('❌ Lỗi remove watchlist:', err);
-    return res.status(500).send('Lỗi server');
+    console.error("❌ Lỗi remove watchlist:", err);
+    return res.status(500).send("Lỗi server");
   }
 });
 
-export default router; 
+export default router;

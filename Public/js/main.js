@@ -1,20 +1,28 @@
+function formatStudents(num) {
+  if (!num) return 0;
+  return num >= 1000 ? (num / 1000).toFixed(1) + "k" : num;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ Script main.js đã sẵn sàng.");
 
-  // ===================== 1️⃣ XỬ LÝ CLICK DANH MỤC (CATEGORY) =====================
-  const categoryCards = document.querySelectorAll(".category-card");
-  const categoryList = document.getElementById("categoryList");
+  // ===================== 1️⃣ XỬ LÝ CLICK DANH MỤC (CATEGORY - TOÀN BỘ KHÓA HỌC) =====================
+// 🔧 Chỉ chọn các thẻ category-card bên trong section Danh Mục
+const categorySection = document.querySelector(".category-section");
+const categoryCards = categorySection ? categorySection.querySelectorAll(".category-card") : [];
+const categoryList = document.getElementById("categoryList");
+
 
   if (categoryCards.length && categoryList) {
     categoryCards.forEach(card => {
       card.addEventListener("click", async () => {
         const category = card.dataset.category;
         try {
-          const res = await fetch(`/category/api/${encodeURIComponent(category)}`);
+          const res = await fetch(`/category/api/all/${encodeURIComponent(category)}`);
           if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
 
           const courses = await res.json();
-          console.log("📦 Dữ liệu nhận được:", courses);
+          console.log("📦 Dữ liệu khóa học theo danh mục:", courses);
 
           // Xóa các khối cũ
           document.querySelectorAll(".course-block").forEach(block => block.remove());
@@ -52,8 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
                       <div class="d-flex align-items-center justify-content-between">
                         <div>
                           <i class="bi bi-star-fill text-warning"></i>
-                          <span class="fw-semibold small">4.8</span>
-                          <span class="text-muted small ms-1">12.5k học viên</span>
+                          <span class="fw-semibold small">${c.star || "4.8"}</span>
+                          <span class="text-muted small ms-1">${c.student ? formatStudents(c.student) : "0"} học viên</span>
+
                         </div>
                         <span class="fw-bold text-primary">$${c.current_price || "0.00"}</span>
                       </div>
@@ -72,101 +81,196 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===================== 2️⃣ NÚT LỌC KHÓA HỌC (FILTER - DÙNG API) =====================
-const filterButtons = document.querySelectorAll(".filter-btn");
-const popularGrid = document.getElementById("popularCoursesGrid");
 
-if (filterButtons.length && popularGrid) {
-  filterButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const selectedCategory = btn.dataset.category;
+  // ===================== 🆕 1.5 XỬ LÝ CLICK TRONG TOP CATEGORIES =====================
+const topCategoryCards = document.querySelectorAll(".top-categories .category-card");
 
-      // Đổi màu nút đang chọn
-      filterButtons.forEach(b => b.classList.remove("active", "btn-outline-primary"));
-      filterButtons.forEach(b => b.classList.add("btn-outline-secondary"));
-      btn.classList.add("active", "btn-outline-primary");
-      btn.classList.remove("btn-outline-secondary");
+if (topCategoryCards.length) {
+  topCategoryCards.forEach(card => {
+    if (card.dataset.bound === "true") return; // 🔥 nếu đã gắn thì bỏ qua
+    card.dataset.bound = "true"; // ✅ đánh dấu là đã gắn listener
 
-      // Hiển thị loading
-      popularGrid.innerHTML = `
-        <div class="col-12 text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Đang tải...</span>
-          </div>
-        </div>
-      `;
+    card.addEventListener("click", async (e) => {
+      e.stopPropagation(); // 🔥 Ngăn sự kiện click lan sang .category-card ở section khác
 
+      const category = card.dataset.category;
       try {
-        // 🧠 Gọi API
-        const res = await fetch(`/category/api/${encodeURIComponent(selectedCategory)}`);
+        const res = await fetch(`/category/api/${encodeURIComponent(category)}`);
         if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
 
         const courses = await res.json();
-        console.log("📦 Dữ liệu khóa học theo danh mục:", courses);
+        console.log("🔥 Dữ liệu khóa học từ top-categories:", courses);
 
-        // 🧹 Làm sạch lưới
-        popularGrid.innerHTML = "";
+        // Xóa phần cũ (nếu có)
+        document.querySelectorAll(".course-block").forEach(block => block.remove());
 
-        if (!courses.length) {
-          popularGrid.innerHTML = `
-            <div class="col-12 text-center text-muted py-5">
-              <p>Không có khóa học nào trong danh mục này.</p>
-            </div>`;
+        const container = card.closest(".top-categories").querySelector(".container");
+
+        if (!courses || !courses.length) {
+          const msg = document.createElement("div");
+          msg.className = "alert alert-info mt-3 text-center course-block";
+          msg.textContent = `Không có khóa học nào trong lĩnh vực "${category}".`;
+          container.appendChild(msg);
           return;
         }
 
-        // 🔧 Sinh HTML hiển thị
-        const html = courses
-          .map(
-            c => `
-            <div class="col-12 col-sm-6 col-lg-3 d-flex course-card" 
-                 data-id="${c.course_id}" data-category="${c.category_name}">
-              <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow">
-                <img src="${c.image_url}" alt="${c.title}" 
-                     class="card-img-top course-img"
-                     style="height:180px; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
-                <div class="card-body d-flex flex-column justify-content-between">
-                  <div>
-                    <span class="badge bg-light text-primary mb-2">${c.category_name}</span>
-                    <h6 class="fw-semibold mb-1 text-dark">${c.title}</h6>
-                    <p class="text-muted small mb-3" style="min-height:40px; overflow:hidden;">
-                      ${c.description || ""}
-                    </p>
-                  </div>
-                  <div>
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="small text-dark">${c.instructor_name || "Giảng viên ẩn danh"}</span>
+        const wrapper = document.createElement("div");
+        wrapper.className = "py-5 bg-light course-block";
+        wrapper.innerHTML = `
+          <div class="section-header text-center mb-5">
+            <h2 class="fw-bold text-primary">${category}</h2>
+            <p class="text-muted">Danh sách khóa học thuộc lĩnh vực này</p>
+          </div>
+          <div class="row g-4 justify-content-center">
+            ${courses.map(c => `
+              <div class="col-12 col-sm-6 col-lg-3 d-flex course-card" data-id="${c.course_id}">
+                <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow">
+                  <img src="${c.image_url}" alt="${c.title}"
+                      class="card-img-top"
+                      style="height:180px; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+                  <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <span class="badge bg-light text-primary mb-2">${c.category_name}</span>
+                      <h6 class="fw-semibold mb-1 text-dark">${c.title}</h6>
+                      <p class="text-muted small mb-3" style="min-height:40px; overflow:hidden;">
+                        ${c.description || ""}
+                      </p>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between">
-                      <div>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <span class="fw-semibold small">4.8</span>
-                        <span class="text-muted small ms-1">12.5k học viên</span>
+                    <div>
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="small text-dark">${c.instructor_name || "Giảng viên ẩn danh"}</span>
                       </div>
-                      <span class="fw-bold text-primary">$${c.current_price || "0.00"}</span>
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                          <i class="bi bi-eye text-primary me-1"></i>
+                          <span class="fw-semibold small">${c.view || 0} lượt xem</span><br>
+                          <i class="bi bi-star-fill text-warning"></i>
+                          <span class="fw-semibold small">${c.star || "4.8"}</span>
+                          <span class="text-muted small ms-1">${c.student || 0} học viên</span>
+                        </div>
+                        <span class="fw-bold text-primary">$${c.current_price || "0.00"}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>`
-          )
-          .join("");
+              </div>`).join("")}
+          </div>
+          <div class="text-center mt-4">
+            <button class="btn btn-outline-secondary" id="backToTopCategories">← Quay lại lĩnh vực</button>
+          </div>
+        `;
 
-        popularGrid.innerHTML = html;
+
+        container.appendChild(wrapper);
+        wrapper.scrollIntoView({ behavior: "smooth" });
+
+        document.getElementById("backToTopCategories").addEventListener("click", () => {
+          wrapper.remove();
+          window.scrollTo({ top: container.offsetTop - 100, behavior: "smooth" });
+        });
+
       } catch (error) {
-        console.error("❌ Lỗi khi tải khóa học:", error);
-        popularGrid.innerHTML = `
-          <div class="col-12 text-center text-danger py-5">
-            <p>Không thể tải danh sách khóa học. Vui lòng thử lại!</p>
-          </div>`;
+        console.error("❌ Lỗi khi tải lĩnh vực:", error);
       }
     });
   });
 }
 
 
+  // ===================== 2️⃣ NÚT LỌC KHÓA HỌC (FILTER - KHÓA HỌC BÁN CHẠY) =====================
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const popularGrid = document.getElementById("popularCoursesGrid");
+
+  if (filterButtons.length && popularGrid) {
+    filterButtons.forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const selectedCategory = btn.dataset.category;
+
+        // Đổi màu nút đang chọn
+        filterButtons.forEach(b => b.classList.remove("active", "btn-outline-primary"));
+        filterButtons.forEach(b => b.classList.add("btn-outline-secondary"));
+        btn.classList.add("active", "btn-outline-primary");
+        btn.classList.remove("btn-outline-secondary");
+
+        // Hiển thị loading
+        popularGrid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang tải...</span>
+            </div>
+          </div>
+        `;
+
+        try {
+          // 🧠 Gọi API khóa học bán chạy
+          const res = await fetch(`/category/api/bestseller/${encodeURIComponent(selectedCategory)}`);
+          if (!res.ok) throw new Error("Lỗi khi gọi API khóa học bán chạy");
+
+          const courses = await res.json();
+          console.log("🔥 Dữ liệu khóa học bán chạy:", courses);
+
+          // 🧹 Làm sạch lưới
+          popularGrid.innerHTML = "";
+
+          if (!courses.length) {
+            popularGrid.innerHTML = `
+              <div class="col-12 text-center text-muted py-5">
+                <p>Không có khóa học bán chạy nào trong danh mục này.</p>
+              </div>`;
+            return;
+          }
+
+          // 🔧 Sinh HTML hiển thị
+          const html = courses
+            .map(
+              c => `
+              <div class="col-12 col-sm-6 col-lg-3 d-flex course-card" 
+                   data-id="${c.course_id}" data-category="${c.category_name}">
+                <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow">
+                  <img src="${c.image_url}" alt="${c.title}" 
+                       class="card-img-top course-img"
+                       style="height:180px; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+                  <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <span class="badge bg-light text-primary mb-2">${c.category_name}</span>
+                      <h6 class="fw-semibold mb-1 text-dark">${c.title}</h6>
+                      <p class="text-muted small mb-3" style="min-height:40px; overflow:hidden;">
+                        ${c.description || ""}
+                      </p>
+                    </div>
+                    <div>
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="small text-dark">${c.instructor_name || "Giảng viên ẩn danh"}</span>
+                      </div>
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span class="fw-semibold small">${c.star || "4.8"}</span>
+                            <span class="text-muted small ms-1">${c.student ? formatStudents(c.student) : "0"} học viên</span>
+                        </div>
+                        <span class="fw-bold text-primary">$${c.current_price || "0.00"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>`
+            )
+            .join("");
+
+          popularGrid.innerHTML = html;
+        } catch (error) {
+          console.error("❌ Lỗi khi tải khóa học bán chạy:", error);
+          popularGrid.innerHTML = `
+            <div class="col-12 text-center text-danger py-5">
+              <p>Không thể tải danh sách khóa học bán chạy. Vui lòng thử lại!</p>
+            </div>`;
+        }
+      });
+    });
+  }
+
   // ===================== 3️⃣ HIỂN THỊ CHI TIẾT KHÓA HỌC (CẢ HOME & CATEGORY) =====================
-  document.addEventListener("click", async (e) => {
+  document.addEventListener("click", async e => {
     const card = e.target.closest(".course-card");
     if (!card) return;
 
@@ -175,7 +279,6 @@ if (filterButtons.length && popularGrid) {
 
     try {
       const res = await fetch(`/courses/detail/${courseId}`);
-      if (!res.ok) throw new Error("Không thể tải chi tiết khóa học");
       const course = await res.json();
 
       const modalEl = document.getElementById("courseModal");
@@ -201,7 +304,7 @@ if (filterButtons.length && popularGrid) {
           </div>
 
           <p class="text-secondary mb-4 text-start" style="min-height:60px;">
-            ${course.description || "Khóa học giúp bạn làm chủ các kỹ năng lập trình web hiện đại từ cơ bản đến nâng cao."}
+            ${course.description || "Khóa học giúp bạn làm chủ kỹ năng lập trình web hiện đại."}
           </p>
 
           <div class="d-flex justify-content-between align-items-center mt-4">
@@ -219,8 +322,6 @@ if (filterButtons.length && popularGrid) {
         </div>
       `;
 
-
-
       let modalInstance = bootstrap.Modal.getInstance(modalEl);
       if (!modalInstance) {
         modalInstance = new bootstrap.Modal(modalEl, { backdrop: true });
@@ -228,7 +329,6 @@ if (filterButtons.length && popularGrid) {
 
       modalInstance.show();
 
-      // 🧼 Đảm bảo backdrop luôn bị xóa khi modal đóng
       modalEl.addEventListener("hidden.bs.modal", () => {
         document.body.classList.remove("modal-open");
         document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
@@ -239,3 +339,91 @@ if (filterButtons.length && popularGrid) {
     }
   });
 });
+// ===================== 🆕 CLICK TRONG "LĨNH VỰC ĐĂNG KÝ NHIỀU TRONG TUẦN" =====================
+const topCategorySection = document.querySelector(".top-categories");
+const topCategoryCards = topCategorySection ? topCategorySection.querySelectorAll(".category-card") : [];
+
+if (topCategoryCards.length) {
+  topCategoryCards.forEach(card => {
+    if (card.dataset.boundTop === "true") return;
+    card.dataset.boundTop = "true";
+    card.addEventListener("click", async () => {
+      const category = card.dataset.category;
+      console.log("🔎 Click lĩnh vực:", category);
+
+      try {
+        const res = await fetch(`/category/api/all/${encodeURIComponent(category)}`);
+        if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
+
+        const courses = await res.json();
+        console.log("📚 Khóa học thuộc lĩnh vực:", courses);
+
+        // Xóa phần khóa học cũ (nếu có)
+        document.querySelectorAll(".course-block").forEach(block => block.remove());
+
+        const container = topCategorySection.querySelector(".container");
+
+        // Nếu không có khóa học
+        if (!courses || !courses.length) {
+          const msg = document.createElement("div");
+          msg.className = "alert alert-info mt-3 text-center course-block";
+          msg.textContent = `Không có khóa học nào trong lĩnh vực "${category}".`;
+          container.appendChild(msg);
+          return;
+        }
+
+        // Tạo HTML danh sách khóa học
+        const wrapper = document.createElement("div");
+        wrapper.className = "py-5 bg-white course-block";
+        wrapper.innerHTML = `
+          <div class="section-header text-center mb-5">
+            <h2 class="fw-bold text-primary">${category}</h2>
+            <p class="text-muted">Danh sách các khóa học thuộc lĩnh vực này</p>
+          </div>
+          <div class="row g-4 justify-content-center">
+            ${courses.map(c => `
+              <div class="col-12 col-sm-6 col-lg-3 d-flex course-card" data-id="${c.course_id}">
+                <div class="card shadow-sm border-0 rounded-4 h-100 w-100 hover-shadow">
+                  <img src="${c.image_url}" alt="${c.title}" 
+                       class="card-img-top"
+                       style="height:180px; object-fit:cover; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+                  <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <span class="badge bg-light text-primary mb-2">${c.category_name}</span>
+                      <h6 class="fw-semibold mb-1 text-dark">${c.title}</h6>
+                      <p class="text-muted small mb-3" style="min-height:40px; overflow:hidden;">
+                        ${c.description || ""}
+                      </p>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span class="fw-semibold small">${c.star || "4.8"}</span>
+                        <span class="text-muted small ms-1">${c.student || 0} học viên</span>
+                      </div>
+                      <span class="fw-bold text-primary">$${c.current_price || "0.00"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>`).join("")}
+          </div>
+          <div class="text-center mt-4">
+            <button class="btn btn-outline-secondary" id="backToTopCategories">← Quay lại lĩnh vực</button>
+          </div>
+        `;
+
+        container.appendChild(wrapper);
+        wrapper.scrollIntoView({ behavior: "smooth" });
+
+        // Nút quay lại
+        document.getElementById("backToTopCategories").addEventListener("click", () => {
+          wrapper.remove();
+          window.scrollTo({ top: container.offsetTop - 100, behavior: "smooth" });
+        });
+      } catch (error) {
+        console.error("❌ Lỗi khi tải lĩnh vực:", error);
+        alert("Không thể tải danh sách khóa học. Vui lòng thử lại!");
+      }
+    });
+  });
+}

@@ -18,7 +18,7 @@ import coursesRoutes from './routes/courses.route.js';
 
 import profileRoutes from "./routes/profile.route.js";
 import courseRoutes from "./routes/courses.route.js";
-
+import categoryRoutes from "./routes/category.route.js";
 import categoryRoute from "./routes/category.route.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -131,6 +131,24 @@ app.use(express.static("Public"));
 
 app.use("/profile", profileRoutes);
 app.use("/courses", courseRoutes);
+app.use("/categories", categoryRoutes);
+
+app.engine("hbs", engine({
+  extname: ".hbs",
+  helpers: {
+    slice: function (arr, start, end) {
+      if (!Array.isArray(arr)) return [];
+      return arr.slice(start, end);
+    },
+  }
+}));
+app.engine("hbs", engine({
+  extname: ".hbs",
+  partialsDir: path.join(__dirname, "views/partials"),
+  helpers: {
+    slice: (arr, start, end) => Array.isArray(arr) ? arr.slice(start, end) : [],
+  },
+}));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

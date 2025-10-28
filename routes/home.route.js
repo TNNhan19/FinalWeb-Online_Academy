@@ -1,19 +1,20 @@
 import express from "express";
 import * as courseModel from "../models/courseModel.js";
 import db from "../configs/db.js";
+import { getTopCategoriesByEnrollment } from "../models/categoryModel.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    // Queries to get the counts (New)
+    // 🧮 Lấy thống kê tổng số lượng
     const [courseCount, studentCount, instructorCount] = await Promise.all([
       db.query("SELECT COUNT(*) FROM courses"),
       db.query("SELECT COUNT(*) FROM students"),
       db.query("SELECT COUNT(*) FROM instructors"),
     ]);
 
-    // Your existing queries
+    // 🏷️ Lấy danh sách danh mục
     const categories = await db.query(`
       SELECT c1.category_id, c1.name AS category_name, c2.name AS parent_name
       FROM categories c1
@@ -21,23 +22,38 @@ router.get("/", async (req, res) => {
       ORDER BY c2.name NULLS FIRST, c1.name;
     `);
 
-    const popularCourses = await courseModel.findPopular(10);
-    const newCourses = await courseModel.findAll();
-    const newestCourses = newCourses.slice(0, 10);
+    // 🔥 Các danh sách khóa học
+    const [
+      bestSellers,          // khóa học bán chạy
+      topViewedCourses,     // khóa học được xem nhiều nhất
+      weeklyHighlights,     // khóa học nổi bật trong tuần
+      newestCourses,        // khóa học mới nhất
+      topCategories         // lĩnh vực được học viên yêu thích nhất
+    ] = await Promise.all([
+      courseModel.findBestSellers(4),
+      courseModel.findTopViewed(10),
+      courseModel.findWeeklyHighlights(4),
+      courseModel.findNewestCourses(10),
+      getTopCategoriesByEnrollment()
+    ]);
 
+    // 🖼️ Render trang chủ
     res.render("home/index", {
       pageTitle: "Online Academy",
       categories,
-      popularCourses,
+      bestSellers,
+      topViewedCourses,
+      weeklyHighlights,
       newestCourses,
+      topCategories, // ✅ thêm vào view
       user: req.session.user || null,
-      // Pass the new stats object to the view (New)
       stats: {
-        courses: courseCount[0].count || 0,
-        students: studentCount[0].count || 0,
-        instructors: instructorCount[0].count || 0,
+        courses: Number(courseCount?.[0]?.count || 0),
+        students: Number(studentCount?.[0]?.count || 0),
+        instructors: Number(instructorCount?.[0]?.count || 0),
       },
     });
+
   } catch (error) {
     console.error("❌ Lỗi khi tải trang chủ:", error);
     res.render("home/index", {
