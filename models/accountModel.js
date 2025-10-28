@@ -1,21 +1,49 @@
-import db from "../configs/db.js";
+import db, { pool } from "../configs/db.js";
 
 export async function findByEmail(email) {
   const rows = await db.query("SELECT * FROM accounts WHERE email = $1", [email]);
   return rows[0];
 }
 
-export async function createAccount(full_name, email, password_hash, otp) {
-  const query = `
-    INSERT INTO accounts (full_name, email, password_hash, role, is_verified, created_at, otp)
-    VALUES ($1, $2, $3, 'student', false, NOW(), $4)
-    RETURNING *;
-  `;
-  const values = [full_name, email, password_hash, otp];
-  const rows = await db.query(query, values);
-  return rows[0];
-}
+export async function createAccount(full_name, email, password_hash, otp, role = 'student') {
+  // Use a transaction to ensure both account and student profile are created
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
+    // Insert into accounts table
+    const accountQuery = `
+      INSERT INTO accounts (full_name, email, password_hash, role, is_verified, created_at, otp)
+      VALUES ($1, $2, $3, $4, false, NOW(), $5)
+      RETURNING account_id, full_name, role;
+    `;
+    const accountValues = [full_name, email, password_hash, role, otp];
+    const accountResult = await client.query(accountQuery, accountValues);
+    const newAccount = accountResult.rows[0];
+
+    // ✨ If the role is 'student', create a corresponding student record
+    if (newAccount && newAccount.role === 'student') {
+      const studentQuery = `
+        INSERT INTO students (account_id, name, created_at)
+        VALUES ($1, $2, NOW());
+      `;
+      // Use the full_name from the account as the initial student name
+      await client.query(studentQuery, [newAccount.account_id, newAccount.full_name]);
+      console.log(`✅ Created student record for account_id: ${newAccount.account_id}`);
+    }
+     // ✨ Add similar logic here for 'instructor' if needed
+
+    await client.query('COMMIT');
+    return newAccount; // Return the created account info
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error("❌ Error during account creation transaction:", error);
+    throw error; // Re-throw the error
+  } finally {
+    client.release();
+  }
+}
 export async function verifyOTP(email, otp) {
   const rows = await db.query("SELECT otp FROM accounts WHERE email = $1", [email]);
   if (!rows[0] || rows[0].otp !== otp) return false;

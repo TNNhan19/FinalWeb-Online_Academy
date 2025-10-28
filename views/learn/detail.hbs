@@ -1,0 +1,283 @@
+{{!-- views/learn/course.hbs --}}
+<div class="container-fluid mt-4">
+  <div class="row g-4">
+
+    {{!-- Cột Trái: Video Player & Review Form --}}
+    <div class="col-lg-8">
+      <h3 class="mb-3">{{courseData.course.title}}</h3>
+
+      {{!-- Khu vực hiển thị Video --}}
+      <div class="video-player-container bg-dark rounded mb-4" style="aspect-ratio: 16 / 9; position: relative;">
+        {{!-- Basic HTML5 video player. Replace or enhance with Plyr/Video.js later if desired --}}
+        {{#if courseData.sections.[0].lectures.[0]}} {{!-- Lấy video bài đầu tiên làm mặc định --}}
+          <video id="learning-video" controls width="100%" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+              {{!-- Ensure video_url is a direct link to a playable video file or a compatible embed URL --}}
+              <source src="{{courseData.sections.[0].lectures.[0].video_url}}" type="video/mp4">
+              Trình duyệt của bạn không hỗ trợ thẻ video.
+          </video>
+           <p id="current-lecture-title" class="text-white position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 rounded-end small" style="z-index: 10;">
+            Đang xem: {{courseData.sections.[0].lectures.[0].title}}
+          </p>
+        {{else}}
+          <div class="d-flex justify-content-center align-items-center h-100 text-white">
+            <p>Chưa có video bài giảng.</p>
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- Tabs for Description, Reviews, Q&A (Optional Enhancement) --}}
+       <div>
+        <h4>Mô tả khóa học</h4>
+        <p>{{courseData.course.description}}</p>
+        {{!-- Display detailed description if desired --}}
+        {{!-- <div class="card card-body border-0 bg-light mb-4 p-4"><h5>Chi tiết:</h5>{{{courseData.course.detail_html}}}</div> --}}
+      </div>
+
+      {{!-- ⭐ FORM ĐÁNH GIÁ --}}
+      {{#if isEnrolled}} {{!-- Chỉ hiển thị form nếu biến isEnrolled được truyền từ route là true --}}
+      <hr class="my-4">
+      <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-light">
+          <strong>Viết đánh giá của bạn</strong>
+        </div>
+        <div class="card-body">
+          {{!-- Display success/error messages based on query parameters --}}
+          {{#if query.success}}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              Đã lưu đánh giá của bạn!
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {{/if}}
+          {{#if query.error}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{#if (eq query.error "invalid_rating")}}Vui lòng chọn số sao hợp lệ (1-5).
+              {{else if (eq query.error "empty_feedback")}}Vui lòng nhập nội dung phản hồi.
+              {{else if (eq query.error "save_failed")}}Không thể lưu đánh giá (lỗi model).
+              {{else}}Có lỗi máy chủ xảy ra, không thể lưu đánh giá. Vui lòng thử lại.
+              {{/if}}
+               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {{/if}}
+
+          <form action="/learn/{{courseData.course.course_id}}/review" method="POST">
+            <div class="mb-3">
+              <label for="rating" class="form-label mb-0">Xếp hạng:</label>
+              {{!-- Star Rating using Radio Buttons and CSS --}}
+              <div id="rating" class="fs-4 star-rating mb-2">
+                <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 sao">★</label>
+                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 sao">★</label>
+                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 sao">★</label>
+                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 sao">★</label>
+                <input type="radio" id="star1" name="rating" value="1" required /><label for="star1" title="1 sao">★</label> {{!-- required --}}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="feedback" class="form-label">Phản hồi của bạn:</label>
+              <textarea class="form-control" id="feedback" name="feedback" rows="4" required placeholder="Chia sẻ trải nghiệm của bạn về khóa học..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+          </form>
+        </div>
+      </div>
+      {{else}}
+        {{!-- Optional: Message if user is not enrolled but somehow got here --}}
+        {{!-- <div class="alert alert-warning">Bạn cần đăng ký khóa học để có thể đánh giá.</div> --}}
+      {{/if}}
+      {{!-- KẾT THÚC FORM ĐÁNH GIÁ --}}
+
+    </div> {{!-- Kết thúc Cột Trái --}}
+
+    {{!-- Cột Phải: Danh sách bài giảng --}}
+    <div class="col-lg-4">
+      <h5 class="mb-3">Nội dung khóa học</h5>
+      <div class="accordion accordion-flush border rounded-3 shadow-sm lecture-list-container" id="learnCourseAccordion" style="max-height: 80vh; overflow-y: auto;">
+        {{#each courseData.sections}}
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="learn-heading-{{section_id}}">
+            <button class="accordion-button collapsed fw-semibold bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#learn-collapse-{{section_id}}">
+              {{order_index}}: {{title}} ({{lectures.length}} bài)
+            </button>
+          </h2>
+          {{!-- Show first section expanded by default? Add 'show' class below --}}
+          <div id="learn-collapse-{{section_id}}" class="accordion-collapse collapse {{#if (eq order_index 1)}}show{{/if}}" data-bs-parent="#learnCourseAccordion">
+            <div class="accordion-body p-0">
+              <ul class="list-group list-group-flush">
+                {{#each lectures}}
+                <li class="list-group-item list-group-item-action py-2 px-3 lecture-link"
+                    style="cursor: pointer;"
+                    data-video-url="{{video_url}}"
+                    data-lecture-title="{{title}}">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-truncate me-2">
+                      <i class="bi bi-play-circle me-2 text-secondary lecture-icon"></i> {{title}}
+                    </span>
+                    <small class="text-muted text-nowrap lecture-duration">({{formatDuration duration}})</small>
+                  </div>
+                  {{!-- Optional: Progress indicator per lecture --}}
+                  {{!-- <div class="progress mt-1" style="height: 3px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div> --}}
+                </li>
+                {{/each}}
+              </ul>
+            </div>
+          </div>
+        </div>
+        {{else}}
+         <div class="p-3 text-muted">Chưa có nội dung bài giảng.</div>
+        {{/each}}
+      </div>
+    </div> {{!-- Kết thúc Cột Phải --}}
+
+  </div> {{!-- Kết thúc Row --}}
+</div> {{!-- Kết thúc Container --}}
+
+{{!-- Section for CSS --}}
+{{#section 'css'}}
+<style>
+  /* Star Rating CSS */
+  .star-rating {
+    direction: rtl; /* Reverse direction */
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+  }
+  .star-rating input[type=radio] {
+    display: none; /* Hide radios */
+  }
+  .star-rating label {
+    color: #ddd; /* Default star color */
+    font-size: 2rem; /* Star size */
+    padding: 0 0.1em;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+    line-height: 1; /* Prevent extra spacing */
+    vertical-align: middle; /* Align stars */
+  }
+  /* Color stars on hover/check */
+  .star-rating input[type=radio]:checked ~ label, /* Checked star and subsequent labels */
+  .star-rating label:hover, /* Hovered star */
+  .star-rating label:hover ~ label { /* Subsequent labels on hover */
+    color: #ffc107; /* Selected/hover star color */
+  }
+  /* Optional: Keep selected stars colored even when hovering elsewhere */
+   .star-rating input[type=radio]:checked + label:hover,
+   .star-rating input[type=radio]:checked ~ label:hover,
+   .star-rating input[type=radio]:checked ~ label:hover ~ label,
+   .star-rating label:hover ~ input[type=radio]:checked ~ label {
+      color: #ffc107;
+   }
+
+  /* Lecture List Styling */
+  .lecture-list-container .list-group-item {
+      border-left: 3px solid transparent; /* For active state */
+  }
+   .lecture-list-container .list-group-item.active {
+      background-color: #e7f1ff !important; /* Light blue background for active */
+      border-left-color: var(--bs-primary); /* Blue left border */
+      font-weight: 600;
+   }
+   .lecture-list-container .list-group-item.active .lecture-icon {
+      color: var(--bs-primary) !important; /* Change icon color */
+   }
+   .lecture-list-container .accordion-button {
+     font-size: 0.95rem;
+     padding: 0.8rem 1rem;
+   }
+   .lecture-list-container .list-group-item-action:hover {
+       background-color: #f8f9fa; /* Light grey hover */
+   }
+
+</style>
+{{/section}}
+
+{{!-- Section for JavaScript --}}
+{{#section "js"}}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const videoPlayer = document.getElementById('learning-video');
+    const lectureTitleElement = document.getElementById('current-lecture-title');
+    const lectureLinks = document.querySelectorAll('.lecture-link');
+
+    // --- Video Switching Logic ---
+    if (videoPlayer && lectureLinks.length > 0) {
+      lectureLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          const videoUrl = this.dataset.videoUrl;
+          const lectureTitle = this.dataset.lectureTitle;
+
+          if (videoUrl) {
+            console.log('Switching video to:', videoUrl);
+            const currentSource = videoPlayer.querySelector('source');
+            if (currentSource) {
+              currentSource.setAttribute('src', videoUrl);
+              videoPlayer.load(); // Load the new source
+              videoPlayer.play().catch(e => console.error("Autoplay failed:", e)); // Attempt to autoplay
+
+              // Update title display
+              if (lectureTitleElement) {
+                 lectureTitleElement.textContent = `Đang xem: ${lectureTitle}`;
+              }
+
+               // Update active class in the lecture list
+               lectureLinks.forEach(el => el.classList.remove('active'));
+               this.classList.add('active');
+
+            } else {
+              console.error('Could not find source element in video player.');
+            }
+          } else {
+              // Handle case where lecture might not have a video (e.g., text article)
+              console.warn('No video URL found for this lecture link.');
+              // Optionally clear the player or show a placeholder message
+              videoPlayer.pause();
+              const currentSource = videoPlayer.querySelector('source');
+               if (currentSource) currentSource.removeAttribute('src');
+               videoPlayer.load();
+               if (lectureTitleElement) {
+                 lectureTitleElement.textContent = `Bài học: ${lectureTitle} (không có video)`;
+               }
+               lectureLinks.forEach(el => el.classList.remove('active'));
+               this.classList.add('active');
+          }
+        });
+      });
+
+      // Mark the first lecture as active initially if it matches the player source
+      const initialSource = videoPlayer.querySelector('source')?.getAttribute('src');
+      if (initialSource) {
+          const firstMatchingLink = Array.from(lectureLinks).find(link => link.dataset.videoUrl === initialSource);
+          if (firstMatchingLink) {
+              firstMatchingLink.classList.add('active');
+          } else if (lectureLinks[0]) {
+             // Fallback to first link if source doesn't match (e.g., if first lecture has no video)
+             lectureLinks[0].classList.add('active');
+          }
+      } else if (lectureLinks[0]) {
+           lectureLinks[0].classList.add('active'); // Mark first if no video initially
+      }
+
+
+    } else {
+        if(!videoPlayer) console.error("Video player element (#learning-video) not found.");
+        if(lectureLinks.length === 0) console.log("No lecture links (.lecture-link) found.");
+    }
+
+    // --- Progress Tracking Logic (Placeholder) ---
+    // This is where you would add event listeners to the video player
+    // to track progress (e.g., 'ended', 'timeupdate') and send updates
+    // to the server via fetch requests to save the progress.
+    // Example:
+    // videoPlayer?.addEventListener('ended', () => {
+    //    const currentLectureId = document.querySelector('.lecture-link.active')?.dataset.lectureId; // Need lecture ID
+    //    console.log(`Lecture ${currentLectureId} finished. Send update to server.`);
+    //    // fetch(`/learn/${courseId}/progress`, { method: 'POST', body: JSON.stringify({ lectureId: currentLectureId, status: 'completed' }) ... });
+    // });
+    // videoPlayer?.addEventListener('timeupdate', () => {
+    //    // Potentially save current time periodically (throttle this carefully!)
+    //    // console.log('Current time:', videoPlayer.currentTime);
+    // });
+
+  });
+</script>
+{{/section}}

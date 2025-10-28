@@ -1,4 +1,5 @@
 import express from 'express';
+// Import necessary functions from profileModel
 import { isInWatchlist, addToWatchlist, removeFromWatchlist } from '../models/profileModel.js';
 import { pool } from "../configs/db.js";
 import { findById, getCourseDetailsById } from "../models/courseModel.js";
@@ -6,7 +7,7 @@ import { findById, getCourseDetailsById } from "../models/courseModel.js";
 const router = express.Router();
 
 
-// 🟢 Lấy chi tiết khóa học
+// 🟢 Lấy chi tiết khóa học (API for modal, maybe?)
 router.get("/detail/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -21,8 +22,8 @@ router.get("/detail/:id", async (req, res) => {
   }
 });
 
-// --- ROUTE 2: FOR THE FULL DETAIL PAGE (From your branch) ---
-// This renders the full HTML page when "Xem chi tiết" is clicked
+// --- ROUTE 2: FOR THE FULL DETAIL PAGE ---
+// This renders the full HTML page (views/courses/detail.hbs)
 router.get('/:id', async (req, res, next) => {
   try {
     const courseId = req.params.id;
@@ -34,8 +35,8 @@ router.get('/:id', async (req, res, next) => {
        });
     }
 
-    // Use the NEW function to get all details
-    const courseDetails = await getCourseDetailsById(courseId);
+    // Use the function to get all details needed for the page
+    const courseDetails = await getCourseDetailsById(courseId); //
 
     if (!courseDetails || !courseDetails.course) {
       return res.status(404).render('error', {
@@ -45,12 +46,22 @@ router.get('/:id', async (req, res, next) => {
       });
     }
 
-    // Render the full detail page
+    // ✨ ADDED LOGIC: CHECK IF THE COURSE IS IN WATCHLIST
+    let isFavorite = false;
+    // Only check if a user is logged in
+    if (req.session.user) { //
+      // Call the model function to check watchlist status
+      isFavorite = await isInWatchlist(req.session.user.account_id, courseId); //
+    }
+    // ===================================================
+
+    // Render the full detail page, passing all details AND the isFavorite status
     res.render('courses/detail', { // Renders views/courses/detail.hbs
       layout: 'main',
       pageTitle: courseDetails.course.title,
-      ...courseDetails,
-      user: req.session.user
+      ...courseDetails, // Pass course, sections, reviews, relatedCourses, etc.
+      user: req.session.user, // Pass user info for conditional rendering in template
+      isFavorite: isFavorite // <-- Pass the watchlist status to the template
     });
 
   } catch (error) {
@@ -62,11 +73,15 @@ router.get('/:id', async (req, res, next) => {
 // 🩷 Thêm khóa học vào watchlist
 router.post('/:id/favorite', async (req, res) => {
   try {
-    const user = req.user;
+    // <-- FIXED: Use req.session.user
+    const user = req.session.user; //
     const courseId = req.params.id;
-  if (!user) return res.redirect('/auth/login');
+    // Redirect to login if user is not logged in
+    if (!user) return res.redirect('/auth/login');
 
-    await addToWatchlist(user.account_id, courseId);
+    // Call the model function to add to watchlist
+    await addToWatchlist(user.account_id, courseId); //
+    // Redirect back to the course detail page
     return res.redirect(`/courses/${courseId}`);
   } catch (err) {
     console.error('❌ Lỗi add watchlist:', err);
@@ -77,11 +92,15 @@ router.post('/:id/favorite', async (req, res) => {
 // 💔 Bỏ khóa học khỏi watchlist
 router.post('/:id/unfavorite', async (req, res) => {
   try {
-    const user = req.user;
+    // <-- FIXED: Use req.session.user
+    const user = req.session.user; //
     const courseId = req.params.id;
-  if (!user) return res.redirect('/auth/login');
+    // Redirect to login if user is not logged in
+    if (!user) return res.redirect('/auth/login');
 
-    await removeFromWatchlist(user.account_id, courseId);
+    // Call the model function to remove from watchlist
+    await removeFromWatchlist(user.account_id, courseId); //
+    // Redirect back to the course detail page
     return res.redirect(`/courses/${courseId}`);
   } catch (err) {
     console.error('❌ Lỗi remove watchlist:', err);
@@ -89,4 +108,4 @@ router.post('/:id/unfavorite', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;
