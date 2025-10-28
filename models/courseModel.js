@@ -80,6 +80,7 @@ export async function getCoursesByCategory(categoryName) {
   return rows;
 }
 
+
 export async function getCourseDetailsById(courseId) {
   try {
     // 1. Get Course, Instructor, Category, Rating, Enrollment Count
