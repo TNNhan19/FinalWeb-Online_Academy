@@ -97,13 +97,26 @@ router.post("/login", async (req, res) => {
       return res.render("auth/login", { error: "Mật khẩu không chính xác!" });
     }
 
-    // ✅ Lưu session
+    // ✅ Thêm instructor_id nếu là giảng viên
+    let instructor_id = null;
+    if (user.role === "instructor") {
+      const { pool } = await import("../configs/db.js");
+      const result = await pool.query(
+        "SELECT instructor_id FROM instructors WHERE account_id = $1",
+        [user.account_id]
+      );
+      instructor_id = result.rows[0]?.instructor_id || null;
+    }
+
+    // ✅ Lưu session đầy đủ
     req.session.user = {
       account_id: user.account_id,
       email: user.email,
       role: user.role,
-      full_name: user.full_name
+      full_name: user.full_name,
+      instructor_id
     };
+
 
     // ✅ Điều hướng theo role
     if (user.role === "instructor") {

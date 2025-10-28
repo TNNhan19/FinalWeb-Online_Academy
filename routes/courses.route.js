@@ -2,8 +2,8 @@ import express from 'express';
 import { isInWatchlist, addToWatchlist, removeFromWatchlist } from '../models/profileModel.js';
 import { pool } from "../configs/db.js";
 import { findById, getCourseDetailsById } from "../models/courseModel.js";
-const router = express.Router();
 
+const router = express.Router();
 
 
 // 🟢 Lấy chi tiết khóa học
