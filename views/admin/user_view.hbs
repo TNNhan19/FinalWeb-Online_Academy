@@ -1,0 +1,236 @@
+<a href="/admin/users" class="btn btn-outline-secondary mb-4">
+    ⬅️ Quay lại danh sách người dùng
+</a>
+
+<h4 class="fw-bold text-center mb-4">Hồ sơ người dùng ({{role}})</h4>
+
+<!-- 🧩 KHUNG THÔNG TIN CHUNG -->
+<div class="card shadow-sm border-0 p-4 mx-auto mb-5" style="max-width: 800px; border-radius: 12px;">
+    <form method="POST"
+        action="/admin/users/update/{{role}}/{{#if profile.instructor_id}}{{profile.instructor_id}}{{else}}{{profile.account_id}}{{/if}}">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Họ và tên</label>
+                <input type="text" name="full_name" class="form-control" value="{{profile.full_name}}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Email</label>
+                <input type="email" name="email" class="form-control" value="{{profile.email}}" required>
+            </div>
+        </div>
+
+        {{#if (eq role "instructor")}}
+        <div class="mt-4">
+            <label class="form-label fw-semibold">Giới thiệu bản thân</label>
+            <textarea name="bio" class="form-control" rows="4">{{profile.bio}}</textarea>
+        </div>
+        <div class="mt-3">
+            <label class="form-label fw-semibold">Tổng học viên</label>
+            <input type="number" name="total_students" class="form-control" value="{{profile.total_students}}">
+        </div>
+        {{/if}}
+
+        {{#if (eq role "admin")}}
+        <div class="mt-4">
+            <p><strong>Vai trò:</strong> {{profile.role}}</p>
+            <p><strong>Ngày tạo:</strong> {{profile.created_at}}</p>
+        </div>
+        {{/if}}
+
+        {{#if (eq role "student")}}
+        <div class="mt-4">
+            <p><strong>Vai trò:</strong> {{profile.role}}</p>
+            <p><strong>Ngày tạo:</strong> {{profile.created_at}}</p>
+        </div>
+        {{/if}}
+
+        <div class="text-end mt-4">
+            <button type="submit" class="btn btn-primary px-4 fw-semibold">💾 Lưu thay đổi</button>
+        </div>
+    </form>
+</div>
+
+{{!-- ======================================================= --}}
+{{!-- 📘 DANH SÁCH KHÓA HỌC CỦA GIẢNG VIÊN --}}
+{{!-- ======================================================= --}}
+{{#if (eq role "instructor")}}
+<hr class="my-5">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">📚 Danh sách khóa học của giảng viên</h5>
+    <button class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+        ➕ Thêm khóa học mới
+    </button>
+</div>
+
+{{#if profile.courses.length}}
+<div class="table-responsive">
+    <table class="table table-hover align-middle border shadow-sm" id="coursesTable">
+        <thead class="table-primary">
+            <tr class="text-center">
+                <th>ID</th>
+                <th>Tiêu đề</th>
+                <th>Trạng thái</th>
+                <th>Bài giảng</th>
+                <th>Giờ học</th>
+                <th>Giá ($)</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each profile.courses}}
+            <tr data-course-id="{{course_id}}">
+                <td class="text-center fw-semibold text-secondary">{{course_id}}</td>
+                <td>{{title}}</td>
+                <td class="text-center">
+                    {{#if (eq status "complete")}}
+                    <span class="badge bg-success">Hoàn thành</span>
+                    {{else}}
+                    <span class="badge bg-warning text-dark">Chưa hoàn thành</span>
+                    {{/if}}
+                </td>
+                <td class="text-center">{{total_lectures}}</td>
+                <td class="text-center">{{total_hours}}</td>
+                <td class="text-center fw-semibold text-success">{{current_price}}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger delete-course-btn">🗑 Xóa</button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+{{else}}
+<p class="text-center text-muted">Giảng viên này chưa đăng bất kỳ khóa học nào.</p>
+{{/if}}
+
+<!-- 🧩 MODAL: ĐĂNG KHÓA HỌC MỚI (BỐ CỤC DỌC) -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="addCourseModalLabel">📘 Đăng khóa học mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body bg-light p-4">
+                <form id="addCourseForm" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <input type="hidden" name="instructor_id" value="{{profile.instructor_id}}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tiêu đề khóa học</label>
+                        <input type="text" name="title" class="form-control form-control-lg"
+                            placeholder="Nhập tiêu đề khóa học" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả ngắn</label>
+                        <textarea name="description" class="form-control form-control-lg" rows="3"
+                            placeholder="Tóm tắt ngắn gọn về khóa học" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nội dung chi tiết</label>
+                        <textarea name="detail_html" class="form-control form-control-lg" rows="7"
+                            placeholder="Nhập nội dung chi tiết cho khóa học..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Danh mục</label>
+                        <select name="category_id" class="form-select form-select-lg" required>
+                            <option value="">-- Chọn lĩnh vực --</option>
+                            {{#each categories}}
+                            <option value="{{category_id}}">{{name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ảnh đại diện khóa học</label>
+                        <input type="file" name="image" class="form-control form-control-lg" accept="image/*" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tổng thời lượng (giờ)</label>
+                            <input type="number" name="total_hours" class="form-control" min="0" step="0.1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tổng số bài giảng</label>
+                            <input type="number" name="total_lectures" class="form-control" min="0">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Giá gốc ($)</label>
+                            <input type="number" name="original_price" class="form-control" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Giá khuyến mãi ($)</label>
+                            <input type="number" name="current_price" class="form-control" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold">
+                            💾 Lưu khóa học
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #addCourseModal .modal-dialog {
+        max-width: 700px !important;
+    }
+
+    #addCourseModal .modal-content {
+        border-radius: 16px;
+    }
+
+    #addCourseModal input,
+    #addCourseModal textarea,
+    #addCourseModal select {
+        border-radius: 10px;
+    }
+
+    #addCourseModal .form-label {
+        color: #1e293b;
+    }
+</style>
+
+<script>
+    document.getElementById("addCourseForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const res = await fetch(`/admin/users/add-course/${formData.get("instructor_id")}`, {
+            method: "POST",
+            body: formData
+        });
+        const result = await res.json();
+        if (res.ok) {
+            alert("✅ Khóa học đã được thêm thành công!");
+            location.reload();
+        } else {
+            alert(result.error || "❌ Lỗi khi thêm khóa học.");
+        }
+    });
+
+
+    // 🗑 XÓA KHÓA HỌC
+    document.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("delete-course-btn")) {
+            const row = e.target.closest("tr");
+            const courseId = row.getAttribute("data-course-id");
+            if (!confirm("Bạn có chắc muốn xóa khóa học này?")) return;
+            const res = await fetch(`/admin/users/delete-course/${courseId}`, { method: "DELETE" });
+            if (res.ok) row.remove();
+            else alert("Không thể xóa khóa học. Vui lòng thử lại.");
+        }
+    });
+</script>
+{{/if}}

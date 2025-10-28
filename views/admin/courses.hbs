@@ -1,6 +1,111 @@
+<a href="/admin" class="btn btn-outline-secondary mb-4">
+  Quay lại Bảng điều khiển
+</a>
+
 <h4 class="mb-3">Quản lý khóa học</h4>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+    ➕ Thêm khóa học mới
+  </button>
+</div>
+
+<!-- 🧩 MODAL THÊM KHÓA HỌC MỚI -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold" id="addCourseModalLabel">📘 Thêm khóa học mới</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body bg-light p-4">
+        <form method="POST" action="/admin/courses/add" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tiêu đề khóa học</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Mô tả ngắn</label>
+            <textarea name="description" class="form-control" rows="3" required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nội dung chi tiết</label>
+            <textarea name="detail_html" class="form-control" rows="5"></textarea>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Danh mục</label>
+              <select name="category_id" class="form-select" required>
+                <option value="">-- Chọn lĩnh vực --</option>
+                {{#each categories}}
+                <option value="{{category_id}}">{{name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Giảng viên</label>
+              <select name="instructor_id" class="form-select" required>
+                <option value="">-- Chọn giảng viên --</option>
+                {{#each instructors}}
+                <option value="{{instructor_id}}">{{name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Ảnh đại diện khóa học</label>
+            <input type="file" name="image" class="form-control" accept="image/*" required>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Tổng thời lượng (giờ)</label>
+              <input type="number" name="total_hours" class="form-control" min="0" step="0.1">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Tổng số bài giảng</label>
+              <input type="number" name="total_lectures" class="form-control" min="0">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Giá gốc ($)</label>
+              <input type="number" name="original_price" class="form-control" min="0" step="0.01">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Giá khuyến mãi ($)</label>
+              <input type="number" name="current_price" class="form-control" min="0" step="0.01">
+            </div>
+          </div>
+
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+              💾 Lưu khóa học
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <table class="table table-bordered table-hover align-middle">
-  <thead><tr><th>ID</th><th>Tiêu đề</th><th>Giảng viên</th><th>Lĩnh vực</th><th>Giá</th><th>Hành động</th></tr></thead>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tiêu đề</th>
+      <th>Giảng viên</th>
+      <th>Lĩnh vực</th>
+      <th>Giá</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
   <tbody>
     {{#each courses}}
     <tr>

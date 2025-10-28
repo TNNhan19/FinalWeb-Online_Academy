@@ -32,6 +32,10 @@
       <td class="text-end">
         <a href="/instructor/detail/{{course_id}}" class="btn btn-sm btn-outline-secondary">Xem</a>
         <a href="/instructor/edit/{{course_id}}" class="btn btn-sm btn-outline-primary">Sửa</a>
+        <form method="POST" action="/instructor/courses/delete/{{course_id}}"
+          onsubmit="return confirm('Bạn có chắc muốn xóa khóa học này không?');" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-danger">🗑 Xóa</button>
+        </form>
       </td>
       </td>
     </tr>

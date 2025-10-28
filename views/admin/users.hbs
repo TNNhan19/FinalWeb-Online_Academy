@@ -1,4 +1,94 @@
-<h4 class="mb-4 fw-bold">Danh sách người dùng</h4>
+<a href="/admin" class="btn btn-outline-secondary mb-4">
+  Quay lại Bảng điều khiển
+</a>
+<h4 class="fw-bold mb-0">Danh sách người dùng</h4>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+    ➕ Thêm người dùng mới
+  </button>
+</div>
+
+<!-- 🌟 Modal thêm người dùng mới -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="/admin/users/add-new">
+        <div class="modal-header">
+          <h5 class="modal-title">Thêm người dùng mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Họ và tên</label>
+            <input type="text" name="full_name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Mật khẩu</label>
+            <input type="password" name="password" class="form-control" minlength="6" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Vai trò</label>
+            <select name="role" class="form-select" required>
+              <option value="student">🎓 Học viên</option>
+              <option value="instructor">👨‍🏫 Giảng viên</option>
+              <option value="admin">🛡️ Quản trị viên</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary">Tạo mới</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ==== ADMIN ==== -->
+<h5 class="fw-semibold text-dark mb-3 mt-4">🛡️ Quản trị viên</h5>
+<table class="table table-hover align-middle border shadow-sm">
+  <thead class="table-light">
+    <tr>
+      <th>ID</th>
+      <th>Tên</th>
+      <th>Email</th>
+      <th>Hồ sơ Quản trị Viên</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each admins}}
+    <tr>
+      <td>{{account_id}}</td>
+      <td>{{full_name}}</td>
+      <td>{{email}}</td>
+      <td>
+        <a href="/admin/users/view/admin/{{account_id}}" class="btn btn-sm btn-outline-primary">
+          Xem hồ sơ
+        </a>
+        <form method="POST" action="/admin/users/delete/admin/{{account_id}}" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-danger"
+            onclick="return confirm('Bạn có chắc muốn xóa quản trị viên này không?')">
+            🗑 Xóa
+          </button>
+        </form>
+      </td>
+
+
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<hr class="my-4">
 
 <!-- ==== GIẢNG VIÊN ==== -->
 <h5 class="fw-semibold text-primary mb-3">📘 Giảng viên đã đăng ký</h5>
@@ -9,20 +99,34 @@
       <th scope="col">Tên</th>
       <th scope="col">Email</th>
       <th scope="col">Tổng học viên</th>
+      <th scope="col">Hồ sơ giảng viên</th>
     </tr>
   </thead>
   <tbody>
     {{#if instructors.length}}
-      {{#each instructors}}
-      <tr>
-        <td>{{instructor_id}}</td>
-        <td>{{name}}</td>
-        <td>{{email}}</td>
-        <td>{{total_students}}</td>
-      </tr>
-      {{/each}}
+    {{#each instructors}}
+    <tr>
+      <td>{{instructor_id}}</td>
+      <td>{{name}}</td>
+      <td>{{email}}</td>
+      <td>{{total_students}}</td>
+      <td>
+        <a href="/admin/users/view/instructor/{{instructor_id}}" class="btn btn-sm btn-outline-primary">
+          Xem hồ sơ
+        </a>
+        <form method="POST" action="/admin/users/delete/instructor/{{instructor_id}}" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-danger"
+            onclick="return confirm('Bạn có chắc muốn xóa giảng viên này không?')">
+            🗑 Xóa
+          </button>
+        </form>
+      </td>
+    </tr>
+    {{/each}}
     {{else}}
-      <tr><td colspan="4" class="text-center text-muted py-3">Chưa có giảng viên nào trong hệ thống</td></tr>
+    <tr>
+      <td colspan="4" class="text-center text-muted py-3">Chưa có giảng viên nào trong hệ thống</td>
+    </tr>
     {{/if}}
   </tbody>
 </table>
@@ -68,19 +172,34 @@
       <th scope="col">ID</th>
       <th scope="col">Tên</th>
       <th scope="col">Email</th>
+      <th scope="col">Hồ sơ học viên</th>
     </tr>
   </thead>
   <tbody>
     {{#if students.length}}
-      {{#each students}}
-      <tr>
-        <td>{{student_id}}</td>
-        <td>{{name}}</td>
-        <td>{{email}}</td>
-      </tr>
-      {{/each}}
+    {{#each students}}
+    <tr>
+      <td>{{student_id}}</td>
+      <td>{{name}}</td>
+      <td>{{email}}</td>
+      <td>
+        <a href="/admin/users/view/student/{{student_id}}" class="btn btn-sm btn-outline-primary">
+          Xem hồ sơ
+        </a>
+        <form method="POST" action="/admin/users/delete/student/{{student_id}}" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-danger"
+            onclick="return confirm('Bạn có chắc muốn xóa học viên này không?')">
+            🗑 Xóa
+          </button>
+        </form>
+
+      </td>
+    </tr>
+    {{/each}}
     {{else}}
-      <tr><td colspan="3" class="text-center text-muted py-3">Chưa có học viên nào đăng ký</td></tr>
+    <tr>
+      <td colspan="3" class="text-center text-muted py-3">Chưa có học viên nào đăng ký</td>
+    </tr>
     {{/if}}
   </tbody>
 </table>

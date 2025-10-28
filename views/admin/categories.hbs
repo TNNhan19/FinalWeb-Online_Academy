@@ -1,29 +1,80 @@
-<h4 class="mb-3">Quản lý lĩnh vực</h4>
+<a href="/admin" class="btn btn-outline-secondary mb-4">
+  Quay lại Bảng điều khiển
+</a>
 
-<form method="POST" class="row g-2 mb-4">
-  <div class="col-md-6"><input name="name" class="form-control" placeholder="Tên lĩnh vực mới" required></div>
-  <div class="col-md-3"><input name="parent_id" type="number" class="form-control" placeholder="ID cha (nếu có)"></div>
-  <div class="col-md-3"><button class="btn btn-primary w-100">Thêm</button></div>
+<h4 class="fw-bold mb-4">Quản lý lĩnh vực</h4>
+<p class="text-muted mb-4">
+  Danh sách các lĩnh vực hiện có trong hệ thống. Bạn có thể thêm lĩnh vực mới, chỉnh sửa tên hoặc xem các khóa học thuộc lĩnh vực đó.
+</p>
+
+<!-- Form thêm lĩnh vực -->
+<form method="POST" class="row g-2 mb-4 align-items-center">
+  <div class="col-md-5">
+    <input name="name" class="form-control" placeholder="Tên lĩnh vực mới" required>
+  </div>
+  <div class="col-md-4">
+    <input name="parent_id" type="number" class="form-control" placeholder="ID lĩnh vực cha (nếu có)">
+  </div>
+  <div class="col-md-3 text-end">
+    <button class="btn btn-primary w-100">+ Thêm lĩnh vực</button>
+  </div>
 </form>
 
-<table class="table table-striped">
-  <thead><tr><th>ID</th><th>Tên</th><th>Cha</th><th>Hành động</th></tr></thead>
-  <tbody>
-    {{#each categories}}
+<!-- Bảng hiển thị -->
+<table class="table table-hover align-middle border shadow-sm">
+  <thead class="table-light">
     <tr>
-      <td>{{category_id}}</td>
-      <td>{{name}}</td>
-      <td>{{parent_id}}</td>
-      <td>
-        <form method="POST" action="/admin/categories/update/{{category_id}}" class="d-inline">
-          <input name="name" placeholder="Tên mới" class="form-control d-inline w-auto" required>
-          <button class="btn btn-sm btn-outline-success">Sửa</button>
-        </form>
-        <form method="POST" action="/admin/categories/delete/{{category_id}}" class="d-inline">
-          <button class="btn btn-sm btn-outline-danger">Xóa</button>
-        </form>
-      </td>
+      <th scope="col">ID</th>
+      <th scope="col">Tên lĩnh vực</th>
+      <th scope="col">Lĩnh vực cha</th>
+      <th scope="col" class="text-center">Số khóa học</th>
+      <th scope="col" class="text-center">Hành động</th>
     </tr>
-    {{/each}}
+  </thead>
+  <tbody>
+    {{#if categories.length}}
+      {{#each categories}}
+      <tr>
+        <td>{{category_id}}</td>
+        <td class="fw-semibold">{{category_name}}</td>
+        <td>{{#if parent_name}}{{parent_name}}{{else}}—{{/if}}</td>
+        <td class="text-center">
+          <span class="badge bg-info text-dark">{{total_courses}}</span>
+        </td>
+        <td class="text-center">
+          <div class="d-inline-flex gap-2">
+            <!-- Nút xem khóa học -->
+            <a href="/admin/courses?category={{category_id}}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i> Xem khóa học
+            </a>
+
+            <!-- Form chỉnh sửa -->
+            <form method="POST" action="/admin/categories/update/{{category_id}}" class="d-inline-flex gap-1">
+              <input name="name" placeholder="Tên mới" class="form-control form-control-sm" style="width: 130px;" required>
+              <button class="btn btn-sm btn-outline-success">Sửa</button>
+            </form>
+
+            <!-- Form xóa -->
+            <form method="POST" action="/admin/categories/delete/{{category_id}}" class="d-inline">
+              <button class="btn btn-sm btn-outline-danger">Xóa</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {{/each}}
+    {{else}}
+      <tr><td colspan="5" class="text-center text-muted py-4">Chưa có lĩnh vực nào trong hệ thống.</td></tr>
+    {{/if}}
   </tbody>
 </table>
+
+<style>
+  table tr:hover {
+    background-color: #f9fafb;
+    transition: background-color 0.2s ease;
+  }
+  .badge {
+    font-size: 0.9rem;
+    padding: 0.4em 0.7em;
+  }
+</style>
