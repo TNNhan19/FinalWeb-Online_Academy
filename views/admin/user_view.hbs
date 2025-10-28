@@ -1,87 +1,108 @@
-<a href="/admin/users" class="btn btn-outline-secondary mb-4">
-    ⬅️ Quay lại danh sách người dùng
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<a href="/admin/users" class="btn-back mb-4 d-inline-flex align-items-center gap-2">
+    <i class="bi bi-arrow-left"></i> Quay lại danh sách người dùng
 </a>
 
-<h4 class="fw-bold text-center mb-4">Hồ sơ người dùng ({{role}})</h4>
+<h4 class="fw-bold text-center mb-4 d-flex justify-content-center align-items-center"
+    style="color: var(--primary-color);">
+    <i class="bi bi-person-badge me-2"></i> Hồ sơ người dùng
+    <span class="badge bg-info text-dark ms-2 text-capitalize">{{role}}</span>
+</h4>
 
-<!-- 🧩 KHUNG THÔNG TIN CHUNG -->
-<div class="card shadow-sm border-0 p-4 mx-auto mb-5" style="max-width: 800px; border-radius: 12px;">
-    <form method="POST"
+<div class="card shadow-sm border-0 p-5 mx-auto mb-5 profile-card" style="max-width: 960px; border-radius: 16px;">
+    <form class="user-profile-form" method="POST"
         action="/admin/users/update/{{role}}/{{#if profile.instructor_id}}{{profile.instructor_id}}{{else}}{{profile.account_id}}{{/if}}">
-        <div class="row g-4">
+        <div class="row g-5">
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Họ và tên</label>
-                <input type="text" name="full_name" class="form-control" value="{{profile.full_name}}" required>
+                <label class="form-label fw-semibold mb-2">Họ và tên</label>
+                <input type="text" name="full_name" class="form-control form-control-lg" value="{{profile.full_name}}"
+                    required>
             </div>
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Email</label>
-                <input type="email" name="email" class="form-control" value="{{profile.email}}" required>
+                <label class="form-label fw-semibold mb-2">Email</label>
+                <input type="email" name="email" class="form-control form-control-lg" value="{{profile.email}}"
+                    required>
             </div>
         </div>
 
         {{#if (eq role "instructor")}}
         <div class="mt-4">
-            <label class="form-label fw-semibold">Giới thiệu bản thân</label>
-            <textarea name="bio" class="form-control" rows="4">{{profile.bio}}</textarea>
+            <label class="form-label fw-semibold mb-2">Giới thiệu bản thân</label>
+            <textarea name="bio" class="form-control form-control-lg" rows="4">{{profile.bio}}</textarea>
         </div>
-        <div class="mt-3">
-            <label class="form-label fw-semibold">Tổng học viên</label>
-            <input type="number" name="total_students" class="form-control" value="{{profile.total_students}}">
+        <div class="mt-4">
+            <label class="form-label fw-semibold mb-2">Tổng học viên</label>
+            <input type="number" name="total_students" class="form-control form-control-lg"
+                value="{{profile.total_students}}">
         </div>
         {{/if}}
 
         {{#if (eq role "admin")}}
-        <div class="mt-4">
-            <p><strong>Vai trò:</strong> {{profile.role}}</p>
-            <p><strong>Ngày tạo:</strong> {{profile.created_at}}</p>
+        <div class="row g-5 mt-1">
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light">Vai trò: <strong>{{profile.role}}</strong></div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light">Ngày tạo: <strong>{{profile.created_at}}</strong></div>
+            </div>
         </div>
         {{/if}}
 
         {{#if (eq role "student")}}
-        <div class="mt-4">
-            <p><strong>Vai trò:</strong> {{profile.role}}</p>
-            <p><strong>Ngày tạo:</strong> {{profile.created_at}}</p>
+        <div class="row g-5 mt-1">
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light">Vai trò: <strong>{{profile.role}}</strong></div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light">Ngày tạo: <strong>{{profile.created_at}}</strong></div>
+            </div>
         </div>
         {{/if}}
 
         <div class="text-end mt-4">
-            <button type="submit" class="btn btn-primary px-4 fw-semibold">💾 Lưu thay đổi</button>
+            <button type="submit"
+                class="btn-gradient btn-green px-4 fw-semibold d-inline-flex align-items-center gap-2">
+                <i class="bi bi-save2"></i> Lưu thay đổi
+            </button>
         </div>
     </form>
 </div>
 
-{{!-- ======================================================= --}}
-{{!-- 📘 DANH SÁCH KHÓA HỌC CỦA GIẢNG VIÊN --}}
-{{!-- ======================================================= --}}
+
 {{#if (eq role "instructor")}}
 <hr class="my-5">
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="fw-bold mb-0">📚 Danh sách khóa học của giảng viên</h5>
-    <button class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addCourseModal">
-        ➕ Thêm khóa học mới
-    </button>
+<div class="course-header d-flex justify-content-between align-items-center p-3 px-4 mb-4">
+  <h5 class="fw-bold mb-0 d-flex align-items-center gap-2 text-primary">
+    <i class="bi bi-journal-text fs-4"></i> Danh sách khóa học của giảng viên
+  </h5>
+  <button class="btn-gradient btn-blue fw-semibold d-inline-flex align-items-center gap-2 px-4 py-2"
+          data-bs-toggle="modal" data-bs-target="#addCourseModal">
+    <i class="bi bi-plus-circle"></i> Thêm khóa học mới
+  </button>
 </div>
 
+
 {{#if profile.courses.length}}
-<div class="table-responsive">
-    <table class="table table-hover align-middle border shadow-sm" id="coursesTable">
-        <thead class="table-primary">
+<div class="table-responsive shadow-sm rounded-3">
+    <table class="table table-hover table-bordered align-middle mb-0" id="coursesTable">
+        <thead class="table-light">
             <tr class="text-center">
-                <th>ID</th>
+                <th style="width:6rem;">ID</th>
                 <th>Tiêu đề</th>
-                <th>Trạng thái</th>
-                <th>Bài giảng</th>
-                <th>Giờ học</th>
-                <th>Giá ($)</th>
-                <th>Hành động</th>
+                <th style="width:10rem;">Trạng thái</th>
+                <th style="width:8rem;">Bài giảng</th>
+                <th style="width:8rem;">Giờ học</th>
+                <th style="width:9rem;">Giá ($)</th>
+                <th style="width:9rem;">Hành động</th>
             </tr>
         </thead>
         <tbody>
             {{#each profile.courses}}
             <tr data-course-id="{{course_id}}">
                 <td class="text-center fw-semibold text-secondary">{{course_id}}</td>
-                <td>{{title}}</td>
+                <td class="fw-medium">{{title}}</td>
                 <td class="text-center">
                     {{#if (eq status "complete")}}
                     <span class="badge bg-success">Hoàn thành</span>
@@ -91,9 +112,11 @@
                 </td>
                 <td class="text-center">{{total_lectures}}</td>
                 <td class="text-center">{{total_hours}}</td>
-                <td class="text-center fw-semibold text-success">{{current_price}}</td>
+                <td class="text-center fw-semibold text-primary">{{current_price}}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-danger delete-course-btn">🗑 Xóa</button>
+                    <button class="btn btn-sm btn-outline-danger btn-compact delete-course-btn">
+                        <i class="bi bi-trash"></i> Xóa
+                    </button>
                 </td>
             </tr>
             {{/each}}
@@ -104,15 +127,15 @@
 <p class="text-center text-muted">Giảng viên này chưa đăng bất kỳ khóa học nào.</p>
 {{/if}}
 
-<!-- 🧩 MODAL: ĐĂNG KHÓA HỌC MỚI (BỐ CỤC DỌC) -->
 <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold" id="addCourseModalLabel">📘 Đăng khóa học mới</h5>
+            <div class="modal-header" style="background: var(--primary-color); color: #fff;">
+                <h5 class="modal-title fw-bold d-flex align-items-center" id="addCourseModalLabel">
+                    <i class="bi bi-book-half me-2"></i> Đăng khóa học mới
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body bg-light p-4">
                 <form id="addCourseForm" enctype="multipart/form-data" class="needs-validation" novalidate>
                     <input type="hidden" name="instructor_id" value="{{profile.instructor_id}}">
@@ -173,8 +196,9 @@
                     </div>
 
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold">
-                            💾 Lưu khóa học
+                        <button type="submit"
+                            class="btn-gradient btn-green px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-save2"></i> Lưu khóa học
                         </button>
                     </div>
                 </form>
@@ -184,53 +208,19 @@
 </div>
 
 <style>
-    #addCourseModal .modal-dialog {
-        max-width: 700px !important;
-    }
-
     #addCourseModal .modal-content {
-        border-radius: 16px;
+        border-radius: 16px
     }
 
     #addCourseModal input,
     #addCourseModal textarea,
     #addCourseModal select {
-        border-radius: 10px;
-    }
-
-    #addCourseModal .form-label {
-        color: #1e293b;
+        border-radius: 10px
     }
 </style>
 
 <script>
-    document.getElementById("addCourseForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const res = await fetch(`/admin/users/add-course/${formData.get("instructor_id")}`, {
-            method: "POST",
-            body: formData
-        });
-        const result = await res.json();
-        if (res.ok) {
-            alert("✅ Khóa học đã được thêm thành công!");
-            location.reload();
-        } else {
-            alert(result.error || "❌ Lỗi khi thêm khóa học.");
-        }
-    });
-
-
-    // 🗑 XÓA KHÓA HỌC
-    document.addEventListener("click", async (e) => {
-        if (e.target.classList.contains("delete-course-btn")) {
-            const row = e.target.closest("tr");
-            const courseId = row.getAttribute("data-course-id");
-            if (!confirm("Bạn có chắc muốn xóa khóa học này?")) return;
-            const res = await fetch(`/admin/users/delete-course/${courseId}`, { method: "DELETE" });
-            if (res.ok) row.remove();
-            else alert("Không thể xóa khóa học. Vui lòng thử lại.");
-        }
-    });
+    document.getElementById("addCourseForm")?.addEventListener("submit", async (e) => { e.preventDefault(); const t = new FormData(e.target); const s = await fetch(`/admin/users/add-course/${t.get("instructor_id")}`, { method: "POST", body: t }); const n = await s.json().catch(() => ({})); if (s.ok) { alert("✅ Khóa học đã được thêm thành công!"); location.reload() } else { alert(n.error || "❌ Lỗi khi thêm khóa học.") } });
+    document.addEventListener("click", async e => { const n = e.target.closest(".delete-course-btn"); if (!n) return; const t = n.closest("tr"); const s = t.getAttribute("data-course-id"); if (!confirm("Bạn có chắc muốn xóa khóa học này?")) return; const a = await fetch(`/admin/users/delete-course/${s}`, { method: "DELETE" }); if (a.ok) t.remove(); else alert("Không thể xóa khóa học. Vui lòng thử lại.") });
 </script>
 {{/if}}
