@@ -21,9 +21,16 @@ router.get('/:courseId', requireLogin, async (req, res, next) => {
   const courseId = req.params.courseId;
   const accountId = req.session.user.account_id;
 
+  // // ⭐ ADD THIS LOGGING LINE ⭐
+  // console.log(`--- Accessing /learn/${courseId} ---`);
+  // console.log(`Session User:`, req.session.user);
+  // console.log(`Checking enrollment for account_id: ${accountId}, course_id: ${courseId}`);
+  // // ⭐ --- END LOGGING ---
+
   try {
     // Check if the user is enrolled in this course
     const isEnrolled = await checkEnrollment(accountId, courseId);
+    // console.log(`Enrollment check result: ${isEnrolled}`); // Log the result
 
     if (!isEnrolled) {
        console.log(`User ${accountId} tried to access course ${courseId} without enrollment.`);
