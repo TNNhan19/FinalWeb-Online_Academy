@@ -5,6 +5,23 @@ export async function findByEmail(email) {
   return rows[0];
 }
 
+// 🔍 Tìm theo ID
+export async function findById(id) {
+  const result = await pool.query("SELECT * FROM accounts WHERE account_id = $1", [id]);
+  return result.rows[0];
+}
+
+// 🆕 Tạo user mới từ Google OAuth
+export async function createFromOAuth({ email, full_name, role = "student", provider = "google" }) {
+  const result = await pool.query(
+    `INSERT INTO accounts (email, full_name, role, is_verified)
+     VALUES ($1, $2, $3, TRUE)
+     RETURNING *`,
+    [email, full_name, role]
+  );
+  return result.rows[0];  
+}
+
 export async function createAccount(full_name, email, password_hash, otp, role = 'student') {
   // Use a transaction to ensure both account and student profile are created
   const client = await pool.connect();
@@ -51,10 +68,7 @@ export async function verifyOTP(email, otp) {
   return true;
 }
 
-export async function findById(id) {
-  const rows = await db.query("SELECT * FROM accounts WHERE id = $1", [id]);
-  return rows[0];
-}
+
 
 export async function updateAvatar(id, avatarUrl) {
   const query = `

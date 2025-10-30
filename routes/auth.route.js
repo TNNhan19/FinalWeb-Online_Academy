@@ -1,9 +1,15 @@
-import express from "express";
+import express, { query } from "express";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import * as accountModel from "../models/accountModel.js";
-
+import { createClient } from "@supabase/supabase-js";
+import axios, { AxiosError } from "axios";
+import {
+  findByEmail,
+  createFromOAuth,
+  findById,
+} from "../models/accountModel.js";
 dotenv.config();
 const router = express.Router();
 
@@ -25,8 +31,8 @@ router.post("/register", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: 'statghoul@gmail.com',
-        pass: 'zrzzzidzybbvotng',
+        user: "statghoul@gmail.com",
+        pass: "zrzzzidzybbvotng",
       },
     });
 
@@ -114,9 +120,8 @@ router.post("/login", async (req, res) => {
       email: user.email,
       role: user.role,
       full_name: user.full_name,
-      instructor_id
+      instructor_id,
     };
-
 
     // ✅ Điều hướng theo role
     if (user.role === "instructor") {
@@ -139,5 +144,78 @@ router.get("/logout", (req, res) => {
     res.redirect("/auth/login");
   });
 });
+console.log("[auth] router loaded"); // <-- log để biết file này đã được nạp
 
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      flowType: "pkce",
+    },
+  }
+);
+
+// 🟢 Route login bằng Google
+router.get("/google", async (req, res) => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: "http://localhost:3000/auth/callback",
+      queryParams: { access_type: "offline" },
+      flowType: "pkce",
+    },
+  });
+  if (error) return res.status(500).send("OAuth error: " + error.message);
+  console.log("OAuth data:", data);
+  return res.redirect(data.url);
+});
+
+router.get("/callback", async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.redirect("/auth/login");
+
+  const { data, error } = await supabase.auth.exchangeCodeForSession({
+    authCode: code,
+  });
+  if (error)
+    return res.status(500).send("OAuth callback error: " + error.message);
+
+  const sUser = data.session?.user;
+  if (!sUser) return res.redirect("/auth/login");
+
+  const email = sUser.email;
+  const name =
+    sUser.user_metadata?.full_name || sUser.user_metadata?.name || email;
+
+  console.log("OAuth user:", email, name);
+
+  // 🔹 1. Tìm user theo email
+  let account = await findByEmail(email);
+
+  // 🔹 2. Nếu chưa có thì tạo mới
+  if (!account) {
+    account = await createFromOAuth({
+      email,
+      full_name: name,
+      role: "student",
+      provider: "google",
+    });
+  }
+
+  // 🔹 3. Lấy lại user để chắc chắn có account_id
+  const found = await findById(account.account_id);
+
+  // 🔹 4. Lưu vào session
+  req.session.user = {
+    account_id: found.account_id,
+    email: found.email,
+    full_name: found.full_name,
+    role: found.role,
+  };
+
+  console.log("✅ User logged in:", req.session.user);
+
+  res.redirect("/");
+});
 export default router;

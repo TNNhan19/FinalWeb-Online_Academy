@@ -21,6 +21,7 @@ import courseRoutes from "./routes/courses.route.js";
 
 import categoryRoute from "./routes/category.route.js"
 
+import cookieParser from "cookie-parser";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
@@ -93,7 +94,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "Public")));
 
-
+app.use(cookieParser());
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
