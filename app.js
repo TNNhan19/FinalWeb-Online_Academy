@@ -27,67 +27,72 @@ import cookieParser from "cookie-parser";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-app.engine(
-  "hbs",
-  engine({
-    extname: ".hbs",
-    helpers: {
-      section: hbs_sections(),
-      eq: (a, b) => String(a) === String(b),
-      year: () => new Date().getFullYear(),
-      ifEquals: function (a, b, options) {
-        return a === b ? options.fn(this) : options.inverse(this);
-      },
-      isDiscount: (current, original) => {
-        const curr = parseFloat(current);
-        const orig = parseFloat(original);
-        return !isNaN(curr) && !isNaN(orig) && curr < orig;
-      },
-      discountPercent: (current, original) => {
-        const curr = parseFloat(current);
-        const orig = parseFloat(original);
-        if (isNaN(curr) || isNaN(orig) || orig <= 0 || curr >= orig) return 0;
-        return Math.round(((orig - curr) / orig) * 100);
-      },
-      makeArray: (n) => Array.from(Array(Math.floor(n || 0)).keys()),
-      math: (lvalue, operator, rvalue) => {
-        lvalue = parseFloat(lvalue);
-        rvalue = parseFloat(rvalue);
-        return { "+": lvalue + rvalue, "-": lvalue - rvalue, "*": lvalue * rvalue, "/": lvalue / rvalue, "%": lvalue % rvalue }[operator];
-      },
-      stars: (rating) => {
-        const r = Math.round(parseFloat(rating || 0) * 2) / 2;
-        const fullStars = Math.floor(r);
-        const halfStar = r % 1 !== 0;
-        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-        let classes = [];
-        for(let i=0; i<fullStars; i++) classes.push('bi-star-fill');
-        if(halfStar) classes.push('bi-star-half');
-        for(let i=0; i<emptyStars; i++) classes.push('bi-star');
-        return classes; // Return array of classes
-      },
-      formatDate: (date) => {
-         if (!date) return 'N/A';
-         try { return format(new Date(date), 'dd/MM/yyyy'); }
-         catch(e) { console.error("Date format error:", e); return date.toString(); }
-      },
-      formatDuration: (durationInSeconds) => { // Assuming DB stores seconds now
-        if (durationInSeconds === null || durationInSeconds === undefined) return '';
-        const totalSeconds = Number(durationInSeconds);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      },
-      firstLetter: (str) => str ? str.charAt(0).toUpperCase() : '?',
-      eq: function (a, b) {
-        return a === b;
-      },
+const hbsEngine = engine({
+  extname: ".hbs",
+  helpers: {
+    section: hbs_sections(),
+    eq: (a, b) => String(a) === String(b),
+    year: () => new Date().getFullYear(),
+    ifEquals: function (a, b, options) {
+      return a === b ? options.fn(this) : options.inverse(this);
     },
-    layoutsDir: path.join(__dirname, "views", "layouts"),
-    partialsDir: path.join(__dirname, "views", "partials"),
-    defaultLayout: "main"
-  })
-);
+    isDiscount: (current, original) => {
+      const curr = parseFloat(current);
+      const orig = parseFloat(original);
+      return !isNaN(curr) && !isNaN(orig) && curr < orig;
+    },
+    discountPercent: (current, original) => {
+      const curr = parseFloat(current);
+      const orig = parseFloat(original);
+      if (isNaN(curr) || isNaN(orig) || orig <= 0 || curr >= orig) return 0;
+      return Math.round(((orig - curr) / orig) * 100);
+    },
+    makeArray: (n) => Array.from(Array(Math.floor(n || 0)).keys()),
+    math: (lvalue, operator, rvalue) => {
+      lvalue = parseFloat(lvalue);
+      rvalue = parseFloat(rvalue);
+      return { "+": lvalue + rvalue, "-": lvalue - rvalue, "*": lvalue * rvalue, "/": lvalue / rvalue, "%": lvalue % rvalue }[operator];
+    },
+    stars: (rating) => {
+      const r = Math.round(parseFloat(rating || 0) * 2) / 2;
+      const fullStars = Math.floor(r);
+      const halfStar = r % 1 !== 0;
+      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+      let classes = [];
+      for(let i=0; i<fullStars; i++) classes.push('bi-star-fill');
+      if(halfStar) classes.push('bi-star-half');
+      for(let i=0; i<emptyStars; i++) classes.push('bi-star');
+      return classes; // Return array of classes
+    },
+    formatDate: (date) => {
+       if (!date) return 'N/A';
+       try { return format(new Date(date), 'dd/MM/yyyy'); }
+       catch(e) { console.error("Date format error:", e); return date.toString(); }
+    },
+    formatDuration: (durationInSeconds) => { // Assuming DB stores seconds now
+      if (durationInSeconds === null || durationInSeconds === undefined) return '';
+      const totalSeconds = Number(durationInSeconds);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    },
+    firstLetter: (str) => str ? str.charAt(0).toUpperCase() : '?',
+  },
+  layoutsDir: path.join(__dirname, "views", "layouts"),
+  partialsDir: path.join(__dirname, "views", "partials"),
+  defaultLayout: "main"
+});
+
+// Log registered helpers for debugging (dev only)
+try {
+  console.log('Handlebars helpers:', Object.keys(hbsEngine.handlebars.helpers || {}).join(', '));
+} catch (e) {
+  console.warn('Could not list handlebars helpers:', e && e.message);
+}
+
+app.engine('hbs', hbsEngine);
+// Disable view cache in development to avoid stale compiled templates
+if (process.env.NODE_ENV !== 'production') app.set('view cache', false);
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
