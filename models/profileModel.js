@@ -111,15 +111,37 @@ export const removeFromWatchlist = async (account_id, course_id) => {
 };
 
 export const addToWatchlist = async (account_id, course_id) => {
-  const query = `
-    INSERT INTO watchlist (student_id, course_id)
-    SELECT student_id, $2
-    FROM students
-    WHERE account_id = $1
-    ON CONFLICT (student_id, course_id) DO NOTHING
-  `;
-  await db.query(query, [account_id, course_id]);
-  return true;
+  // --- ADD LOGGING ---
+  console.log(`[addToWatchlist] Called with account_id: ${account_id}, course_id: ${course_id}`);
+  // --- END LOGGING ---
+  try {
+    // --- ADD LOGGING: Check if student_id exists ---
+    const studentCheckQuery = `SELECT student_id FROM students WHERE account_id = $1`;
+    const studentCheckResult = await db.query(studentCheckQuery, [account_id]);
+    const studentId = studentCheckResult[0]?.student_id;
+    console.log(`[addToWatchlist] Found student_id: ${studentId} for account_id: ${account_id}`);
+    // --- END LOGGING ---
+
+    if (!studentId) {
+       console.error(`[addToWatchlist] ERROR: No student_id found for account_id ${account_id}. Cannot insert into watchlist.`);
+       return false; // Indicate failure
+    }
+
+    // Original insert query (now using the found studentId directly)
+    const query = `
+      INSERT INTO watchlist (student_id, course_id)
+      VALUES ($1, $2)
+      ON CONFLICT (student_id, course_id) DO NOTHING
+    `;
+    // Use the found studentId
+    const result = await db.query(query, [studentId, course_id]);
+    console.log(`[addToWatchlist] Insert result (rowCount might be 0 if conflict):`, result); // Log the result object if available
+
+    return true; // Indicate success (or conflict ignored)
+  } catch (error) {
+    console.error(`[addToWatchlist] Database error:`, error);
+    throw error; // Re-throw error to be caught by route handler
+  }
 };
 
 export const isInWatchlist = async (account_id, course_id) => {

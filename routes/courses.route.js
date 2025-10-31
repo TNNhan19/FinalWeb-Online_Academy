@@ -6,9 +6,8 @@ import { findById, getCourseDetailsById } from "../models/courseModel.js";
 
 const router = express.Router();
 
-/* ===========================================================
-   🧠 1️⃣ API: Lấy chi tiết khóa học + tăng lượt xem (dành cho modal / AJAX)
-   =========================================================== */
+ API: Lấy chi tiết khóa học + tăng lượt xem (dành cho modal / AJAX)
+
 router.get("/detail/:id", async (req, res) => {
   try {
     const courseId = parseInt(req.params.id);
@@ -65,12 +64,22 @@ router.get("/:id", async (req, res, next) => {
       });
     }
 
-    // ✅ Render ra trang chi tiết khóa học
-    res.render("courses/detail", {
-      layout: "main",
+    // ✨ ADDED LOGIC: CHECK IF THE COURSE IS IN WATCHLIST
+    let isFavorite = false;
+    // Only check if a user is logged in
+    if (req.session.user) { //
+      // Call the model function to check watchlist status
+      isFavorite = await isInWatchlist(req.session.user.account_id, courseId); //
+    }
+    // ===================================================
+
+    // Render the full detail page, passing all details AND the isFavorite status
+    res.render('courses/detail', { // Renders views/courses/detail.hbs
+      layout: 'main',
       pageTitle: courseDetails.course.title,
-      ...courseDetails,
-      user: req.session.user || null,
+      ...courseDetails, // Pass course, sections, reviews, relatedCourses, etc.
+      user: req.session.user, // Pass user info for conditional rendering in template
+      isFavorite: isFavorite // <-- Pass the watchlist status to the template
     });
   } catch (error) {
     console.error("❌ Lỗi khi lấy chi tiết khóa học (PAGE):", error);
@@ -88,7 +97,9 @@ router.post("/:id/favorite", async (req, res) => {
 
     if (!user) return res.redirect("/auth/login");
 
-    await addToWatchlist(user.account_id, courseId);
+    // Call the model function to add to watchlist
+    await addToWatchlist(user.account_id, courseId); //
+    // Redirect back to the course detail page
     return res.redirect(`/courses/${courseId}`);
   } catch (err) {
     console.error("❌ Lỗi add watchlist:", err);
@@ -106,7 +117,9 @@ router.post("/:id/unfavorite", async (req, res) => {
 
     if (!user) return res.redirect("/auth/login");
 
-    await removeFromWatchlist(user.account_id, courseId);
+    // Call the model function to remove from watchlist
+    await removeFromWatchlist(user.account_id, courseId); //
+    // Redirect back to the course detail page
     return res.redirect(`/courses/${courseId}`);
   } catch (err) {
     console.error("❌ Lỗi remove watchlist:", err);

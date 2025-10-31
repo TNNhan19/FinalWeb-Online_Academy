@@ -9,35 +9,46 @@
     </div>
 
     <!-- Tab content -->
+    {{!-- Display Enrolled Courses --}}
     <div id="allCourses">
-        <div class="row mt-3">
-            {{#each courses}}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{this.thumbnail_url}}" class="card-img-top">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">{{this.title}}</h5>
-                            <button class="btn btn-link toggle-watchlist" data-course-id="{{this.course_id}}"
-                                data-is-watchlisted="{{this.is_in_watchlist}}">
-                                <i class="fas fa-heart{{#unless this.is_in_watchlist}}-o{{/unless}}"
-                                    style="color: {{#if this.is_in_watchlist}}red{{else}}grey{{/if}};"></i>
-                            </button>
-                        </div>
-                        <div class="progress mb-3">
-                            <div class="progress-bar" role="progressbar" style="width: {{this.progress}}%;"
-                                aria-valuenow="{{this.progress}}" aria-valuemin="0" aria-valuemax="100">
-                                {{this.progress}}%
+        <div class="row mt-3 g-4"> {{!-- Added g-4 for spacing --}}
+            {{#if courses.length}}
+                {{#each courses}}
+                <div class="col-md-6 col-lg-4 d-flex"> {{!-- Adjusted column classes --}}
+                    <div class="card h-100 shadow-sm border-0">
+                        {{!-- Use image_url from courses table --}}
+                        <img src="{{this.image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 180px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column"> {{!-- Use flex column --}}
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0 flex-grow-1 me-2">{{this.title}}</h5>
+                                {{!-- Favorite button using API (requires separate JS or full page reload) --}}
+                                {{!-- Consider simplifying or removing instant toggle here --}}
+                                <button class="btn btn-link p-0 toggle-watchlist-enrolled" data-course-id="{{this.course_id}}"
+                                        data-is-watchlisted="{{this.is_in_watchlist}}">
+                                    <i class="bi {{#if this.is_in_watchlist}}bi-heart-fill text-danger{{else}}bi-heart text-secondary{{/if}}"
+                                       style="font-size: 1.2rem;"></i>
+                                </button>
                             </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="/courses/{{this.course_id}}" class="btn btn-primary">Vào học</a>
-                            <small class="text-muted">Đã đăng ký: {{formatDate this.enrolled_at}}</small>
+                            {{!-- Progress Bar --}}
+                            <div class="progress mb-3" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{this.progress}}%;"
+                                     aria-valuenow="{{this.progress}}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            {{!-- Footer with Link and Date --}}
+                            <div class="mt-auto d-flex justify-content-between align-items-center"> {{!-- mt-auto pushes to bottom --}}
+                                <a href="/learn/{{this.course_id}}" class="btn btn-primary btn-sm">Vào học</a>
+                                <small class="text-muted">Đã đăng ký: {{formatDate this.enrolled_at}}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {{/each}}
+                {{/each}}
+            {{else}}
+                <div class="col-12">
+                    <p class="text-muted text-center mt-5">Bạn chưa đăng ký khóa học nào.</p>
+                </div>
+            {{/if}}
         </div>
     </div>
 
@@ -69,62 +80,57 @@
 <!-- Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
+{{#section "js"}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const allCoursesTab = document.getElementById('allCourses');
-    const watchlistTab = document.getElementById('watchlistCourses');
-    const allBtn = document.getElementById('showAllBtn');
-    const watchlistBtn = document.getElementById('showWatchlistBtn');
-
-    // Switch tabs
-    allBtn.addEventListener('click', () => {
-        allCoursesTab.style.display = 'block';
-        watchlistTab.style.display = 'none';
-        allBtn.classList.add('active');
-        watchlistBtn.classList.remove('active');
-    });
-
-    watchlistBtn.addEventListener('click', () => {
-        allCoursesTab.style.display = 'none';
-        watchlistTab.style.display = 'block';
-        watchlistBtn.classList.add('active');
-        allBtn.classList.remove('active');
-    });
-
-    // Toggle watchlist
-    document.querySelectorAll('.toggle-watchlist').forEach(button => {
+    // --- Simplified Favorite Toggle for Enrolled Page (Requires Page Reload or more JS) ---
+    // This version sends the request but doesn't instantly update UI beyond the icon
+    document.querySelectorAll('.toggle-watchlist-enrolled').forEach(button => {
         button.addEventListener('click', async function() {
             const courseId = this.dataset.courseId;
-            const isWatchlisted = this.dataset.isWatchlisted === 'true';
-            
+            let isWatchlisted = this.dataset.isWatchlisted === 'true';
+            const icon = this.querySelector('i');
+
+            // Disable button during request
+            this.disabled = true;
+            icon.classList.add('opacity-50');
+
             try {
-                const response = await fetch(`/profile/watchlist/${isWatchlisted ? 'remove' : 'add'}/${courseId}`, {
+                const url = `/profile/watchlist/${isWatchlisted ? 'remove' : 'add'}/${courseId}`;
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json' // Prefer JSON response
                     }
                 });
 
                 if (response.ok) {
-                    // Toggle heart icon
-                    const icon = this.querySelector('i');
+                    // Toggle state and icon
+                    isWatchlisted = !isWatchlisted;
+                    this.dataset.isWatchlisted = isWatchlisted;
                     if (isWatchlisted) {
-                        icon.classList.remove('fa-heart');
-                        icon.classList.add('fa-heart-o');
-                        icon.style.color = 'grey';
-                        this.dataset.isWatchlisted = 'false';
+                        icon.classList.remove('bi-heart', 'text-secondary');
+                        icon.classList.add('bi-heart-fill', 'text-danger');
                     } else {
-                        icon.classList.remove('fa-heart-o');
-                        icon.classList.add('fa-heart');
-                        icon.style.color = 'red';
-                        this.dataset.isWatchlisted = 'true';
+                        icon.classList.remove('bi-heart-fill', 'text-danger');
+                        icon.classList.add('bi-heart', 'text-secondary');
                     }
+                     // Optional: Reload to see changes reflected if you have separate tabs/lists
+                     // window.location.reload();
+                } else {
+                     console.error('Failed to update watchlist status:', response.status);
+                     alert('Lỗi: Không thể cập nhật danh sách yêu thích.');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi cập nhật danh sách yêu thích');
+                console.error('Error toggling watchlist:', error);
+                alert('Lỗi mạng khi cập nhật danh sách yêu thích.');
+            } finally {
+                // Re-enable button
+                this.disabled = false;
+                 icon.classList.remove('opacity-50');
             }
         });
     });
 });
 </script>
+{{/section}}

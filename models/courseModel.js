@@ -296,9 +296,6 @@ export async function findTopViewed(limit = 10) {
 }
 
 
-
-
-// ========================= COURSE DETAILS (giữ nguyên cấu trúc) =========================
 export async function getCourseDetailsById(courseId) {
   try {
     const courseQuery = `
