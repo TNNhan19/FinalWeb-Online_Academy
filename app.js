@@ -133,7 +133,22 @@ app.use(express.static("Public"));
 app.use("/profile", profileRoutes);
 app.use("/courses", courseRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Start server and handle listen errors (e.g. EADDRINUSE) gracefully
+const server = app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
+});
+
+server.on("error", (err) => {
+  if (err && err.code === "EADDRINUSE") {
+    console.error(`❌ Port ${PORT} is already in use. Please stop the process using this port or set a different PORT environment variable.`);
+    console.error("Useful commands:");
+    console.error("  - Windows PowerShell: Get-Process -Id (Get-NetTCPConnection -LocalPort " + PORT + ").OwningProcess");
+    console.error("  - Windows cmd: netstat -ano | findstr :" + PORT);
+    console.error("  - Kill (Windows): taskkill /PID <pid> /F");
+    process.exit(1);
+  }
+  console.error("Server error:", err);
+  process.exit(1);
 });
