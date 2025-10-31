@@ -160,28 +160,64 @@ export async function findById(id) {
 
 
 // ========================= BY CATEGORY (tất cả khóa học trong danh mục) =========================
+
 export async function getCoursesByCategory(categoryName) {
-  const query = `
-    SELECT 
-      c.course_id,
-      c.title,
-      c.description,
-      c.image_url,
-      c.current_price,
-      c.original_price,
-      c.student,
-      c.star,
-      i.name AS instructor_name,
-      cat.name AS category_name
-    FROM courses c
-    LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
-    LEFT JOIN categories  cat ON c.category_id = cat.category_id
-    WHERE cat.name = $1
-    ORDER BY c.created_at DESC;
-  `;
-  const rows = await db.query(query, [categoryName]);
-  return rows;
+  try {
+    // 1️⃣ Lấy ID & parent_id của danh mục được click
+    const categories = await db.query(
+      `SELECT category_id, parent_id FROM categories WHERE LOWER(name) = LOWER($1)`,
+      [categoryName.trim()]
+    );
+
+    if (!categories || categories.length === 0) {
+      console.warn(`⚠️ Không tìm thấy danh mục: ${categoryName}`);
+      return [];
+    }
+
+    const { category_id, parent_id } = categories[0];
+    let courses = [];
+
+    // 2️⃣ Nếu là danh mục CHA → lấy tất cả KHÓA HỌC của các danh mục CON
+    if (parent_id === null) {
+      courses = await db.query(
+        `
+        SELECT c.*, cat.name AS category_name, i.name AS instructor_name
+        FROM courses c
+        JOIN categories cat ON c.category_id = cat.category_id
+        LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
+        WHERE cat.parent_id = $1
+        ORDER BY c.course_id DESC
+        `,
+        [category_id]
+      );
+    }
+    // 3️⃣ Nếu là danh mục CON → chỉ lấy khóa học thuộc mục con đó
+    else {
+      courses = await db.query(
+        `
+        SELECT c.*, cat.name AS category_name, i.name AS instructor_name
+        FROM courses c
+        JOIN categories cat ON c.category_id = cat.category_id
+        LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
+        WHERE cat.category_id = $1
+        ORDER BY c.course_id DESC
+        `,
+        [category_id]
+      );
+    }
+
+    if (!courses || courses.length === 0) {
+      console.warn(`⚠️ Không có khóa học thuộc danh mục: ${categoryName}`);
+      return [];
+    }
+
+    return courses;
+  } catch (error) {
+    console.error("❌ Lỗi khi lấy khóa học theo danh mục:", error);
+    return [];
+  }
 }
+
 
 // 🆕 Lấy 10 khóa học mới nhất (mọi lĩnh vực)
 export async function findNewestCourses(limit = 10) {

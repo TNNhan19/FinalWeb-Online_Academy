@@ -989,8 +989,48 @@ body {
   transform: translateY(-6px);
   box-shadow: 0 8px 18px rgba(0,0,0,0.08);
 }
+.category-card {
+  user-select: none;
+}
 .category-card:focus {
+  outline: none !important;
+  caret-color: transparent !important;
+}
+.category-card,
+.course-card {
+  user-select: none;              /* Không cho chọn chữ */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.category-card:focus,
+.course-card:focus {
+  outline: none !important;       /* Ẩn viền focus */
+  caret-color: transparent !important; /* Ẩn con trỏ nhấp nháy */
+}
+
+.course-card h6,
+.course-card p,
+.course-card span,
+.course-card div {
+  caret-color: transparent !important;
+}
+
+.modal * {
+  caret-color: transparent !important;
+}
+
+.modal:focus,
+.modal *:focus {
   outline: none !important;
   box-shadow: none !important;
 }
 
+#searchResultsSection .card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#searchResultsSection .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}

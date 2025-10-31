@@ -9,14 +9,15 @@
     </a>
 
     <!-- ===== Search (ẩn trên mobile) ===== -->
-    <form class="d-none d-md-flex align-items-center flex-grow-1 mx-md-3" role="search" style="max-width: 380px;">
+    <form id="globalSearchForm" class="d-none d-md-flex align-items-center flex-grow-1 mx-md-3" role="search" style="max-width: 380px;">
       <div class="input-group position-relative w-100">
-        <input type="search" class="form-control rounded-pill ps-3 pe-5" placeholder="Tìm khóa học..." />
+        <input type="search" name="q" id="globalSearchInput" class="form-control rounded-pill ps-3 pe-5" placeholder="Tìm khóa học hoặc lĩnh vực..." />
         <button type="submit" class="btn btn-link position-absolute end-0 me-3 text-primary">
           <i class="bi bi-search"></i>
         </button>
       </div>
     </form>
+
 
     <!-- ===== User / Auth Buttons ===== -->
     <div class="d-flex align-items-center gap-2">

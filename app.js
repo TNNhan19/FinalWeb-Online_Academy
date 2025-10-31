@@ -21,6 +21,8 @@ import courseRoutes from "./routes/courses.route.js";
 import categoryRoutes from "./routes/category.route.js";
 import categoryRoute from "./routes/category.route.js"
 
+import searchApi from "./routes/search.api.js";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
@@ -149,6 +151,9 @@ app.engine("hbs", engine({
     slice: (arr, start, end) => Array.isArray(arr) ? arr.slice(start, end) : [],
   },
 }));
+
+
+app.use("/api/search", searchApi);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
