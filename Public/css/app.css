@@ -51,8 +51,6 @@ body {
     transition: var(--transition);
 }
 
-
-
 .logo h1 {
     font-size: 24px;
     font-weight: 700;
@@ -420,6 +418,7 @@ body {
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -571,7 +570,9 @@ body {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
+    
 }
 
 .modal.active {
@@ -775,6 +776,7 @@ body {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
@@ -784,6 +786,7 @@ body {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
@@ -1081,6 +1084,60 @@ a.btn-gradient:hover {
 
 .course-header h5 {
     font-size: 1.15rem;
+}
+.video-player-container {
+  position: relative;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ❌ Xóa khung giữ tỉ lệ ảo */
+.video-player-container::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* ✅ Giữ tỷ lệ thật của video */
+.video-player-container iframe,
+.video-player-container video,
+.video-player-container .plyr {
+  position: relative !important;
+  z-index: 5 !important;
+  display: block !important;
+  width: 100% !important;
+  height: auto !important; /* 👈 CHỈNH LẠI DÒNG NÀY */
+  background: #000 !important;
+  object-fit: contain !important;
+  border: none;
+  outline: none;
+}
+
+/* Đặt lại thanh điều khiển của Plyr ở đáy player */
+.plyr__controls {
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: absolute !important;  /* 👈 thay relative thành absolute */
+  bottom: 0 !important;
+  left: 0;
+  width: 100%;
+  z-index: 20 !important;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); /* đẹp kiểu YouTube */
+}
+
+
+/* 🎬 Giữ tỉ lệ video hợp lý, không kéo dài */
+.plyr__video-wrapper {
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: 540px !important;
+}
+
+/* ⚙️ Đảm bảo control không bị che */
+.plyr--video {
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 10 !important;
 }
 
 .hover-scale {
