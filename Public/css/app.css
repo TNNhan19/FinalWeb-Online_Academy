@@ -599,6 +599,7 @@ body {
         transform: translateY(50px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -743,41 +744,34 @@ body {
     text-align: center;
 }
 
-/* ===============================
-   🧩 CARD KHOÁ HỌC – CHUẨN UDEMY STYLE
-   =============================== */
 
-/* Ảnh khoá học */
 .course-img {
-  width: 100%;
-  height: 180px;             /* Cố định chiều cao ảnh */
-  object-fit: cover;         /* Ảnh được cắt gọn mà không méo */
-  border-top-left-radius: 1rem;
-  border-top-right-radius: 1rem;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
 }
 
-/* Cấu trúc thẻ card */
 .course-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Nội dung card */
 .course-card .card-body {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-/* Tiêu đề (giới hạn 2 dòng) */
 .course-card h6 {
   min-height: 42px;
   overflow: hidden;
@@ -788,7 +782,6 @@ body {
   -webkit-box-orient: vertical;
 }
 
-/* Mô tả (giới hạn 2 dòng) */
 .course-card p {
   min-height: 38px;
   overflow: hidden;
@@ -799,57 +792,482 @@ body {
   -webkit-box-orient: vertical;
 }
 
-/* Bảo đảm các card đều cao bằng nhau trong 1 hàng */
-.row.g-4 > [class*="col-"] {
-  display: flex;
+.row.g-4>[class*="col-"] {
+    display: flex;
 }
 
-.row.g-4 > [class*="col-"] > .course-card {
-  flex: 1;
+.row.g-4>[class*="col-"]>.course-card {
+    flex: 1;
 }
 
-/* ===============================
-   🎨 MODAL CHI TIẾT KHOÁ HỌC
-   =============================== */
 
 #courseModal .btn {
-  min-width: 120px;
-  font-weight: 500;
-  border-radius: 0.5rem;
+    min-width: 120px;
+    font-weight: 500;
+    border-radius: 0.5rem;
 }
 
-/* Nút Xem chi tiết */
 #courseModal .btn-outline-primary {
-  border-width: 1.8px;
-  color: #2563eb;
-  border-color: #2563eb;
-  background-color: transparent;
+    border-width: 1.8px;
+    color: #2563eb;
+    border-color: #2563eb;
+    background-color: transparent;
 }
 
 #courseModal .btn-outline-primary:hover {
-  background-color: #2563eb;
-  color: #fff;
+    background-color: #2563eb;
+    color: #fff;
 }
 
-/* Nút Đăng ký học */
 #courseModal .btn-primary {
-  background-color: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
 }
 
 #courseModal .btn-primary:hover {
-  background-color: #1e40af;
-  border-color: #1e40af;
+    background-color: #1e40af;
+    border-color: #1e40af;
 }
 
-/* ===============================
-   ✨ HIỆU ỨNG CHUNG
-   =============================== */
 .course-card img {
-  transition: transform 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .course-card:hover img {
-  transform: scale(1.03);
+    transform: scale(1.03);
+}
+
+.btn-floating {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 0;
+    width: 100%;
+    color: #fff !important;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.btn-floating:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.btn-gradient {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 0;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: all 0.25s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+.btn-blue {
+    background: linear-gradient(90deg, #2979ff 0%, #1e40ff 100%);
+}
+
+.btn-green {
+    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+}
+
+.btn-cyan {
+    background: linear-gradient(90deg, #06b6d4 0%, #0ea5e9 100%);
+}
+
+.table-clean td,
+.table-clean th {
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+.td-title {
+    max-width: 460px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.td-category {
+    max-width: 220px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.td-price {
+    width: 110px;
+}
+
+.td-date {
+    max-width: 360px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.td-status {
+    width: 190px;
+}
+
+.td-actions {
+    width: 210px;
+}
+
+.btn-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-status {
+    min-width: 150px;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(90deg, #64748b 0%, #475569 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    transition: all 0.25s ease;
+}
+
+.btn-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+a.btn-back,
+a.btn-gradient {
+    text-decoration: none !important;
+}
+
+a.btn-back:hover,
+a.btn-gradient:hover {
+    text-decoration: none !important;
+}
+
+.modal-xxl {
+    --bs-modal-width: 1200px;
+}
+
+@media (min-width: 1400px) {
+    .modal-xxl {
+        --bs-modal-width: 1280px;
+    }
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.fg-12 {
+    grid-column: span 12;
+}
+
+.fg-6 {
+    grid-column: span 6;
+}
+
+.fg-4 {
+    grid-column: span 4;
+}
+
+@media (max-width: 991.98px) {
+
+    .fg-6,
+    .fg-4 {
+        grid-column: span 12;
+    }
+}
+
+.form-pane {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+}
+
+.form-pane .form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-pane .form-control,
+.form-pane .form-select,
+.form-pane textarea {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.hover-card {
+    transition: all 0.25s ease-in-out;
+    border-radius: 1rem;
+    background-color: #ffffff;
+}
+
+.hover-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.breadcrumb {
+    font-size: 0.95rem;
+}
+
+.bg-primary-subtle {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.user-profile-form .row {
+    --bs-gutter-x: 2rem;
+    --bs-gutter-y: 1.25rem
+}
+
+.user-profile-form .form-control {
+    padding: 14px 16px;
+    border-radius: 12px
+}
+
+.profile-card {
+    box-shadow: var(--shadow-md)
+}
+
+@media (max-width: 992px) {
+    .profile-card {
+        padding: 24px !important
+    }
+}
+
+.course-header {
+  background-color: var(--bg-secondary);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+.course-header:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.course-header h5 {
+  font-size: 1.15rem;
+}
+.hover-scale {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+/* ===== Lĩnh vực yêu thích nhất ===== */
+.top-categories .category-card {
+  height: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.top-categories .category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.top-categories .category-icon i {
+  color: var(--primary-color);
+}
+
+.top-categories .text-success {
+  font-weight: 500;
+}
+
+.top-categories .text-warning {
+  font-weight: 500;
+}
+
+.top-categories .row {
+  row-gap: 1.5rem;
+}
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Khung carousel */
+#viewedCarousel {
+  position: relative;
+  padding-bottom: 60px; /* chừa chỗ cho dãy số */
+}
+
+#viewedCarousel .carousel-inner { overflow: visible; }
+
+/* Thanh indicators ở chính giữa đáy carousel */
+#viewedCarousel .carousel-indicators.indicators-numeric {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  width: 100%;
+  z-index: 5;
+}
+
+/* Nút số – reset rule mặc định của Bootstrap */
+#viewedCarousel .carousel-indicators.indicators-numeric [data-bs-target] {
+  /* reset mặc định của Bootstrap */
+  text-indent: 0;
+  border-top: 0;
+  border-bottom: 0;
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+
+  /* style của mình */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 1;
+  transition: all .2s ease;
+}
+
+#viewedCarousel .carousel-indicators.indicators-numeric [data-bs-target]:hover {
+  background: #dbe3ff;
+  border-color: #b6c4ff;
+}
+
+#viewedCarousel .carousel-indicators.indicators-numeric .active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+/* === CAROUSEL "Khóa Học Mới Nhất" – căn giữa chỉ số === */
+#newestCarousel { position: relative; padding-bottom: 56px; }
+#newestCarousel .carousel-inner { overflow: visible; }
+
+/* Thanh chỉ số: phủ ngang, căn giữa */
+#newestCarousel .carousel-indicators.indicators-numeric{
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  width: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+/* Nút số */
+#newestCarousel .carousel-indicators.indicators-numeric [data-bs-target]{
+  text-indent: 0;        /* bỏ dot mặc định */
+  width: auto; height: auto;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 1;
+  transition: all .2s ease;
+}
+
+#newestCarousel .carousel-indicators.indicators-numeric [data-bs-target]:hover{
+  background: #dbe3ff; border-color: #b6c4ff;
+}
+
+#newestCarousel .carousel-indicators.indicators-numeric .active{
+  background: #2563eb; border-color: #2563eb; color: #fff;
+}
+.top-categories .category-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+.category-card {
+  user-select: none;
+}
+.category-card:focus {
+  outline: none !important;
+  caret-color: transparent !important;
+}
+.category-card,
+.course-card {
+  user-select: none;              /* Không cho chọn chữ */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.category-card:focus,
+.course-card:focus {
+  outline: none !important;       /* Ẩn viền focus */
+  caret-color: transparent !important; /* Ẩn con trỏ nhấp nháy */
+}
+
+.course-card h6,
+.course-card p,
+.course-card span,
+.course-card div {
+  caret-color: transparent !important;
+}
+
+.modal * {
+  caret-color: transparent !important;
+}
+
+.modal:focus,
+.modal *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#searchResultsSection .card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#searchResultsSection .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }

@@ -18,54 +18,74 @@ const upload = multer({ storage });
 
 const router = express.Router();
 
-// ✅ Middleware kiểm tra quyền giảng viên
+// Chặn truy cập
 function requireInstructor(req, res, next) {
   if (!req.session.user) return res.redirect("/auth/login");
   if (req.session.user.role !== "instructor") return res.redirect("/");
   next();
 }
 
-// ====================
-// TRANG CHÍNH GIẢNG VIÊN
-// ====================
+// Trang chủ
 router.get("/", requireInstructor, async (req, res) => {
   const accountId = req.session.user.account_id;
   const instructorName = req.session.user.full_name;
 
   try {
-    const { rows: stats } = await pool.query(
-      `
-      SELECT
-        COUNT(*) FILTER (WHERE status = 'complete') AS courses,
-        COALESCE(SUM(total_lectures), 0) AS lectures
-      FROM courses c
-      JOIN instructors i ON c.instructor_id = i.instructor_id
-      WHERE i.account_id = $1
-      `,
+
+    const { rows: instructorRows } = await pool.query(
+      "SELECT instructor_id FROM instructors WHERE account_id = $1",
       [accountId]
+    );
+
+    const instructorId = instructorRows[0]?.instructor_id;
+    if (!instructorId) {
+      return res.status(404).render("instructor/index", {
+        layout: "main",
+        pageTitle: "Trang giảng viên",
+        instructor: { name: instructorName },
+        stats: { courses: 0, students: 0 },
+        error: "Không tìm thấy thông tin giảng viên.",
+      });
+    }
+
+    const { rows: courseRows } = await pool.query(
+      `SELECT COUNT(*) AS total_courses
+       FROM courses
+       WHERE instructor_id = $1`,
+      [instructorId]
+    );
+
+    const { rows: studentRows } = await pool.query(
+      `SELECT COUNT(DISTINCT s.student_id) AS total_students
+       FROM students s
+       JOIN enrollments e ON s.student_id = e.student_id
+       JOIN courses c ON e.course_id = c.course_id
+       WHERE c.instructor_id = $1`,
+      [instructorId]
     );
 
     res.render("instructor/index", {
       layout: "main",
       pageTitle: "Trang giảng viên",
       instructor: { name: instructorName },
-      stats: stats[0] || { courses: 0, lectures: 0 },
+      stats: {
+        courses: courseRows[0].total_courses || 0,
+        students: studentRows[0].total_students || 0,
+      },
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải trang giảng viên:", err.message);
+    console.error("Lỗi khi tải trang giảng viên:", err.message);
     res.render("instructor/index", {
       layout: "main",
       pageTitle: "Trang giảng viên",
       instructor: { name: instructorName },
-      stats: { courses: 0, lectures: 0 },
+      stats: { courses: 0, students: 0 },
       error: "Không thể tải dữ liệu. Vui lòng thử lại.",
     });
   }
 });
 
-// ====================
-// DASHBOARD – KHÓA HỌC CỦA TÔI
-// ====================
+// Dashboard
 router.get("/dashboard", requireInstructor, async (req, res) => {
   const accountId = req.session.user.account_id;
 
@@ -86,7 +106,7 @@ router.get("/dashboard", requireInstructor, async (req, res) => {
       courses: rows,
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải dashboard:", err.message);
+    console.error("Lỗi khi tải dashboard:", err.message);
     res.render("instructor/dashboard", {
       layout: "main",
       pageTitle: "Khóa học của tôi",
@@ -96,9 +116,7 @@ router.get("/dashboard", requireInstructor, async (req, res) => {
   }
 });
 
-// ====================
-// TẠO KHÓA HỌC MỚI
-// ====================
+// Tạo khoá học mới
 router.get("/new", requireInstructor, async (req, res) => {
   try {
     const { rows: categories } = await pool.query(
@@ -111,29 +129,24 @@ router.get("/new", requireInstructor, async (req, res) => {
       categories,
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải form đăng khóa học:", err.message);
+    console.error("Lỗi khi tải form đăng khóa học:", err.message);
     res.redirect("/instructor/dashboard");
   }
 });
 
-// ====================
-// TẠO KHÓA HỌC MỚI (CÓ UPLOAD ẢNH)
-// ====================
 router.post("/new", requireInstructor, upload.single("image_file"), async (req, res) => {
   const accountId = req.session.user.account_id;
 
   try {
-    // 🔹 Lấy instructor_id từ account_id
     const { rows: inst } = await pool.query(
       "SELECT instructor_id FROM instructors WHERE account_id = $1",
       [accountId]
     );
 
     if (!inst.length) {
-      return res.send("❌ Không tìm thấy hồ sơ giảng viên.");
+      return res.send("Không tìm thấy hồ sơ giảng viên.");
     }
 
-    // 🔹 Lấy dữ liệu từ form
     const {
       title,
       description,
@@ -145,12 +158,10 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       original_price,
     } = req.body;
 
-    // 🔹 Xử lý ảnh upload
     const image_url = req.file
-      ? `/uploads/${req.file.filename}`  // Nếu upload file mới
-      : req.body.image_url || null;      // Nếu không upload, lấy link sẵn có
+      ? `/uploads/${req.file.filename}`
+      : req.body.image_url || null;
 
-    // 🔹 Lưu vào database
     await pool.query(
       `
       INSERT INTO courses 
@@ -174,7 +185,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
 
     res.redirect("/instructor/dashboard");
   } catch (err) {
-    console.error("❌ Lỗi khi đăng khóa học:", err.message);
+    console.error("Lỗi khi đăng khóa học:", err.message);
     res.render("instructor/course_form", {
       layout: "main",
       pageTitle: "Đăng khóa học mới",
@@ -184,10 +195,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
   }
 });
 
-
-// ====================
-// CHỈNH SỬA KHÓA HỌC (HIỂN THỊ FORM)
-// ====================
+// Chỉnh sửa khoá học
 router.get("/edit/:id", requireInstructor, async (req, res) => {
   const { id } = req.params;
   const accountId = req.session.user.account_id;
@@ -235,20 +243,17 @@ router.get("/edit/:id", requireInstructor, async (req, res) => {
       lectures,
     });
   } catch (err) {
-    console.error("❌ Lỗi khi chỉnh sửa khóa học:", err.message);
+    console.error("Lỗi khi chỉnh sửa khóa học:", err.message);
     res.redirect("/instructor/dashboard");
   }
 });
 
-// ====================
-// CẬP NHẬT (CHỈNH SỬA) KHÓA HỌC
-// ====================
 router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (req, res) => {
   const { id } = req.params;
   const accountId = req.session.user.account_id;
 
   try {
-    // 🔒 Kiểm tra quyền sở hữu
+
     const { rows: ownership } = await pool.query(
       `
       SELECT c.*, i.instructor_id
@@ -260,12 +265,11 @@ router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (
     );
 
     if (!ownership.length) {
-      return res.status(403).send("❌ Bạn không có quyền chỉnh sửa khóa học này.");
+      return res.status(403).send("Bạn không có quyền chỉnh sửa khóa học này.");
     }
 
     const oldCourse = ownership[0];
 
-    // 🧾 Lấy dữ liệu từ form
     const {
       title,
       description,
@@ -278,12 +282,10 @@ router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (
       status,
     } = req.body;
 
-    // 🖼️ Xử lý ảnh upload
     const image_url = req.file
       ? `/uploads/${req.file.filename}`
       : oldCourse.image_url;
 
-    // 💾 Cập nhật DB
     await pool.query(
       `
       UPDATE courses
@@ -297,7 +299,8 @@ router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (
         total_lectures = $7,
         current_price = $8,
         original_price = $9,
-        status = $10
+        status = $10,
+        updated_at = NOW()
       WHERE course_id = $11
       `,
       [
@@ -315,10 +318,10 @@ router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (
       ]
     );
 
-    console.log(`✅ Khóa học ${id} đã được cập nhật bởi ${req.session.user.full_name}`);
+    console.log(`Khóa học ${id} đã được cập nhật bởi ${req.session.user.full_name}`);
     res.redirect("/instructor/dashboard");
   } catch (err) {
-    console.error("❌ Lỗi khi cập nhật khóa học:", err.message);
+    console.error("Lỗi khi cập nhật khóa học:", err.message);
     res.status(500).render("instructor/course_form", {
       layout: "main",
       pageTitle: "Cập nhật khóa học",
@@ -328,11 +331,7 @@ router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (
   }
 });
 
-
-
-// ====================
-// HỒ SƠ GIẢNG VIÊN
-// ====================
+// Hồ sơ giảng viên
 router.get("/profile", requireInstructor, async (req, res) => {
   const accountId = req.session.user.account_id;
 
@@ -375,7 +374,7 @@ router.get("/profile", requireInstructor, async (req, res) => {
       courses: courseRows,
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải hồ sơ giảng viên:", err.message);
+    console.error("Lỗi khi tải hồ sơ giảng viên:", err.message);
     res.render("instructor/profile", {
       layout: "main",
       pageTitle: "Hồ sơ giảng viên",
@@ -384,15 +383,51 @@ router.get("/profile", requireInstructor, async (req, res) => {
   }
 });
 
-// ====================
-// CHI TIẾT KHÓA HỌC CỦA GIẢNG VIÊN
-// ====================
+// Cập nhật hồ sơ giảng viên
+router.post("/profile/update", requireInstructor, async (req, res) => {
+  const accountId = req.session.user.account_id;
+
+  try {
+    const { name, bio } = req.body;
+
+    if (!name) {
+      return res.status(400).render("instructor/profile", {
+        layout: "main",
+        error: "Họ và tên không được để trống"
+      });
+    }
+
+    await pool.query(
+      `
+      UPDATE instructors 
+      SET name = $1, bio = $2
+      WHERE account_id = $3
+      `,
+      [name, bio || "", accountId]
+    );
+
+    await pool.query(
+      "UPDATE accounts SET full_name = $1 WHERE account_id = $2",
+      [name, accountId]
+    );
+
+    console.log(`Giảng viên ${name} đã cập nhật hồ sơ thành công.`);
+    res.redirect("/instructor/profile");
+  } catch (err) {
+    console.error("Lỗi khi cập nhật hồ sơ giảng viên:", err);
+    res.status(500).render("instructor/profile", {
+      layout: "main",
+      error: "Không thể cập nhật hồ sơ. Vui lòng thử lại.",
+    });
+  }
+});
+
+// Chi tiết khoá học
 router.get("/detail/:id", requireInstructor, async (req, res) => {
   const courseId = req.params.id;
   const accountId = req.session.user.account_id;
 
   try {
-    // ✅ Lấy thông tin khóa học, kèm thông tin giảng viên
     const { rows: courseRows } = await pool.query(
       `
       SELECT c.*, cat.name AS category_name, i.name AS instructor_name, i.bio AS instructor_bio
@@ -410,7 +445,7 @@ router.get("/detail/:id", requireInstructor, async (req, res) => {
 
     const course = courseRows[0];
 
-    // ✅ Lấy danh sách chương & bài giảng
+
     const { rows: sections } = await pool.query(
       "SELECT * FROM course_sections WHERE course_id = $1 ORDER BY order_index",
       [courseId]
@@ -426,7 +461,6 @@ router.get("/detail/:id", requireInstructor, async (req, res) => {
       [courseId]
     );
 
-    // ✅ Render view chi tiết khóa học
     res.render("instructor/course_detail", {
       layout: "main",
       pageTitle: `Chi tiết khóa học - ${course.title}`,
@@ -435,21 +469,18 @@ router.get("/detail/:id", requireInstructor, async (req, res) => {
       lectures,
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải chi tiết khóa học:", err.message);
+    console.error("Lỗi khi tải chi tiết khóa học:", err.message);
     res.redirect("/instructor/dashboard");
   }
 });
 
-// ====================
-// CẬP NHẬT CẤU TRÚC KHÓA HỌC (CHƯƠNG & BÀI GIẢNG)
-// ====================
+// Thêm chương và bài giảng
 router.post("/update-structure/:courseId", requireInstructor, async (req, res) => {
   const { courseId } = req.params;
   const { sections } = req.body;
   const accountId = req.session.user.account_id;
 
   try {
-    // 🔒 Kiểm tra quyền giảng viên sở hữu khóa học
     const check = await pool.query(
       `
       SELECT c.course_id
@@ -463,18 +494,12 @@ router.post("/update-structure/:courseId", requireInstructor, async (req, res) =
       return res.status(403).json({ message: "Bạn không có quyền sửa khóa học này." });
     }
 
-    // ==========================
-    // XÓA CẤU TRÚC CŨ (nếu có)
-    // ==========================
     await pool.query(
       "DELETE FROM lectures WHERE section_id IN (SELECT section_id FROM course_sections WHERE course_id = $1)",
       [courseId]
     );
     await pool.query("DELETE FROM course_sections WHERE course_id = $1", [courseId]);
 
-    // ==========================
-    // LƯU CẤU TRÚC MỚI
-    // ==========================
     for (let sIndex = 0; sIndex < sections.length; sIndex++) {
       const section = sections[sIndex];
       const sectionRes = await pool.query(
@@ -494,9 +519,6 @@ router.post("/update-structure/:courseId", requireInstructor, async (req, res) =
       }
     }
 
-    // ==========================
-    // CẬP NHẬT TRẠNG THÁI KHÓA HỌC
-    // ==========================
     await pool.query(
       `
       UPDATE courses 
@@ -512,8 +534,40 @@ router.post("/update-structure/:courseId", requireInstructor, async (req, res) =
 
     res.json({ message: "Đã lưu thay đổi thành công!" });
   } catch (err) {
-    console.error("❌ Lỗi khi cập nhật cấu trúc khóa học:", err.message);
+    console.error("Lỗi khi cập nhật cấu trúc khóa học:", err.message);
     res.status(500).json({ message: "Không thể lưu thay đổi." });
+  }
+});
+
+// Xoá khoá học
+router.post("/courses/delete/:id", requireInstructor, async (req, res) => {
+  const { id } = req.params;
+  const accountId = req.session.user.account_id;
+
+  try {
+    const { rows: instRows } = await pool.query(
+      "SELECT instructor_id FROM instructors WHERE account_id = $1",
+      [accountId]
+    );
+    const instructorId = instRows[0]?.instructor_id;
+    if (!instructorId) {
+      return res.status(403).send("Không tìm thấy thông tin giảng viên.");
+    }
+
+    const { rowCount } = await pool.query(
+      "DELETE FROM courses WHERE course_id = $1 AND instructor_id = $2",
+      [id, instructorId]
+    );
+
+    if (rowCount === 0) {
+      return res.status(403).send("Không thể xóa khóa học này (không thuộc quyền sở hữu).");
+    }
+
+    console.log(`Giảng viên ${instructorId} đã xóa khóa học ${id}`);
+    res.redirect("/instructor/dashboard");
+  } catch (err) {
+    console.error("Lỗi khi xóa khóa học:", err.message);
+    res.status(500).send("Không thể xóa khóa học. Vui lòng thử lại.");
   }
 });
 
