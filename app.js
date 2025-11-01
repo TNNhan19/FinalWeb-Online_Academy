@@ -1,20 +1,20 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-
 import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import hbs_sections from "express-handlebars-sections";
 import session from "express-session";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
-import coursesRoutes from './routes/courses.route.js';
+import coursesRoutes from "./routes/courses.route.js";
+
 import profileRoutes from "./routes/profile.route.js";
 import categoryRoute from "./routes/category.route.js";
 import enrollmentRoutes from "./routes/enrollment.route.js";
@@ -31,6 +31,7 @@ const hbsEngine = engine({
   helpers: {
     section: hbs_sections(),
     eq: (a, b) => String(a) === String(b),
+    includes: (str, substring) => typeof str === "string" && str.includes(substring),
     year: () => new Date().getFullYear(),
     ifEquals: function (a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
@@ -88,12 +89,18 @@ const hbsEngine = engine({
       }
     },
     formatDate: (date) => {
-       if (!date) return 'N/A';
-       try { return format(new Date(date), 'dd/MM/yyyy'); }
-       catch(e) { console.error("Date format error:", e); return date.toString(); }
+      if (!date) return "N/A";
+      try {
+        return format(new Date(date), "dd/MM/yyyy");
+      } catch (e) {
+        console.error("Date format error:", e);
+        return date.toString();
+      }
     },
-    formatDuration: (durationInSeconds) => { // Assuming DB stores seconds now
-      if (durationInSeconds === null || durationInSeconds === undefined) return '';
+    formatDuration: (durationInSeconds) => {
+      // Assuming DB stores seconds now
+      if (durationInSeconds === null || durationInSeconds === undefined)
+        return "";
       const totalSeconds = Number(durationInSeconds);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
@@ -111,8 +118,20 @@ const hbsEngine = engine({
   defaultLayout: "main",
 });
 
-app.engine("hbs", hbsEngine);
+// Log registered helpers for debugging (dev only)
+try {
+  const helpersObj =
+    hbsEngine && hbsEngine.handlebars && hbsEngine.handlebars.helpers;
+  if (helpersObj && typeof helpersObj === "object") {
+    console.log("Handlebars helpers:", Object.keys(helpersObj).join(", "));
+  } else {
+    console.log("Handlebars helpers not available on engine object yet.");
+  }
+} catch (e) {
+  console.warn("Could not list handlebars helpers:", e && e.message);
+}
 
+app.engine("hbs", hbsEngine);
 // Disable view cache in development to avoid stale compiled templates
 if (process.env.NODE_ENV !== "production") app.set("view cache", false);
 
@@ -145,7 +164,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "supersecretkey",
     resave: false,
     saveUninitialized: false, // Don't save empty sessions
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // Session duration
+    cookie: { maxAge: 24 * 60 * 60 * 1000 }, // Session duration
   })
 );
 
@@ -179,4 +198,23 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
+});
+
+server.on("error", (err) => {
+  if (err && err.code === "EADDRINUSE") {
+    console.error(
+      `❌ Port ${PORT} is already in use. Please stop the process using this port or set a different PORT environment variable.`
+    );
+    console.error("Useful commands:");
+    console.error(
+      "  - Windows PowerShell: Get-Process -Id (Get-NetTCPConnection -LocalPort " +
+      PORT +
+      ").OwningProcess"
+    );
+    console.error("  - Windows cmd: netstat -ano | findstr :" + PORT);
+    console.error("  - Kill (Windows): taskkill /PID <pid> /F");
+    process.exit(1);
+  }
+  console.error("Server error:", err);
+  process.exit(1);
 });

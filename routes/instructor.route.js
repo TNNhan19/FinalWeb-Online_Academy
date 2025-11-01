@@ -138,6 +138,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
   const accountId = req.session.user.account_id;
 
   try {
+    // Lấy instructor_id theo account
     const { rows: inst } = await pool.query(
       "SELECT instructor_id FROM instructors WHERE account_id = $1",
       [accountId]
@@ -156,18 +157,20 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       total_lectures,
       current_price,
       original_price,
+      structure_json, 
     } = req.body;
 
     const image_url = req.file
       ? `/uploads/${req.file.filename}`
       : req.body.image_url || null;
 
-    await pool.query(
+    const newCourse = await pool.query(
       `
       INSERT INTO courses 
         (title, description, detail_html, image_url, instructor_id, category_id, 
          total_hours, total_lectures, current_price, original_price, status, created_at)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'incomplete',NOW())
+      RETURNING course_id
       `,
       [
         title,
@@ -183,6 +186,46 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       ]
     );
 
+    const courseId = newCourse.rows[0].course_id;
+
+    if (structure_json) {
+      const sections = JSON.parse(structure_json);
+
+      for (let sIndex = 0; sIndex < sections.length; sIndex++) {
+        const section = sections[sIndex];
+        const sectionRes = await pool.query(
+          `INSERT INTO course_sections (course_id, title, order_index)
+           VALUES ($1, $2, $3)
+           RETURNING section_id`,
+          [courseId, section.title, sIndex + 1]
+        );
+        const sectionId = sectionRes.rows[0].section_id;
+
+        for (let lIndex = 0; lIndex < section.lectures.length; lIndex++) {
+          const lec = section.lectures[lIndex];
+          await pool.query(
+            `INSERT INTO lectures (section_id, title, video_url, duration, is_preview, order_index)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [sectionId, lec.title, lec.video_url, lec.duration || 0, lec.is_preview, lIndex + 1]
+          );
+        }
+      }
+
+      await pool.query(
+        `
+        UPDATE courses 
+        SET status = 'complete'
+        WHERE course_id = $1 
+        AND EXISTS (
+          SELECT 1 FROM course_sections cs
+          JOIN lectures l ON cs.section_id = l.section_id
+          WHERE cs.course_id = $1
+        )
+        `,
+        [courseId]
+      );
+    }
+
     res.redirect("/instructor/dashboard");
   } catch (err) {
     console.error("Lỗi khi đăng khóa học:", err.message);
@@ -194,6 +237,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
     });
   }
 });
+
 
 // Chỉnh sửa khoá học
 router.get("/edit/:id", requireInstructor, async (req, res) => {
@@ -336,6 +380,7 @@ router.get("/profile", requireInstructor, async (req, res) => {
   const accountId = req.session.user.account_id;
 
   try {
+    // Lấy thông tin giảng viên
     const { rows: profileRows } = await pool.query(
       `
       SELECT i.*, a.email, a.full_name
@@ -347,7 +392,6 @@ router.get("/profile", requireInstructor, async (req, res) => {
     );
 
     const profile = profileRows[0];
-
     if (!profile) {
       return res.render("instructor/profile", {
         layout: "main",
@@ -356,6 +400,24 @@ router.get("/profile", requireInstructor, async (req, res) => {
       });
     }
 
+    // Tính tổng số khóa học của giảng viên
+    const { rows: totalCourses } = await pool.query(
+      `SELECT COUNT(*) AS total_courses FROM courses WHERE instructor_id = $1`,
+      [profile.instructor_id]
+    );
+
+    // Tính tổng số học viên duy nhất đã học khóa của giảng viên
+    const { rows: totalStudents } = await pool.query(
+      `
+      SELECT COUNT(DISTINCT e.student_id) AS total_students
+      FROM enrollments e
+      JOIN courses c ON e.course_id = c.course_id
+      WHERE c.instructor_id = $1
+      `,
+      [profile.instructor_id]
+    );
+
+    // Lấy danh sách khóa học để hiển thị bảng
     const { rows: courseRows } = await pool.query(
       `
       SELECT c.course_id, c.title, c.status, c.current_price, cat.name AS category_name
@@ -366,6 +428,10 @@ router.get("/profile", requireInstructor, async (req, res) => {
       `,
       [profile.instructor_id]
     );
+
+    // Gắn thêm hai thông tin tổng vào profile object
+    profile.total_courses = totalCourses[0]?.total_courses || 0;
+    profile.total_students = totalStudents[0]?.total_students || 0;
 
     res.render("instructor/profile", {
       layout: "main",
@@ -383,33 +449,36 @@ router.get("/profile", requireInstructor, async (req, res) => {
   }
 });
 
-// Cập nhật hồ sơ giảng viên
-router.post("/profile/update", requireInstructor, async (req, res) => {
+
+// Cập nhật hồ sơ giảng viên 
+router.post("/profile/update", requireInstructor, upload.single("avatar_file"), async (req, res) => {
   const accountId = req.session.user.account_id;
 
   try {
     const { name, bio } = req.body;
-
     if (!name) {
       return res.status(400).render("instructor/profile", {
         layout: "main",
-        error: "Họ và tên không được để trống"
+        error: "Họ và tên không được để trống",
       });
     }
 
+    // Nếu upload ảnh mới
+    let avatar_url = null;
+    if (req.file) {
+      avatar_url = `/uploads/${req.file.filename}`;
+      await pool.query(
+        `UPDATE instructors SET avatar_url = $1 WHERE account_id = $2`,
+        [avatar_url, accountId]
+      );
+    }
+
+    // Cập nhật thông tin cá nhân
     await pool.query(
-      `
-      UPDATE instructors 
-      SET name = $1, bio = $2
-      WHERE account_id = $3
-      `,
+      `UPDATE instructors SET name = $1, bio = $2 WHERE account_id = $3`,
       [name, bio || "", accountId]
     );
-
-    await pool.query(
-      "UPDATE accounts SET full_name = $1 WHERE account_id = $2",
-      [name, accountId]
-    );
+    await pool.query("UPDATE accounts SET full_name = $1 WHERE account_id = $2", [name, accountId]);
 
     console.log(`Giảng viên ${name} đã cập nhật hồ sơ thành công.`);
     res.redirect("/instructor/profile");
@@ -422,6 +491,7 @@ router.post("/profile/update", requireInstructor, async (req, res) => {
   }
 });
 
+
 // Chi tiết khoá học
 router.get("/detail/:id", requireInstructor, async (req, res) => {
   const courseId = req.params.id;
@@ -430,7 +500,11 @@ router.get("/detail/:id", requireInstructor, async (req, res) => {
   try {
     const { rows: courseRows } = await pool.query(
       `
-      SELECT c.*, cat.name AS category_name, i.name AS instructor_name, i.bio AS instructor_bio
+      SELECT c.*, 
+       cat.name AS category_name, 
+       i.name AS instructor_name, 
+       i.bio AS instructor_bio,
+       i.avatar_url AS instructor_avatar
       FROM courses c
       JOIN instructors i ON c.instructor_id = i.instructor_id
       LEFT JOIN categories cat ON c.category_id = cat.category_id
@@ -568,6 +642,34 @@ router.post("/courses/delete/:id", requireInstructor, async (req, res) => {
   } catch (err) {
     console.error("Lỗi khi xóa khóa học:", err.message);
     res.status(500).send("Không thể xóa khóa học. Vui lòng thử lại.");
+  }
+});
+const videoDir = path.join(process.cwd(), "Public", "uploads", "videos");
+if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
+
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, videoDir),
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+const uploadVideo = multer({
+  storage: videoStorage,
+  limits: { fileSize: 1024 * 1024 * 200 },
+  fileFilter: (req, file, cb) => {
+    const ok = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"].includes(file.mimetype);
+    cb(ok ? null : new Error("UNSUPPORTED_VIDEO_TYPE"), ok);
+  },
+});
+
+router.post("/upload-video", requireInstructor, uploadVideo.single("video_file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file" });
+    const url = `/uploads/videos/${req.file.filename}`;
+    return res.json({ url });
+  } catch (e) {
+    return res.status(500).json({ message: "Upload failed" });
   }
 });
 
