@@ -19,7 +19,7 @@ import profileRoutes from "./routes/profile.route.js";
 import courseRoutes from "./routes/courses.route.js";
 import categoryRoutes from "./routes/category.route.js";
 import categoryRoute from "./routes/category.route.js";
-
+import enrollmentRoutes from "./routes/enrollment.route.js";
 import searchApi from "./routes/search.api.js";
 
 import cookieParser from "cookie-parser";
@@ -141,14 +141,22 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+  const user = req.session.user || null;
+  // Gán user vào cả req.user và res.locals.user
+  req.user = user;
+  res.locals.user = user;
+  res.locals.isAuthenticated = !!user;
   next();
 });
+// Đăng ký các routes
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
-app.use("/courses", coursesRoutes); // 3. Register course route
+app.use("/courses", coursesRoutes);
 app.use("/instructor", instructorRoutes);
 app.use("/admin", adminRoutes);
+app.use("/profile", profileRoutes);
+app.use("/category", categoryRoute);
+app.use("/enrollment", enrollmentRoutes);
 
 // Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
