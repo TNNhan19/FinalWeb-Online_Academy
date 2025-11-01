@@ -6,7 +6,7 @@ import { findById, getCourseDetailsById } from "../models/courseModel.js";
 
 const router = express.Router();
 
- //API: Lấy chi tiết khóa học + tăng lượt xem (dành cho modal / AJAX)
+ API: Lấy chi tiết khóa học + tăng lượt xem (dành cho modal / AJAX)
 
 router.get("/detail/:id", async (req, res) => {
   try {
