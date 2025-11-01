@@ -157,14 +157,13 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       total_lectures,
       current_price,
       original_price,
-      structure_json, // ✅ Thêm phần này để nhận chương & bài giảng
+      structure_json, 
     } = req.body;
 
     const image_url = req.file
       ? `/uploads/${req.file.filename}`
       : req.body.image_url || null;
 
-    // ✅ 1️⃣ Thêm khóa học trước
     const newCourse = await pool.query(
       `
       INSERT INTO courses 
@@ -189,7 +188,6 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
 
     const courseId = newCourse.rows[0].course_id;
 
-    // ✅ 2️⃣ Nếu có dữ liệu chương & bài giảng thì lưu luôn
     if (structure_json) {
       const sections = JSON.parse(structure_json);
 
@@ -213,7 +211,6 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
         }
       }
 
-      // ✅ Nếu có ít nhất một bài giảng thì đánh dấu là “complete”
       await pool.query(
         `
         UPDATE courses 
@@ -383,6 +380,7 @@ router.get("/profile", requireInstructor, async (req, res) => {
   const accountId = req.session.user.account_id;
 
   try {
+    // Lấy thông tin giảng viên
     const { rows: profileRows } = await pool.query(
       `
       SELECT i.*, a.email, a.full_name
@@ -394,7 +392,6 @@ router.get("/profile", requireInstructor, async (req, res) => {
     );
 
     const profile = profileRows[0];
-
     if (!profile) {
       return res.render("instructor/profile", {
         layout: "main",
@@ -403,6 +400,24 @@ router.get("/profile", requireInstructor, async (req, res) => {
       });
     }
 
+    // Tính tổng số khóa học của giảng viên
+    const { rows: totalCourses } = await pool.query(
+      `SELECT COUNT(*) AS total_courses FROM courses WHERE instructor_id = $1`,
+      [profile.instructor_id]
+    );
+
+    // Tính tổng số học viên duy nhất đã học khóa của giảng viên
+    const { rows: totalStudents } = await pool.query(
+      `
+      SELECT COUNT(DISTINCT e.student_id) AS total_students
+      FROM enrollments e
+      JOIN courses c ON e.course_id = c.course_id
+      WHERE c.instructor_id = $1
+      `,
+      [profile.instructor_id]
+    );
+
+    // Lấy danh sách khóa học để hiển thị bảng
     const { rows: courseRows } = await pool.query(
       `
       SELECT c.course_id, c.title, c.status, c.current_price, cat.name AS category_name
@@ -413,6 +428,10 @@ router.get("/profile", requireInstructor, async (req, res) => {
       `,
       [profile.instructor_id]
     );
+
+    // Gắn thêm hai thông tin tổng vào profile object
+    profile.total_courses = totalCourses[0]?.total_courses || 0;
+    profile.total_students = totalStudents[0]?.total_students || 0;
 
     res.render("instructor/profile", {
       layout: "main",
@@ -430,33 +449,36 @@ router.get("/profile", requireInstructor, async (req, res) => {
   }
 });
 
-// Cập nhật hồ sơ giảng viên
-router.post("/profile/update", requireInstructor, async (req, res) => {
+
+// Cập nhật hồ sơ giảng viên 
+router.post("/profile/update", requireInstructor, upload.single("avatar_file"), async (req, res) => {
   const accountId = req.session.user.account_id;
 
   try {
     const { name, bio } = req.body;
-
     if (!name) {
       return res.status(400).render("instructor/profile", {
         layout: "main",
-        error: "Họ và tên không được để trống"
+        error: "Họ và tên không được để trống",
       });
     }
 
+    // Nếu upload ảnh mới
+    let avatar_url = null;
+    if (req.file) {
+      avatar_url = `/uploads/${req.file.filename}`;
+      await pool.query(
+        `UPDATE instructors SET avatar_url = $1 WHERE account_id = $2`,
+        [avatar_url, accountId]
+      );
+    }
+
+    // Cập nhật thông tin cá nhân
     await pool.query(
-      `
-      UPDATE instructors 
-      SET name = $1, bio = $2
-      WHERE account_id = $3
-      `,
+      `UPDATE instructors SET name = $1, bio = $2 WHERE account_id = $3`,
       [name, bio || "", accountId]
     );
-
-    await pool.query(
-      "UPDATE accounts SET full_name = $1 WHERE account_id = $2",
-      [name, accountId]
-    );
+    await pool.query("UPDATE accounts SET full_name = $1 WHERE account_id = $2", [name, accountId]);
 
     console.log(`Giảng viên ${name} đã cập nhật hồ sơ thành công.`);
     res.redirect("/instructor/profile");
@@ -469,6 +491,7 @@ router.post("/profile/update", requireInstructor, async (req, res) => {
   }
 });
 
+
 // Chi tiết khoá học
 router.get("/detail/:id", requireInstructor, async (req, res) => {
   const courseId = req.params.id;
@@ -477,7 +500,11 @@ router.get("/detail/:id", requireInstructor, async (req, res) => {
   try {
     const { rows: courseRows } = await pool.query(
       `
-      SELECT c.*, cat.name AS category_name, i.name AS instructor_name, i.bio AS instructor_bio
+      SELECT c.*, 
+       cat.name AS category_name, 
+       i.name AS instructor_name, 
+       i.bio AS instructor_bio,
+       i.avatar_url AS instructor_avatar
       FROM courses c
       JOIN instructors i ON c.instructor_id = i.instructor_id
       LEFT JOIN categories cat ON c.category_id = cat.category_id

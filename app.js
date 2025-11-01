@@ -31,6 +31,7 @@ const hbsEngine = engine({
   helpers: {
     section: hbs_sections(),
     eq: (a, b) => String(a) === String(b),
+    includes: (str, substring) => typeof str === "string" && str.includes(substring),
     year: () => new Date().getFullYear(),
     ifEquals: function (a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
@@ -178,8 +179,8 @@ server.on("error", (err) => {
     console.error("Useful commands:");
     console.error(
       "  - Windows PowerShell: Get-Process -Id (Get-NetTCPConnection -LocalPort " +
-        PORT +
-        ").OwningProcess"
+      PORT +
+      ").OwningProcess"
     );
     console.error("  - Windows cmd: netstat -ano | findstr :" + PORT);
     console.error("  - Kill (Windows): taskkill /PID <pid> /F");
