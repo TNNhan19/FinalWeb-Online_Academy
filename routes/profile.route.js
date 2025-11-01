@@ -7,6 +7,7 @@ import {
   getProfileById,
   updateProfile,
   getWatchlist,
+  addToWatchlist,
   removeFromWatchlist,
   getEnrolledCourses,
   createOTP,
