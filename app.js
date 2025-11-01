@@ -134,6 +134,8 @@ app.use(express.static("Public"));
 app.use("/profile", profileRoutes);
 app.use("/courses", courseRoutes);
 app.use("/categories", categoryRoutes);
+app.use("/search", searchApi);
+app.use("/api/search", searchApi);
 
 app.engine("hbs", engine({
   extname: ".hbs",
