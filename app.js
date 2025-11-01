@@ -31,7 +31,8 @@ const hbsEngine = engine({
   helpers: {
     section: hbs_sections(),
     eq: (a, b) => String(a) === String(b),
-    includes: (str, substring) => typeof str === "string" && str.includes(substring),
+    includes: (str, substring) =>
+      typeof str === "string" && str.includes(substring),
     year: () => new Date().getFullYear(),
     ifEquals: function (a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
@@ -72,20 +73,24 @@ const hbsEngine = engine({
     },
     // Check whether URL is a YouTube link
     isYouTube: (url) => {
-      if (!url || typeof url !== 'string') return false;
-      return /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)/i.test(url);
+      if (!url || typeof url !== "string") return false;
+      return /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)/i.test(
+        url
+      );
     },
     // Convert various YouTube URLs to embed URL
     youtubeEmbed: (url) => {
-      if (!url || typeof url !== 'string') return '';
+      if (!url || typeof url !== "string") return "";
       try {
         // Extract video id from multiple YouTube URL formats
-        const match = url.match(/(?:youtu\.be\/([\w-]{11})|v=([\w-]{11})|embed\/([\w-]{11}))/i);
+        const match = url.match(
+          /(?:youtu\.be\/([\w-]{11})|v=([\w-]{11})|embed\/([\w-]{11}))/i
+        );
         const id = match && (match[1] || match[2] || match[3]);
-        if (!id) return '';
+        if (!id) return "";
         return `https://www.youtube.com/embed/${id}`;
       } catch (e) {
-        return '';
+        return "";
       }
     },
     formatDate: (date) => {
@@ -104,9 +109,9 @@ const hbsEngine = engine({
       const totalSeconds = Number(durationInSeconds);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
-      return `${minutes.toString().padStart(2, '0')}:${seconds
+      return `${minutes.toString().padStart(2, "0")}:${seconds
         .toString()
-        .padStart(2, '0')}`;
+        .padStart(2, "0")}`;
     },
     firstLetter: (str) => (str ? str.charAt(0).toUpperCase() : "?"),
     // Slice helper (from new file)
@@ -198,23 +203,4 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
-});
-
-server.on("error", (err) => {
-  if (err && err.code === "EADDRINUSE") {
-    console.error(
-      `❌ Port ${PORT} is already in use. Please stop the process using this port or set a different PORT environment variable.`
-    );
-    console.error("Useful commands:");
-    console.error(
-      "  - Windows PowerShell: Get-Process -Id (Get-NetTCPConnection -LocalPort " +
-      PORT +
-      ").OwningProcess"
-    );
-    console.error("  - Windows cmd: netstat -ano | findstr :" + PORT);
-    console.error("  - Kill (Windows): taskkill /PID <pid> /F");
-    process.exit(1);
-  }
-  console.error("Server error:", err);
-  process.exit(1);
 });
