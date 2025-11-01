@@ -16,9 +16,9 @@ import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import coursesRoutes from './routes/courses.route.js';
 import profileRoutes from "./routes/profile.route.js";
-import courseRoutes from "./routes/courses.route.js";
-import learnRoute from './routes/learn.route.js';
-import categoryRoute from "./routes/category.route.js"
+import categoryRoute from "./routes/category.route.js";
+// import enrollmentRoutes from "./routes/enrollment.route.js";
+import Learn from "./routes/learn.route.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -61,6 +61,24 @@ app.engine(
         if(halfStar) classes.push('bi-star-half');
         for(let i=0; i<emptyStars; i++) classes.push('bi-star');
         return classes; // Return array of classes
+      },
+      // Check whether URL is a YouTube link
+      isYouTube: (url) => {
+        if (!url || typeof url !== 'string') return false;
+        return /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)/i.test(url);
+      },
+      // Convert various YouTube URLs to embed URL
+      youtubeEmbed: (url) => {
+        if (!url || typeof url !== 'string') return '';
+        try {
+          // Extract video id from multiple YouTube URL formats
+          const match = url.match(/(?:youtu\.be\/([\w-]{11})|v=([\w-]{11})|embed\/([\w-]{11}))/i);
+          const id = match && (match[1] || match[2] || match[3]);
+          if (!id) return '';
+          return `https://www.youtube.com/embed/${id}`;
+        } catch (e) {
+          return '';
+        }
       },
       formatDate: (date) => {
          if (!date) return 'N/A';
@@ -122,7 +140,9 @@ app.use("/instructor", instructorRoutes);
 app.use("/admin", adminRoutes);
 app.use("/profile", profileRoutes);
 app.use("/category", categoryRoute);
-app.use("/learn", learnRoute); // <-- Use the learn route
+// app.use("/enrollment", enrollmentRoutes);
+app.use("/learn", Learn);
+
 
 // Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
@@ -132,7 +152,7 @@ app.use("/category", categoryRoute);
 app.use(express.static("Public"));
 
 app.use("/profile", profileRoutes);
-app.use("/courses", courseRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -6,43 +6,29 @@
     <div class="col-lg-8">
       <h3 class="mb-3">{{courseData.course.title}}</h3>
 
-      {{!-- ⭐ Khu vực hiển thị Video Player (Sử dụng Video.js) --}}
-      <div class="video-player-container rounded mb-4 overflow-hidden shadow-sm bg-dark">
-         {{!-- Video.js attaches to this element --}}
-         <video
-            id="learning-video"
-            class="video-js vjs-big-play-centered vjs-fluid" {{!-- Add Video.js classes --}}
-            controls
-            preload="auto"
-            poster="{{courseData.course.image_url}}" {{!-- Optional: Use course image as poster --}}
-            data-setup="{}" {{!-- Basic setup attribute --}}
-          >
-            {{#if courseData.sections.[0].lectures.[0]}}
-                {{!-- Set initial source --}}
-                <source src="{{courseData.sections.[0].lectures.[0].video_url}}" type="video/mp4" />
-            {{/if}}
-            <p class="vjs-no-js">
-              To view this video please enable JavaScript, and consider upgrading to a
-              web browser that <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-            </p>
-         </video>
+      <div class="video-player-container bg-dark rounded mb-4 shadow-sm"
+        style="position:relative; overflow:hidden; aspect-ratio:16/9;">
+        <div id="plyr-root" style="position:absolute; inset:0;"></div>
       </div>
-       <p id="current-lecture-title" class="fw-semibold mb-3">
-         {{#if courseData.sections.[0].lectures.[0]}}
-            Đang xem: {{courseData.sections.[0].lectures.[0].title}}
-         {{else}}
-            Chưa có bài giảng
-         {{/if}}
-       </p>
+
+      <p id="current-lecture-title" class="fw-semibold mb-3">
+        {{#if courseData.sections.[0].lectures.[0]}}
+        Đang xem: {{courseData.sections.[0].lectures.[0].title}}
+        {{else}}
+        Chưa có bài giảng
+        {{/if}}
+      </p>
       {{!-- ⭐ END Khu vực Video Player --}}
 
 
       {{!-- Course Description --}}
-       <div>
+      <div>
         <h4>Mô tả khóa học</h4>
         <p>{{courseData.course.description}}</p>
         {{!-- Display detailed description if desired --}}
-        {{!-- <div class="card card-body border-0 bg-light mb-4 p-4"><h5>Chi tiết:</h5>{{{courseData.course.detail_html}}}</div> --}}
+        {{!-- <div class="card card-body border-0 bg-light mb-4 p-4">
+          <h5>Chi tiết:</h5>{{{courseData.course.detail_html}}}
+        </div> --}}
       </div>
 
       {{!-- ⭐ FORM ĐÁNH GIÁ --}}
@@ -55,20 +41,20 @@
         <div class="card-body">
           {{!-- Display success/error messages based on query parameters --}}
           {{#if query.success}}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-              Đã lưu đánh giá của bạn!
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Đã lưu đánh giá của bạn!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
           {{/if}}
           {{#if query.error}}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-              {{#if (eq query.error "invalid_rating")}}Vui lòng chọn số sao hợp lệ (1-5).
-              {{else if (eq query.error "empty_feedback")}}Vui lòng nhập nội dung phản hồi.
-              {{else if (eq query.error "save_failed")}}Không thể lưu đánh giá (lỗi model).
-              {{else}}Có lỗi máy chủ xảy ra, không thể lưu đánh giá. Vui lòng thử lại.
-              {{/if}}
-               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{#if (eq query.error "invalid_rating")}}Vui lòng chọn số sao hợp lệ (1-5).
+            {{else if (eq query.error "empty_feedback")}}Vui lòng nhập nội dung phản hồi.
+            {{else if (eq query.error "save_failed")}}Không thể lưu đánh giá (lỗi model).
+            {{else}}Có lỗi máy chủ xảy ra, không thể lưu đánh giá. Vui lòng thử lại.
+            {{/if}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
           {{/if}}
 
           <form action="/learn/{{courseData.course.course_id}}/review" method="POST">
@@ -80,20 +66,22 @@
                 <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 sao">★</label>
                 <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 sao">★</label>
                 <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 sao">★</label>
-                <input type="radio" id="star1" name="rating" value="1" required /><label for="star1" title="1 sao">★</label> {{!-- required --}}
+                <input type="radio" id="star1" name="rating" value="1" required /><label for="star1"
+                  title="1 sao">★</label> {{!-- required --}}
               </div>
             </div>
             <div class="mb-3">
               <label for="feedback" class="form-label">Phản hồi của bạn:</label>
-              <textarea class="form-control" id="feedback" name="feedback" rows="4" required placeholder="Chia sẻ trải nghiệm của bạn về khóa học..."></textarea>
+              <textarea class="form-control" id="feedback" name="feedback" rows="4" required
+                placeholder="Chia sẻ trải nghiệm của bạn về khóa học..."></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
           </form>
         </div>
       </div>
       {{else}}
-         {{!-- Optional: Message if user is not enrolled but somehow got here --}}
-        {{!-- <div class="alert alert-warning">Bạn cần đăng ký khóa học để có thể đánh giá.</div> --}}
+      {{!-- Optional: Message if user is not enrolled but somehow got here --}}
+      {{!-- <div class="alert alert-warning">Bạn cần đăng ký khóa học để có thể đánh giá.</div> --}}
       {{/if}}
       {{!-- KẾT THÚC FORM ĐÁNH GIÁ --}}
 
@@ -102,24 +90,26 @@
     {{!-- Cột Phải: Danh sách bài giảng --}}
     <div class="col-lg-4">
       <h5 class="mb-3">Nội dung khóa học</h5>
-      <div class="accordion accordion-flush border rounded-3 shadow-sm lecture-list-container" id="learnCourseAccordion" style="max-height: 80vh; overflow-y: auto;">
+      <div class="accordion accordion-flush border rounded-3 shadow-sm lecture-list-container" id="learnCourseAccordion"
+        style="max-height: 80vh; overflow-y: auto;">
         {{#each courseData.sections}}
         <div class="accordion-item">
           <h2 class="accordion-header" id="learn-heading-{{section_id}}">
-            <button class="accordion-button collapsed fw-semibold bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#learn-collapse-{{section_id}}">
+            <button class="accordion-button collapsed fw-semibold bg-light" type="button" data-bs-toggle="collapse"
+              data-bs-target="#learn-collapse-{{section_id}}">
               {{order_index}}: {{title}} ({{lectures.length}} bài)
             </button>
           </h2>
           {{!-- Show first section expanded by default? Add 'show' class below --}}
-          <div id="learn-collapse-{{section_id}}" class="accordion-collapse collapse {{#if (eq order_index 1)}}show{{/if}}" data-bs-parent="#learnCourseAccordion">
+          <div id="learn-collapse-{{section_id}}"
+            class="accordion-collapse collapse {{#if (eq order_index 1)}}show{{/if}}"
+            data-bs-parent="#learnCourseAccordion">
             <div class="accordion-body p-0">
               <ul class="list-group list-group-flush">
                 {{#each lectures}}
-                <li class="list-group-item list-group-item-action py-2 px-3 lecture-link"
-                    style="cursor: pointer;"
-                    data-video-url="{{video_url}}"
-                    data-video-type="video/mp4" {{!-- Assuming MP4 --}}
-                    data-lecture-title="{{title}}">
+                <li class="list-group-item list-group-item-action py-2 px-3 lecture-link" style="cursor: pointer;"
+                  data-video-url="{{video_url}}" data-video-type="video/mp4" {{!-- Assuming MP4 --}}
+                  data-lecture-title="{{title}}">
                   <div class="d-flex justify-content-between align-items-center">
                     <span class="text-truncate me-2">
                       <i class="bi bi-play-circle me-2 text-secondary lecture-icon"></i> {{title}}
@@ -128,7 +118,8 @@
                   </div>
                   {{!-- Optional: Progress indicator per lecture --}}
                   {{!-- <div class="progress mt-1" style="height: 3px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0"
+                      aria-valuemin="0" aria-valuemax="100"></div>
                   </div> --}}
                 </li>
                 {{/each}}
@@ -137,7 +128,7 @@
           </div>
         </div>
         {{else}}
-         <div class="p-3 text-muted">Chưa có nội dung bài giảng.</div>
+        <div class="p-3 text-muted">Chưa có nội dung bài giảng.</div>
         {{/each}}
       </div>
     </div> {{!-- Kết thúc Cột Phải --}}
@@ -149,154 +140,177 @@
 {{#section 'css'}}
 <style>
   /* Star Rating CSS */
-  .star-rating { direction: rtl; display: inline-block; padding: 0; margin: 0; }
-  .star-rating input[type=radio] { display: none; }
-  .star-rating label { color: #ddd; font-size: 2rem; padding: 0 0.1em; cursor: pointer; transition: color 0.2s; line-height: 1; vertical-align: middle; }
-  /* Color stars on hover/check */
-  .star-rating input[type=radio]:checked ~ label, /* Checked star and subsequent labels */
-  .star-rating label:hover, /* Hovered star */
-  .star-rating label:hover ~ label { /* Subsequent labels on hover */
-    color: #ffc107; /* Selected/hover star color */
+  .star-rating {
+    direction: rtl;
+    display: inline-block;
+    padding: 0;
+    margin: 0;
   }
+
+  .star-rating input[type=radio] {
+    display: none;
+  }
+
+  .star-rating label {
+    color: #ddd;
+    font-size: 2rem;
+    padding: 0 0.1em;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  /* Color stars on hover/check */
+  .star-rating input[type=radio]:checked~label,
+  /* Checked star and subsequent labels */
+  .star-rating label:hover,
+  /* Hovered star */
+  .star-rating label:hover~label {
+    /* Subsequent labels on hover */
+    color: #ffc107;
+    /* Selected/hover star color */
+  }
+
   /* Optional: Keep selected stars colored even when hovering elsewhere */
-   .star-rating input[type=radio]:checked + label:hover,
-   .star-rating input[type=radio]:checked ~ label:hover,
-   .star-rating input[type=radio]:checked ~ label:hover ~ label,
-   .star-rating label:hover ~ input[type=radio]:checked ~ label {
-      color: #ffc107;
-   }
+  .star-rating input[type=radio]:checked+label:hover,
+  .star-rating input[type=radio]:checked~label:hover,
+  .star-rating input[type=radio]:checked~label:hover~label,
+  .star-rating label:hover~input[type=radio]:checked~label {
+    color: #ffc107;
+  }
 
   /* Lecture List Styling */
-  .lecture-list-container .list-group-item { border-left: 3px solid transparent; /* For active state */
+  .lecture-list-container .list-group-item {
+    border-left: 3px solid transparent;
+    /* For active state */
   }
-   .lecture-list-container .list-group-item.active { background-color: #e7f1ff !important; /* Light blue background for active */
-      border-left-color: var(--bs-primary); /* Blue left border */
-      font-weight: 600;
-   }
-   .lecture-list-container .list-group-item.active .lecture-icon { color: var(--bs-primary) !important; /* Change icon color */
-   }
-   .lecture-list-container .accordion-button { font-size: 0.95rem; padding: 0.8rem 1rem; }
-   .lecture-list-container .list-group-item-action:hover { background-color: #f8f9fa; /* Light grey hover */
-   }
+
+  .lecture-list-container .list-group-item.active {
+    background-color: #e7f1ff !important;
+    /* Light blue background for active */
+    border-left-color: var(--bs-primary);
+    /* Blue left border */
+    font-weight: 600;
+  }
+
+  .lecture-list-container .list-group-item.active .lecture-icon {
+    color: var(--bs-primary) !important;
+    /* Change icon color */
+  }
+
+  .lecture-list-container .accordion-button {
+    font-size: 0.95rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .lecture-list-container .list-group-item-action:hover {
+    background-color: #f8f9fa;
+    /* Light grey hover */
+  }
 
   /* Video.js adjustments */
   .video-js {
-     font-size: 14px; /* Adjust base font size if needed */
-  }
-  .vjs-fluid {
-    padding-top: 56.25%; /* Default 16:9 aspect ratio */
+    font-size: 14px;
+    /* Adjust base font size if needed */
   }
 
+  .vjs-fluid {
+    padding-top: 56.25%;
+    /* Default 16:9 aspect ratio */
+  }
 </style>
 {{/section}}
 
-{{!-- ⭐ UPDATED JavaScript Section --}}
 {{#section "js"}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.css" />
+<script src="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.polyfilled.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const videoElement = document.getElementById('learning-video');
-    const lectureTitleElement = document.getElementById('current-lecture-title');
-    const lectureLinks = document.querySelectorAll('.lecture-link');
+document.addEventListener('DOMContentLoaded', () => {
+  const root = document.getElementById('plyr-root');
+  const titleEl = document.getElementById('current-lecture-title');
+  const lectureLinks = document.querySelectorAll('.lecture-link');
 
-    let player; // Variable to hold the Video.js player instance
+  let player = null;
+  let hls = null;
 
-    // --- Initialize Video.js Player ---
-    if (videoElement) {
-       try {
-            player = videojs(videoElement, {
-                // Video.js options can go here, e.g.:
-                // controls: true,
-                // autoplay: false,
-                // preload: 'auto',
-                fluid: true, // Make player responsive
-                aspectRatio: '16:9' // Set aspect ratio
-            });
-            console.log("✅ Video.js player initialized.");
+  const isYouTube = (u) => /(?:youtu\.be|youtube\.com)/i.test(u||'');
+  const isVimeo   = (u) => /vimeo\.com/i.test(u||'');
+  const isHls     = (u) => (u||'').toLowerCase().includes('.m3u8');
+  const isMP4     = (u) => /\.(mp4|webm|ogg)$/i.test(u||'');
 
-            // --- Add event listeners for progress tracking (placeholder) ---
-            player.on('ended', () => {
-                 const currentLectureEl = document.querySelector('.lecture-link.active');
-                 // const lectureId = currentLectureEl?.dataset.lectureId; // Need lecture ID
-                 console.log(`Lecture finished. Need lecture ID to update progress.`);
-                 // fetch(`/learn/{{courseData.course.course_id}}/progress`, { method: 'POST', ... });
-            });
+  function mountYouTube(id) {
+    root.innerHTML = `<div id="plyr-youtube" data-plyr-provider="youtube" data-plyr-embed-id="${id}"></div>`;
+    player = new Plyr('#plyr-youtube');
+  }
 
-            player.on('timeupdate', () => {
-                const currentTime = player.currentTime();
-                // Potentially save currentTime periodically (throttle carefully!)
-                // console.log('Current time:', currentTime);
-            });
+  function mountVimeo(id) {
+    root.innerHTML = `<div id="plyr-vimeo" data-plyr-provider="vimeo" data-plyr-embed-id="${id}"></div>`;
+    player = new Plyr('#plyr-vimeo');
+  }
 
+  function mountMP4(url) {
+    root.innerHTML = `<video id="plyr-html5" class="plyr" controls playsinline>
+        <source src="${url}" type="video/mp4">
+      </video>`;
+    player = new Plyr('#plyr-html5');
+  }
 
-       } catch (error) {
-            console.error("❌ Failed to initialize Video.js:", error);
-       }
+  function mountHLS(url) {
+    root.innerHTML = `<video id="plyr-hls" class="plyr" controls playsinline></video>`;
+    const video = document.getElementById('plyr-hls');
+    player = new Plyr(video);
+    if (Hls.isSupported()) {
+      hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
     } else {
-        console.error("Video player element (#learning-video) not found.");
+      root.innerHTML = `<div class="text-white p-3">Trình duyệt không hỗ trợ HLS (.m3u8)</div>`;
     }
+  }
 
+  function render(url) {
+    if (!url) return (root.innerHTML = `<div class="text-white p-3">Không có video.</div>`);
+    if (player?.destroy) player.destroy();
+    if (hls) { hls.destroy(); hls = null; }
 
-    // --- Video Switching Logic (using Video.js API) ---
-    if (player && lectureLinks.length > 0) {
-      lectureLinks.forEach(link => {
-        link.addEventListener('click', function() {
-          const videoUrl = this.dataset.videoUrl;
-          const videoType = this.dataset.videoType || 'video/mp4';
-          const lectureTitle = this.dataset.lectureTitle;
-
-          if (videoUrl) {
-            console.log('Switching Video.js source to:', videoUrl);
-            try {
-                // Use Video.js API to change source
-                player.src({ type: videoType, src: videoUrl });
-                player.load(); // Load the new source
-                player.play().catch(e => console.warn("Autoplay prevented:", e)); // Attempt autoplay
-
-                // Update title display
-                if (lectureTitleElement) {
-                    lectureTitleElement.textContent = `Đang xem: ${lectureTitle}`;
-                }
-
-                // Update active class in the lecture list
-                lectureLinks.forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-
-            } catch (error) {
-                 console.error("❌ Error setting Video.js source:", error);
-            }
-
-          } else {
-             console.warn('No video URL found for this lecture link.');
-             // Clear the player
-             player.pause();
-             player.src(''); // Clear source in Video.js
-             if (lectureTitleElement) {
-                 lectureTitleElement.textContent = `Bài học: ${lectureTitle} (không có video)`;
-             }
-             lectureLinks.forEach(el => el.classList.remove('active'));
-             this.classList.add('active');
-          }
-        });
-      });
-
-       // Mark initial lecture active
-      const initialSourceElement = videoElement.querySelector('source');
-      const initialSource = initialSourceElement?.getAttribute('src');
-      if (initialSource) {
-          const firstMatchingLink = Array.from(lectureLinks).find(link => link.dataset.videoUrl === initialSource);
-          if (firstMatchingLink) { firstMatchingLink.classList.add('active'); }
-           else if (lectureLinks[0]) { lectureLinks[0].classList.add('active'); }
-      } else if (lectureLinks[0]) { lectureLinks[0].classList.add('active'); }
-
-
-    } else {
-       if(!player) console.warn("Video.js player instance not available for event listeners.");
-       if(lectureLinks.length === 0) console.log("No lecture links found.");
+    if (isYouTube(url)) {
+      const id = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/)?.[1];
+      return id ? mountYouTube(id) : (root.innerHTML = `<div class="text-white p-3">Lỗi YouTube URL</div>`);
     }
+    if (isVimeo(url)) {
+      const id = url.match(/vimeo\.com\/(?:.*?\/)?(\d+)/)?.[1];
+      return id ? mountVimeo(id) : (root.innerHTML = `<div class="text-white p-3">Lỗi Vimeo URL</div>`);
+    }
+    if (isHls(url)) return mountHLS(url);
+    if (isMP4(url)) return mountMP4(url);
 
-    // --- Progress Tracking Logic (Placeholder) ---
-    // videoPlayer?.addEventListener('ended', () => { /* Send update */ });
-    // videoPlayer?.addEventListener('timeupdate', () => { /* Save time */ });
+    root.innerHTML = `<div class="text-white p-3">Định dạng video không được hỗ trợ.</div>`;
+  }
+
+  // --- Sự kiện click bài học ---
+  lectureLinks.forEach(li => {
+    li.addEventListener('click', () => {
+      const url = li.dataset.videoUrl;
+      const title = li.dataset.lectureTitle || 'Bài học';
+      render(url);
+      titleEl.textContent = `Đang xem: ${title}`;
+      lectureLinks.forEach(x => x.classList.remove('active'));
+      li.classList.add('active');
+    });
   });
+
+  // --- Render video đầu tiên ---
+  const first = document.querySelector('.lecture-link');
+  if (first) {
+    render(first.dataset.videoUrl);
+    first.classList.add('active');
+    titleEl.textContent = `Đang xem: ${first.dataset.lectureTitle}`;
+  }
+});
 </script>
 {{/section}}

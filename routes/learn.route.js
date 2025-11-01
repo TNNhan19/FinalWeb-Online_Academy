@@ -53,7 +53,7 @@ router.get('/:courseId', requireLogin, async (req, res, next) => {
     }
 
     // Render the learning page
-    res.render('learn/course', {
+    res.render('learn/detail', {
       layout: 'main', // Or a different layout for learning pages
       pageTitle: `Học: ${courseDetails.course.title}`,
       courseData: courseDetails,
