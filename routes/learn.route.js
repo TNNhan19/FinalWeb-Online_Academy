@@ -3,6 +3,7 @@ import express from 'express';
 import { getCourseDetailsById } from '../models/courseModel.js';
 import db from '../configs/db.js';
 import { addOrUpdateReview, checkEnrollment } from '../models/reviewModel.js';
+import { getStudentId, markLectureComplete, updateCourseProgress, getCompletedLectures } from '../models/learnModel.js';
 
 const router = express.Router();
 
@@ -21,16 +22,8 @@ router.get('/:courseId', requireLogin, async (req, res, next) => {
   const courseId = req.params.courseId;
   const accountId = req.session.user.account_id;
 
-  // // ⭐ ADD THIS LOGGING LINE ⭐
-  // console.log(`--- Accessing /learn/${courseId} ---`);
-  // console.log(`Session User:`, req.session.user);
-  // console.log(`Checking enrollment for account_id: ${accountId}, course_id: ${courseId}`);
-  // // ⭐ --- END LOGGING ---
-
   try {
-    // Check if the user is enrolled in this course
     const isEnrolled = await checkEnrollment(accountId, courseId);
-    // console.log(`Enrollment check result: ${isEnrolled}`); // Log the result
 
     if (!isEnrolled) {
        console.log(`User ${accountId} tried to access course ${courseId} without enrollment.`);
@@ -51,6 +44,23 @@ router.get('/:courseId', requireLogin, async (req, res, next) => {
         message: "Xin lỗi, không tìm thấy khóa học bạn yêu cầu."
       });
     }
+
+    // Get student_id
+    const studentId = await getStudentId(accountId);
+    
+    // Get list of completed lecture IDs
+    const completedIds = await getCompletedLectures(studentId, courseId);
+    
+    // Loop through sections and lectures to add 'is_completed' flag
+    courseDetails.sections.forEach(section => {
+      section.lectures.forEach(lecture => {
+        if (completedIds.includes(lecture.lecture_id)) {
+          lecture.is_completed = true;
+        } else {
+          lecture.is_completed = false;
+        }
+      });
+    });
 
     // Render the learning page
     res.render('learn/detail', {
@@ -108,6 +118,54 @@ router.post('/:courseId/review', requireLogin, async (req, res, next) => {
         console.error(`❌ Lỗi khi xử lý đánh giá cho khóa học ${courseId}:`, error);
         return res.redirect(`/learn/${courseId}?error=server_error`);
     }
+});
+
+// Route POST to mark a lecture as completed and update course progress
+router.post('/:courseId/complete', requireLogin, async (req, res) => {
+  const courseId = req.params.courseId;
+  const accountId = req.session.user.account_id;
+  const { lectureId } = req.body;
+
+  if (!lectureId) {
+    return res.status(400).json({ success: false, message: 'Missing lectureId' });
+  }
+
+  try {
+    // Verify enrollment
+    const isEnrolled = await checkEnrollment(accountId, courseId);
+    if (!isEnrolled) {
+      return res.status(403).json({ success: false, message: 'User not enrolled in course' });
+    }
+
+    // Verify lecture belongs to this course
+    const lectureCheck = await db.query(
+      `SELECT l.lecture_id FROM lectures l JOIN course_sections cs ON l.section_id = cs.section_id WHERE l.lecture_id = $1 AND cs.course_id = $2`,
+      [lectureId, courseId]
+    );
+    if (!lectureCheck || lectureCheck.length === 0) {
+      return res.status(400).json({ success: false, message: 'Lecture does not belong to course' });
+    }
+
+    // Resolve student id
+    const studentId = await getStudentId(accountId);
+    if (!studentId) {
+      return res.status(400).json({ success: false, message: 'Student record not found' });
+    }
+
+    // Mark lecture complete (idempotent due to upsert in model)
+    const ok = await markLectureComplete(studentId, lectureId);
+    if (!ok) {
+      return res.status(500).json({ success: false, message: 'Failed to mark lecture complete' });
+    }
+
+    // Update course progress and return the new percentage
+    const newProgress = await updateCourseProgress(studentId, courseId);
+
+    return res.json({ success: true, newProgress });
+  } catch (error) {
+    console.error(`❌ Error in /learn/${courseId}/complete:`, error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 export default router;

@@ -1,5 +1,3 @@
-{{!-- views/learn/detail.hbs --}}
-
 <div class="container my-4">
 
   {{!-- ======= VIDEO PLAYER SECTION ======= --}}
@@ -16,24 +14,24 @@
   </div>
 
   {{!-- ======= COURSE NAVIGATION TABS ======= --}}
-  <ul class="nav nav-tabs mb-4 border-0 shadow-sm rounded-3 overflow-hidden bg-white">
-    <li class="nav-item">
-      <button class="nav-link active fw-semibold" id="tab-course" data-bs-toggle="tab"
-        data-bs-target="#pane-course">Khóa học</button>
+  <ul class="nav nav-tabs mb-4 border-0 shadow-sm rounded-3 overflow-hidden bg-white" id="learnTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active fw-semibold" id="tab-course" data-bs-toggle="tab" data-bs-target="#pane-course"
+        type="button" role="tab" aria-controls="pane-course" aria-selected="true">
+        <i class="bi bi-list-ul me-2"></i>Nội dung
+      </button>
     </li>
-    <li class="nav-item">
-      <button class="nav-link fw-semibold" id="tab-members" data-bs-toggle="tab" data-bs-target="#pane-members">Thành
-        viên</button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link fw-semibold" id="tab-grade" data-bs-toggle="tab" data-bs-target="#pane-grade">Điểm
-        số</button>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fw-semibold" id="tab-reviews" data-bs-toggle="tab" data-bs-target="#pane-reviews"
+        type="button" role="tab" aria-controls="pane-reviews" aria-selected="false">
+        <i class="bi bi-star-fill me-2"></i>Đánh giá
+      </button>
     </li>
   </ul>
 
   <div class="tab-content">
     {{!-- ==================== TAB 1: KHÓA HỌC ==================== --}}
-    <div class="tab-pane fade show active" id="pane-course">
+    <div class="tab-pane fade show active" id="pane-course" role="tabpanel" aria-labelledby="tab-course">
 
       {{!-- Accordion: Danh sách chương & bài học --}}
       <div class="accordion mb-4" id="courseAccordion">
@@ -45,19 +43,30 @@
               {{order_index}}. {{title}} ({{lectures.length}} bài)
             </button>
           </h2>
-          <div id="collapse-{{section_id}}" class="accordion-collapse collapse {{#if (eq order_index 1)}}show{{/if}}">
+          <div id="collapse-{{section_id}}" class="accordion-collapse collapse {{#if (eq order_index 1)}}show{{/if}}"
+            data-bs-parent="#courseAccordion">
             <div class="accordion-body p-0">
               <ul class="list-group list-group-flush">
+                {{!-- ⭐ 1. MODIFIED LECTURE LINK --}}
                 {{#each lectures}}
                 <li
-                  class="list-group-item list-group-item-action lecture-link d-flex justify-content-between align-items-center"
-                  data-video-url="{{video_url}}" data-lecture-title="{{title}}" style="cursor:pointer;">
+                  class="list-group-item list-group-item-action lecture-link d-flex justify-content-between align-items-center {{#if is_completed}}list-group-item-success{{/if}}"
+                  data-video-url="{{video_url}}" 
+                  data-lecture-title="{{title}}"
+                  data-lecture-id="{{lecture_id}}" {{!-- Added lecture ID --}}
+                  style="cursor:pointer;">
                   <span class="text-truncate">
-                    <i class="bi bi-play-circle me-2 text-secondary"></i>{{title}}
+                    {{#if is_completed}}
+                      <i class="bi bi-check-circle-fill me-2 text-success lecture-icon"></i>
+                    {{else}}
+                      <i class="bi bi-play-circle me-2 text-secondary lecture-icon"></i>
+                    {{/if}}
+                    {{title}}
                   </span>
                   <small class="text-muted">{{formatDuration duration}}</small>
                 </li>
                 {{/each}}
+                {{!-- ⭐ END MODIFIED LECTURE LINK --}}
               </ul>
             </div>
           </div>
@@ -68,149 +77,111 @@
       </div>
 
       {{!-- Mô tả khóa học --}}
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-          <h5 class="fw-bold mb-3">Mô tả khóa học</h5>
-          <p class="mb-0 text-secondary">{{courseData.course.description}}</p>
-        </div>
+      <h5 class="fw-semibold mt-5 mb-3">Mô tả khóa học</h5>
+      <div class="bg-light p-4 rounded-3">
+        {{{courseData.course.detail_html}}}
       </div>
+    </div>
 
-      {{!-- Form đánh giá --}}
+    {{!-- ==================== TAB 2: ĐÁNH GIÁ ==================== --}}
+    <div class="tab-pane fade" id="pane-reviews" role="tabpanel" aria-labelledby="tab-reviews">
+      <h5 class="fw-semibold mb-3">Viết đánh giá của bạn</h5>
       {{#if isEnrolled}}
-      <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-light fw-semibold">Viết đánh giá của bạn</div>
-        <div class="card-body">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
           <form action="/learn/{{courseData.course.course_id}}/review" method="POST">
             <div class="mb-3">
-              <label class="form-label mb-1">Xếp hạng:</label>
-              <div class="star-rating fs-4">
-                <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
-                <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
-                <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
-                <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
-                <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
+              <label class="form-label fw-semibold">Bạn đánh giá khóa học này thế nào?</label>
+              <div class="star-rating-input" data-rating="0">
+                <i class="bi bi-star" data-value="1"></i>
+                <i class="bi bi-star" data-value="2"></i>
+                <i class="bi bi-star" data-value="3"></i>
+                <i class="bi bi-star" data-value="4"></i>
+                <i class="bi bi-star" data-value="5"></i>
               </div>
+              <input type="hidden" name="rating" id="ratingInput" value="0" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Phản hồi:</label>
-              <textarea class="form-control" name="feedback" rows="4" required
-                placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+              <label for="feedbackText" class="form-label fw-semibold">Viết nhận xét</label>
+              <textarea class="form-control" id="feedbackText" name="feedback" rows="4"
+                placeholder="Nội dung khóa học thế nào? Giảng viên có dễ hiểu không?..." required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary px-4">Gửi đánh giá</button>
+            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
           </form>
         </div>
       </div>
+      {{else}}
+      <div class="alert alert-info">Bạn phải đăng ký khóa học để để lại đánh giá.</div>
       {{/if}}
 
-    </div>
-
-    {{!-- ==================== TAB 2: THÀNH VIÊN ==================== --}}
-    <div class="tab-pane fade" id="pane-members">
-      <div class="alert alert-light border shadow-sm">Tính năng này đang được phát triển.</div>
-    </div>
-
-    {{!-- ==================== TAB 3: ĐIỂM SỐ ==================== --}}
-    <div class="tab-pane fade" id="pane-grade">
-      <div class="alert alert-light border shadow-sm">Tính năng này đang được phát triển.</div>
+      <h5 class="fw-semibold mt-5 mb-3">Các đánh giá khác</h5>
+      {{#each courseData.reviews}}
+      <div class="d-flex gap-3 mb-4 pb-4 border-bottom">
+        <img src="https://placehold.co/40x40/7F8C8D/FFFFFF?text={{firstLetter student_name}}" alt="{{student_name}}" class="rounded-circle"
+          style="width: 40px; height: 40px; object-fit: cover;">
+        <div>
+          <h6 class="fw-semibold mb-0">{{student_name}}</h6>
+          <div class="d-flex align-items-center mb-1">
+            <div class="star-rating-display text-warning" data-rating="{{rating}}">
+              {{#each (stars rating)}}
+                <i class="bi {{this}}"></i>
+              {{/each}}
+            </div>
+            <small class="text-muted ms-2">{{formatDate created_at}}</small>
+          </div>
+          <p class="mb-0">{{feedback}}</p>
+        </div>
+      </div>
+      {{else}}
+      <p class="text-muted">Chưa có đánh giá nào cho khóa học này.</p>
+      {{/each}}
     </div>
   </div>
+
 </div>
 
 
-{{!-- ==================== CUSTOM CSS ==================== --}}
+{{!-- ==================== CSS ==================== --}}
 {{#section 'css'}}
 <style>
-  /* Xóa khung đệm ảo tạo bởi ::before (chính là phần trống đen) */
   .video-player-container {
-    max-width: 960px;
-    margin: 0 auto;
-    border-radius: 12px;
     background: #000;
-    overflow: hidden;
-    position: relative;
-    padding: 0 !important;
-    height: auto !important;
   }
 
-  /* Fix triệt để khoảng đen ảo do Bootstrap ratio tạo ra */
-  main .video-player-container::before,
-  body .video-player-container::before {
-    content: none !important;
-    display: none !important;
-    padding: 0 !important;
-    height: 0 !important;
-  }
-
-  /* ✅ Fix chính: ghi đè khung giữ tỉ lệ 16:9 mặc định của Plyr */
-  .video-player-container .plyr__video-wrapper {
-    height: auto !important;
-    aspect-ratio: auto !important;
-  }
-
-  /* Giữ player hiển thị đúng kích thước thực */
   #plyr-root {
-    width: 100%;
-    height: auto;
+    min-height: 480px;
+    aspect-ratio: 16 / 9;
+  }
+  @media (max-width: 767px) {
+    #plyr-root { min-height: 250px; }
   }
 
-  .plyr video,
-  .plyr iframe {
-    display: block;
-    width: 100% !important;
-    height: auto !important;
-    background: #000 !important;
-    object-fit: contain !important;
-  }
-
-  /* ====== Các phần khác không thay đổi ====== */
-  .learn-layout {
-    background-color: var(--bg-secondary);
-    border-radius: 14px;
-    padding: 24px;
-  }
-
-  .accordion-button:not(.collapsed) {
-    color: var(--primary-color);
-    background-color: rgba(37, 99, 235, 0.05);
-  }
-
-  .lecture-link:hover {
-    background-color: rgba(37, 99, 235, 0.05);
-  }
-
-  .lecture-link.active {
-    background-color: rgba(37, 99, 235, 0.1);
-    border-left: 4px solid var(--primary-color);
-  }
-
-  #video-overlay-info {
-    font-size: 0.9rem;
-    border-top-right-radius: 8px;
-  }
-
-  .star-rating {
-    direction: rtl;
-    display: inline-flex;
-  }
-
-  .star-rating input {
-    display: none;
-  }
-
-  .star-rating label {
-    color: #ddd;
+  /* Star Rating Input */
+  .star-rating-input>i {
+    font-size: 1.5rem;
+    color: #ccc;
     cursor: pointer;
     transition: color 0.2s;
-    font-size: 2rem;
+  }
+  .star-rating-input>i:hover,
+  .star-rating-input>i.hover {
+    color: #ffc107;
+  }
+  .star-rating-input>i.filled {
+    color: #ffc107;
   }
 
-  .star-rating input:checked~label,
-  .star-rating label:hover,
-  .star-rating label:hover~label {
-    color: #ffc107;
+  /* ⭐ ADDED: Style for completed lectures */
+  .list-group-item.list-group-item-success {
+      background-color: #f0fdf4; /* Light green */
+      color: #3f621e; /* Dark green text */
+  }
+  .list-group-item.list-group-item-success .lecture-icon {
+      color: var(--bs-success) !important; /* Bootstrap success color */
   }
 </style>
 {{/section}}
+
 
 {{!-- ==================== PLYR + JS ==================== --}}
 {{#section 'js'}}
@@ -226,7 +197,13 @@
 
     let player = null;
     let hls = null;
+    
+    // ⭐ 2. ADDED: Variables to track state
+    let currentLectureId = null;
+    let currentLectureElement = null;
+    const currentCourseId = {{courseData.course.course_id}}; // Get course ID from Handlebars
 
+    // --- Helper functions ---
     const isYouTube = u => /youtu\.?be/.test(u || '');
     const isVimeo = u => /vimeo\.com/.test(u || '');
     const isHls = u => (u || '').includes('.m3u8');
@@ -234,78 +211,190 @@
     const toYouTubeId = u => (u || '').match(/(?:v=|youtu\.be\/)([\w-]{11})/)?.[1];
     const toVimeoId = u => (u || '').match(/vimeo\.com\/(\d+)/)?.[1];
 
-    function mountPlayer(url) {
+
+    // ⭐ 3. ADDED: Function to send "complete" signal to server
+    async function markLectureAsComplete() {
+      if (!currentLectureId || !currentCourseId) return;
+
+      // Find the lecture element in the list
+      const lectureEl = document.querySelector(`.lecture-link[data-lecture-id="${currentLectureId}"]`);
+      
+      // If already marked as complete, do nothing
+      if (lectureEl && lectureEl.classList.contains('list-group-item-success')) {
+        // console.log(`Lecture ${currentLectureId} already complete.`);
+        return; 
+      }
+
+      console.log(`Marking lecture ${currentLectureId} as complete for course ${currentCourseId}...`);
+
+      try {
+        const response = await fetch(`/learn/${currentCourseId}/complete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ lectureId: parseInt(currentLectureId, 10) }) // Ensure ID is integer
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server responded with status ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log(`Successfully marked complete. New progress: ${result.newProgress}%`);
+          // Update UI
+          if (lectureEl) {
+            lectureEl.classList.add('list-group-item-success');
+            const icon = lectureEl.querySelector('.lecture-icon');
+            if (icon) {
+              icon.classList.remove('bi-play-circle', 'text-secondary');
+              icon.classList.add('bi-check-circle-fill', 'text-success');
+            }
+          }
+        } else {
+           console.error('Server returned success:false', result.message);
+        }
+      } catch (error) {
+        console.error('Error marking lecture complete:', error);
+      }
+    }
+
+
+    function mountPlayer(url, element) {
       if (player?.destroy) player.destroy();
       if (hls) { hls.destroy(); hls = null; }
 
+      // (Store lecture ID and element)
+      currentLectureId = element.dataset.lectureId;
+      currentLectureElement = element;
+
+      if (!url) {
+        root.innerHTML = `<div class="p-5 bg-dark text-white text-center rounded-3">Bài giảng này chưa có video.</div>`;
+        return;
+      }
+      
+      const controls = [
+        'play-large', 'play', 'progress', 'current-time', 'mute', 
+        'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+      ];
+      
+      const commonConfig = { controls, invertTime: false, tooltips: { controls: true, seek: true }};
+
       if (isYouTube(url)) {
-        const id = toYouTubeId(url);
-        root.innerHTML = `<div data-plyr-provider="youtube" data-plyr-embed-id="${id}"></div>`;
-        player = new Plyr('[data-plyr-provider]');
+        root.innerHTML = `<div class="plyr__video-embed"><iframe src="${url.replace('watch?v=', 'embed/')}?origin=${window.location.origin}&iv_load_policy=3&modestbranding=1&playsinline=1&showinfo=0&rel=0&enablejsapi=1" allowfullscreen allowtransparency allow="autoplay"></iframe></div>`;
+        player = new Plyr(root.querySelector('iframe'), commonConfig);
+        
       } else if (isVimeo(url)) {
-        const id = toVimeoId(url);
-        root.innerHTML = `<div data-plyr-provider="vimeo" data-plyr-embed-id="${id}"></div>`;
-        player = new Plyr('[data-plyr-provider]');
+        root.innerHTML = `<div class="plyr__video-embed"><iframe src="https://player.vimeo.com/video/${toVimeoId(url)}?loop=false&byline=false&portrait=false&title=false&speed=true&transparent=0&gesture=media" allowfullscreen allowtransparency allow="autoplay"></iframe></div>`;
+        player = new Plyr(root.querySelector('iframe'), commonConfig);
+        
       } else if (isHls(url)) {
         root.innerHTML = `<video class="plyr" controls playsinline></video>`;
         const video = root.querySelector('video');
-        player = new Plyr(video);
-        if (Hls.isSupported()) {
-          hls = new Hls();
-          hls.loadSource(url);
-          hls.attachMedia(video);
-        } else video.src = url;
-      }
-      else if (isMP4(url)) {
-        root.innerHTML = `<video class="plyr" controls playsinline>
+        player = new Plyr(video, commonConfig);
+        
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        window.hls = hls;
+        
+      } else if (isMP4(url)) {
+        root.innerHTML = `<video class"plyr" controls playsinline>
                       <source src="${url}" type="video/mp4">
                     </video>`;
-
         const video = root.querySelector('video');
-        player = new Plyr(video, {
-          controls: [
-            'play-large',     // Nút play to ở giữa
-            'rewind',         // Tua lại 10s
-            'play',           // Play/pause nhỏ
-            'fast-forward',   // Tua tới 10s
-            'progress',       // Thanh tiến độ
-            'current-time',   // Thời gian hiện tại
-            'duration',       // Tổng thời lượng
-            'mute',           // Nút tắt tiếng
-            'volume',         // Thanh chỉnh âm lượng
-            'captions',       // Phụ đề (nếu có)
-            'settings',       // Menu settings (tốc độ, subtitle,…)
-            'pip',            // Picture-in-Picture
-            'airplay',        // AirPlay (nếu có)
-            'fullscreen'      // Toàn màn hình
-          ],
-          seekTime: 10,
-          clickToPlay: true,
-          keyboard: { focused: true, global: true },
-        });
-      }
+        player = new Plyr(video, commonConfig);
 
-      else {
-        root.innerHTML = `<div class="text-white p-4 bg-dark">Không thể phát video.</div>`;
+      } else {
+        root.innerHTML = `<div class="p-5 bg-dark text-white text-center rounded-3">Không thể tải video. Định dạng không được hỗ trợ.</div>`;
+      }
+      
+      // ⭐ 4. ADDED: Event listener for when video finishes
+      if(player) {
+        player.on('ended', () => {
+          console.log('Video ended, marking as complete.');
+          markLectureAsComplete();
+        });
       }
     }
 
     lectureLinks.forEach(li => {
       li.addEventListener('click', () => {
-        lectureLinks.forEach(x => x.classList.remove('active'));
-        li.classList.add('active');
+        lectureLinks.forEach(x => x.classList.remove('active', 'bg-light'));
+        li.classList.add('active', 'bg-light');
+        
         const url = li.dataset.videoUrl;
         const title = li.dataset.lectureTitle;
-        mountPlayer(url);
+        
+        // Pass the clicked <li> element to mountPlayer
+        mountPlayer(url, li); 
+        
         titleEl.textContent = `Đang xem: ${title}`;
       });
     });
 
     const first = document.querySelector('.lecture-link');
     if (first) {
-      first.classList.add('active');
-      mountPlayer(first.dataset.videoUrl);
+      first.classList.add('active', 'bg-light');
+      // Pass the first <li> element to mountPlayer
+      mountPlayer(first.dataset.videoUrl, first); 
+      titleEl.textContent = `Đang xem: ${first.dataset.lectureTitle}`;
     }
+
+    // --- Star Rating JS ---
+    const ratingInput = document.getElementById('ratingInput');
+    const stars = document.querySelectorAll('.star-rating-input > i');
+
+    if (ratingInput && stars.length) {
+      const setRating = (value) => {
+        ratingInput.value = value;
+        stars.forEach(star => {
+          if (star.dataset.value <= value) {
+            star.classList.add('filled', 'bi-star-fill');
+            star.classList.remove('bi-star');
+          } else {
+            star.classList.remove('filled', 'bi-star-fill');
+            star.classList.add('bi-star');
+          }
+        });
+      };
+
+      stars.forEach(star => {
+        star.addEventListener('mouseover', () => {
+          stars.forEach(s => {
+            if (s.dataset.value <= star.dataset.value) {
+              s.classList.add('hover', 'bi-star-fill');
+              s.classList.remove('bi-star');
+            } else {
+              s.classList.remove('hover', 'bi-star-fill');
+              s.classList.add('bi-star');
+            }
+          });
+        });
+
+        star.addEventListener('mouseout', () => {
+          stars.forEach(s => s.classList.remove('hover'));
+          setRating(ratingInput.value); // Reset to current selected rating
+        });
+
+        star.addEventListener('click', () => {
+          setRating(star.dataset.value);
+        });
+      });
+    }
+
+    // --- Handle Review Tab Anchor ---
+    // If the URL has #pane-reviews, switch to that tab
+    if(window.location.hash === '#pane-reviews') {
+      const tab = document.getElementById('tab-reviews');
+      if (tab) {
+        new bootstrap.Tab(tab).show();
+      }
+    }
+
   });
 </script>
 {{/section}}

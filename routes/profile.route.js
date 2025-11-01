@@ -12,8 +12,7 @@ import {
   getEnrolledCourses,
   createOTP,
   verifyOTP,
-  isInWatchlist,
-  addToWatchlist
+  isInWatchlist
 } from "../models/profileModel.js"
 
 const router = express.Router();
