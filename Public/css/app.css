@@ -1068,201 +1068,252 @@ a.btn-gradient:hover {
 }
 
 .course-header {
-  background-color: var(--bg-secondary);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+    background-color: var(--bg-secondary);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
 }
+
 .course-header:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
+
 .course-header h5 {
-  font-size: 1.15rem;
+    font-size: 1.15rem;
 }
+
 .hover-scale {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
 .hover-scale:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
+
 /* ===== Lĩnh vực yêu thích nhất ===== */
 .top-categories .category-card {
-  height: 100%;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+    height: 100%;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .top-categories .category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 .top-categories .category-icon i {
-  color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .top-categories .text-success {
-  font-weight: 500;
+    font-weight: 500;
 }
 
 .top-categories .text-warning {
-  font-weight: 500;
+    font-weight: 500;
 }
 
 .top-categories .row {
-  row-gap: 1.5rem;
+    row-gap: 1.5rem;
 }
+
 .fade-in {
-  animation: fadeIn 0.4s ease;
+    animation: fadeIn 0.4s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-/* Khung carousel */
-#viewedCarousel {
-  position: relative;
-  padding-bottom: 60px; /* chừa chỗ cho dãy số */
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-#viewedCarousel .carousel-inner { overflow: visible; }
+/* Khung carousel */
+#viewedCarousel {
+    position: relative;
+    padding-bottom: 60px;
+    /* chừa chỗ cho dãy số */
+}
+
+#viewedCarousel .carousel-inner {
+    overflow: visible;
+}
 
 /* Thanh indicators ở chính giữa đáy carousel */
 #viewedCarousel .carousel-indicators.indicators-numeric {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  width: 100%;
-  z-index: 5;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    width: 100%;
+    z-index: 5;
 }
 
 /* Nút số – reset rule mặc định của Bootstrap */
 #viewedCarousel .carousel-indicators.indicators-numeric [data-bs-target] {
-  /* reset mặc định của Bootstrap */
-  text-indent: 0;
-  border-top: 0;
-  border-bottom: 0;
-  width: auto;
-  height: auto;
-  padding: 6px 12px;
+    /* reset mặc định của Bootstrap */
+    text-indent: 0;
+    border-top: 0;
+    border-bottom: 0;
+    width: auto;
+    height: auto;
+    padding: 6px 12px;
 
-  /* style của mình */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 1px solid #c7d2fe;
-  background: #eef2ff;
-  color: #2563eb;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1;
-  opacity: 1;
-  transition: all .2s ease;
+    /* style của mình */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 1;
+    transition: all .2s ease;
 }
 
 #viewedCarousel .carousel-indicators.indicators-numeric [data-bs-target]:hover {
-  background: #dbe3ff;
-  border-color: #b6c4ff;
+    background: #dbe3ff;
+    border-color: #b6c4ff;
 }
 
 #viewedCarousel .carousel-indicators.indicators-numeric .active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
 }
+
 /* === CAROUSEL "Khóa Học Mới Nhất" – căn giữa chỉ số === */
-#newestCarousel { position: relative; padding-bottom: 56px; }
-#newestCarousel .carousel-inner { overflow: visible; }
+#newestCarousel {
+    position: relative;
+    padding-bottom: 56px;
+}
+
+#newestCarousel .carousel-inner {
+    overflow: visible;
+}
 
 /* Thanh chỉ số: phủ ngang, căn giữa */
-#newestCarousel .carousel-indicators.indicators-numeric{
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  width: 100%;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  z-index: 10;
+#newestCarousel .carousel-indicators.indicators-numeric {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
 }
 
 /* Nút số */
-#newestCarousel .carousel-indicators.indicators-numeric [data-bs-target]{
-  text-indent: 0;        /* bỏ dot mặc định */
-  width: auto; height: auto;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid #c7d2fe;
-  background: #eef2ff;
-  color: #2563eb;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1;
-  opacity: 1;
-  transition: all .2s ease;
+#newestCarousel .carousel-indicators.indicators-numeric [data-bs-target] {
+    text-indent: 0;
+    /* bỏ dot mặc định */
+    width: auto;
+    height: auto;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 1;
+    transition: all .2s ease;
 }
 
-#newestCarousel .carousel-indicators.indicators-numeric [data-bs-target]:hover{
-  background: #dbe3ff; border-color: #b6c4ff;
+#newestCarousel .carousel-indicators.indicators-numeric [data-bs-target]:hover {
+    background: #dbe3ff;
+    border-color: #b6c4ff;
 }
 
-#newestCarousel .carousel-indicators.indicators-numeric .active{
-  background: #2563eb; border-color: #2563eb; color: #fff;
+#newestCarousel .carousel-indicators.indicators-numeric .active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
 }
+
 .top-categories .category-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
+
 .category-card {
-  user-select: none;
+    user-select: none;
 }
+
 .category-card:focus {
-  outline: none !important;
-  caret-color: transparent !important;
+    outline: none !important;
+    caret-color: transparent !important;
 }
+
 .category-card,
 .course-card {
-  user-select: none;              /* Không cho chọn chữ */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+    user-select: none;
+    /* Không cho chọn chữ */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .category-card:focus,
 .course-card:focus {
-  outline: none !important;       /* Ẩn viền focus */
-  caret-color: transparent !important; /* Ẩn con trỏ nhấp nháy */
+    outline: none !important;
+    /* Ẩn viền focus */
+    caret-color: transparent !important;
+    /* Ẩn con trỏ nhấp nháy */
 }
 
 .course-card h6,
 .course-card p,
 .course-card span,
 .course-card div {
-  caret-color: transparent !important;
+    caret-color: transparent !important;
 }
 
 .modal * {
-  caret-color: transparent !important;
+    caret-color: transparent !important;
 }
 
 .modal:focus,
 .modal *:focus {
-  outline: none !important;
-  box-shadow: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 #searchResultsSection .card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 #searchResultsSection .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+#addCourseModal .modal-content {
+    border-radius: 16px
+}
+
+#addCourseModal input,
+#addCourseModal textarea,
+#addCourseModal select {
+    border-radius: 10px
 }

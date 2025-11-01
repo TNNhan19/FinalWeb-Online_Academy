@@ -13,6 +13,41 @@
     <i class="bi bi-plus-circle fs-5"></i> Thêm khóa học mới
   </button>
 </div>
+<!-- Bộ lọc khóa học -->
+<form method="GET" action="/admin/courses" class="d-flex flex-wrap align-items-end gap-3 mb-4">
+  <div>
+    <label class="form-label fw-semibold">Lọc theo lĩnh vực</label>
+    <select name="category" class="form-select">
+      <option value="">-- Tất cả lĩnh vực --</option>
+      {{#each categories}}
+      <option value="{{category_id}}" {{#if (eq ../selectedCategory category_id)}}selected{{/if}}>
+        {{name}}
+      </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div>
+    <label class="form-label fw-semibold">Lọc theo giảng viên</label>
+    <select name="instructor" class="form-select">
+      <option value="">-- Tất cả giảng viên --</option>
+      {{#each instructors}}
+      <option value="{{instructor_id}}" {{#if (eq ../selectedInstructor instructor_id)}}selected{{/if}}>
+        {{name}}
+      </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    <button type="submit" class="btn btn-outline-primary fw-semibold">
+      <i class="bi bi-funnel"></i> Lọc
+    </button>
+    <a href="/admin/courses" class="btn btn-outline-secondary fw-semibold">
+      <i class="bi bi-x-circle"></i> Xóa lọc
+    </a>
+  </div>
+</form>
 
 <!-- Form thêm khoá học-->
 <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
@@ -111,6 +146,7 @@
         <th>Giảng viên</th>
         <th>Lĩnh vực</th>
         <th class="text-end">Giá</th>
+        <th class="text-center">Trạng thái</th>
         <th class="text-center">Hành động</th>
       </tr>
     </thead>
@@ -122,6 +158,20 @@
         <td>{{instructor}}</td>
         <td>{{category}}</td>
         <td class="text-end text-primary fw-semibold">{{current_price}}$</td>
+        <td class="text-center">
+          <form method="POST" action="/admin/courses/update-status/{{course_id}}"
+            class="d-inline-flex align-items-center gap-2">
+            <select name="newStatus" class="form-select form-select-sm" style="width:140px;">
+              <option value="incomplete" {{#if (eq status "incomplete" )}}selected{{/if}}>Chưa hoàn thành</option>
+              <option value="completed" {{#if (eq status "complete" )}}selected{{/if}}>Hoàn thành</option>
+              <option value="active" {{#if (eq status "active" )}}selected{{/if}}>Đang hoạt động</option>
+              <option value="suspended" {{#if (eq status "suspended" )}}selected{{/if}}>Đình chỉ</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-arrow-repeat"></i>
+            </button>
+          </form>
+        </td>
         <td class="text-center">
           <form method="POST" action="/admin/courses/delete/{{course_id}}" class="d-inline">
             <button class="btn btn-sm btn-outline-danger btn-compact">
@@ -136,3 +186,8 @@
 </div>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<script>
+  document.querySelectorAll('select[name="category"], select[name="instructor"]').forEach(select => {
+    select.addEventListener('change', () => select.form.submit());
+  });
+</script>

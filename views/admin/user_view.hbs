@@ -9,6 +9,13 @@
     <i class="bi bi-person-badge me-2"></i> Hồ sơ người dùng
     <span class="badge bg-info text-dark ms-2 text-capitalize">{{role}}</span>
 </h4>
+{{#if (eq role "instructor")}}
+<div class="text-center mb-4">
+    <img src="{{#if profile.avatar_url}}{{profile.avatar_url}}{{else}}/uploads/default-avatar.png{{/if}}"
+        alt="{{profile.full_name}}" class="rounded-circle shadow-sm border"
+        style="width: 140px; height: 140px; object-fit: cover;">
+</div>
+{{/if}}
 
 <div class="card shadow-sm border-0 p-5 mx-auto mb-5 profile-card" style="max-width: 960px; border-radius: 16px;">
     <form class="user-profile-form" method="POST"
@@ -34,7 +41,8 @@
         <div class="mt-4">
             <label class="form-label fw-semibold mb-2">Tổng học viên</label>
             <input type="number" name="total_students" class="form-control form-control-lg"
-                value="{{profile.total_students}}">
+                value="{{profile.total_students}}" readonly>
+            <small class="text-muted">Tổng số học viên được tính từ tất cả khóa học do giảng viên giảng dạy.</small>
         </div>
         {{/if}}
 
@@ -74,13 +82,13 @@
 <hr class="my-5">
 
 <div class="course-header d-flex justify-content-between align-items-center p-3 px-4 mb-4">
-  <h5 class="fw-bold mb-0 d-flex align-items-center gap-2 text-primary">
-    <i class="bi bi-journal-text fs-4"></i> Danh sách khóa học của giảng viên
-  </h5>
-  <button class="btn-gradient btn-blue fw-semibold d-inline-flex align-items-center gap-2 px-4 py-2"
-          data-bs-toggle="modal" data-bs-target="#addCourseModal">
-    <i class="bi bi-plus-circle"></i> Thêm khóa học mới
-  </button>
+    <h5 class="fw-bold mb-0 d-flex align-items-center gap-2 text-primary">
+        <i class="bi bi-journal-text fs-4"></i> Danh sách khóa học của giảng viên
+    </h5>
+    <button class="btn-gradient btn-blue fw-semibold d-inline-flex align-items-center gap-2 px-4 py-2"
+        data-bs-toggle="modal" data-bs-target="#addCourseModal">
+        <i class="bi bi-plus-circle"></i> Thêm khóa học mới
+    </button>
 </div>
 
 
@@ -104,8 +112,12 @@
                 <td class="text-center fw-semibold text-secondary">{{course_id}}</td>
                 <td class="fw-medium">{{title}}</td>
                 <td class="text-center">
-                    {{#if (eq status "complete")}}
-                    <span class="badge bg-success">Hoàn thành</span>
+                    {{#if (eq status "active")}}
+                    <span class="badge bg-success">Đang hoạt động</span>
+                    {{else if (eq status "suspended")}}
+                    <span class="badge bg-danger">Bị đình chỉ</span>
+                    {{else if (eq status "complete")}}
+                    <span class="badge bg-info text-dark">Hoàn thành</span>
                     {{else}}
                     <span class="badge bg-warning text-dark">Chưa hoàn thành</span>
                     {{/if}}
@@ -207,20 +219,10 @@
     </div>
 </div>
 
-<style>
-    #addCourseModal .modal-content {
-        border-radius: 16px
-    }
 
-    #addCourseModal input,
-    #addCourseModal textarea,
-    #addCourseModal select {
-        border-radius: 10px
-    }
-</style>
 
 <script>
-    document.getElementById("addCourseForm")?.addEventListener("submit", async (e) => { e.preventDefault(); const t = new FormData(e.target); const s = await fetch(`/admin/users/add-course/${t.get("instructor_id")}`, { method: "POST", body: t }); const n = await s.json().catch(() => ({})); if (s.ok) { alert("✅ Khóa học đã được thêm thành công!"); location.reload() } else { alert(n.error || "❌ Lỗi khi thêm khóa học.") } });
+    document.getElementById("addCourseForm")?.addEventListener("submit", async (e) => { e.preventDefault(); const t = new FormData(e.target); const s = await fetch(`/admin/users/add-course/${t.get("instructor_id")}`, { method: "POST", body: t }); const n = await s.json().catch(() => ({})); if (s.ok) { alert("Khóa học đã được thêm thành công!"); location.reload() } else { alert(n.error || "Lỗi khi thêm khóa học.") } });
     document.addEventListener("click", async e => { const n = e.target.closest(".delete-course-btn"); if (!n) return; const t = n.closest("tr"); const s = t.getAttribute("data-course-id"); if (!confirm("Bạn có chắc muốn xóa khóa học này?")) return; const a = await fetch(`/admin/users/delete-course/${s}`, { method: "DELETE" }); if (a.ok) t.remove(); else alert("Không thể xóa khóa học. Vui lòng thử lại.") });
 </script>
 {{/if}}

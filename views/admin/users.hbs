@@ -7,12 +7,14 @@
     <i class="bi bi-people-fill me-2"></i> Danh sách người dùng
   </h4>
 
-  <button class="btn-gradient btn-blue d-inline-flex align-items-center justify-content-center gap-2 px-4 py-3 fw-semibold w-auto"
-          data-bs-toggle="modal" data-bs-target="#addUserModal">
+  <button
+    class="btn-gradient btn-blue d-inline-flex align-items-center justify-content-center gap-2 px-4 py-3 fw-semibold w-auto"
+    data-bs-toggle="modal" data-bs-target="#addUserModal">
     <i class="bi bi-person-plus"></i> Thêm người dùng mới
   </button>
 </div>
 
+<!-- Thêm người dùng -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-md modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
@@ -67,72 +69,112 @@
 <div class="table-responsive shadow-sm rounded-3 mb-5">
   <table class="table table-hover table-bordered align-middle mb-0">
     <thead class="table-light">
-      <tr>
+      <tr class="text-center">
         <th>ID</th>
         <th>Tên</th>
         <th>Email</th>
-        <th class="text-center">Hồ sơ</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
       </tr>
     </thead>
     <tbody>
       {{#each admins}}
       <tr>
-        <td>{{account_id}}</td>
+        <td class="text-center">{{account_id}}</td>
         <td>{{full_name}}</td>
         <td>{{email}}</td>
         <td class="text-center">
-          <a href="/admin/users/view/admin/{{account_id}}" class="btn btn-sm btn-outline-primary btn-compact">
-            <i class="bi bi-person-badge"></i> Xem hồ sơ
+          {{#if is_active}}
+          <span class="badge bg-success">Hoạt động</span>
+          {{else}}
+          <span class="badge bg-danger">Đã khóa</span>
+          {{/if}}
+        </td>
+        <td class="text-center">
+          <a href="/admin/users/view/admin/{{account_id}}" class="btn btn-sm btn-outline-primary btn-compact mb-1">
+            <i class="bi bi-person-badge"></i> Hồ sơ
           </a>
           <form method="POST" action="/admin/users/delete/admin/{{account_id}}" class="d-inline">
-            <button type="submit" class="btn btn-sm btn-outline-danger btn-compact"
+            <button type="submit" class="btn btn-sm btn-outline-danger btn-compact mb-1"
               onclick="return confirm('Bạn có chắc muốn xóa quản trị viên này không?')">
               <i class="bi bi-trash"></i> Xóa
             </button>
           </form>
+          <form method="POST" action="/admin/users/toggle/admin/{{account_id}}" class="d-inline">
+            {{#if is_active}}
+            <button type="submit" class="btn btn-sm btn-outline-warning btn-compact mb-1">
+              <i class="bi bi-lock"></i> Khóa
+            </button>
+            {{else}}
+            <button type="submit" class="btn btn-sm btn-outline-success btn-compact mb-1">
+              <i class="bi bi-unlock"></i> Mở
+            </button>
+            {{/if}}
+          </form>
         </td>
+
       </tr>
       {{/each}}
     </tbody>
   </table>
 </div>
 
-<h5 class="fw-semibold text-primary mb-3"><i class="bi bi-person-video3 me-2"></i> Giảng viên đã đăng ký</h5>
+<h5 class="fw-semibold text-primary mb-3"><i class="bi bi-person-video3 me-2"></i> Giảng viên</h5>
 <div class="table-responsive shadow-sm rounded-3 mb-5">
   <table class="table table-hover table-bordered align-middle mb-0">
     <thead class="table-light">
-      <tr>
+      <tr class="text-center">
         <th>ID</th>
         <th>Tên</th>
         <th>Email</th>
         <th>Tổng học viên</th>
-        <th class="text-center">Hồ sơ</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
       </tr>
     </thead>
     <tbody>
       {{#if instructors.length}}
-        {{#each instructors}}
-        <tr>
-          <td>{{instructor_id}}</td>
-          <td>{{name}}</td>
-          <td>{{email}}</td>
-          <td>{{total_students}}</td>
-          <td class="text-center">
-            <a href="/admin/users/view/instructor/{{instructor_id}}" class="btn btn-sm btn-outline-primary btn-compact">
-              <i class="bi bi-eye"></i> Xem hồ sơ
-            </a>
-            <form method="POST" action="/admin/users/delete/instructor/{{instructor_id}}" class="d-inline">
-              <button type="submit" class="btn btn-sm btn-outline-danger btn-compact"
-                onclick="return confirm('Bạn có chắc muốn xóa giảng viên này không?')">
-                <i class="bi bi-trash"></i> Xóa
-              </button>
-            </form>
-          </td>
-        </tr>
-        {{/each}}
+      {{#each instructors}}
+      <tr>
+        <td class="text-center">{{instructor_id}}</td>
+        <td>{{name}}</td>
+        <td>{{email}}</td>
+        <td class="text-center">{{total_students}}</td>
+        <td class="text-center">
+          {{#if is_active}}
+          <span class="badge bg-success">Hoạt động</span>
+          {{else}}
+          <span class="badge bg-danger">Đã khóa</span>
+          {{/if}}
+        </td>
+        <td class="text-center">
+          <a href="/admin/users/view/instructor/{{instructor_id}}"
+            class="btn btn-sm btn-outline-primary btn-compact mb-1">
+            <i class="bi bi-eye"></i> Hồ sơ
+          </a>
+          <form method="POST" action="/admin/users/delete/instructor/{{instructor_id}}" class="d-inline">
+            <button type="submit" class="btn btn-sm btn-outline-danger btn-compact mb-1"
+              onclick="return confirm('Bạn có chắc muốn xóa giảng viên này không?')">
+              <i class="bi bi-trash"></i> Xóa
+            </button>
+          </form>
+          <form method="POST" action="/admin/users/toggle/instructor/{{instructor_id}}" class="d-inline">
+            {{#if is_active}}
+            <button type="submit" class="btn btn-sm btn-outline-warning btn-compact mb-1">
+              <i class="bi bi-lock"></i> Khóa
+            </button>
+            {{else}}
+            <button type="submit" class="btn btn-sm btn-outline-success btn-compact mb-1">
+              <i class="bi bi-unlock"></i> Mở
+            </button>
+            {{/if}}
+          </form>
+        </td>
+      </tr>
+      {{/each}}
       {{else}}
       <tr>
-        <td colspan="5" class="text-center text-muted py-3">Chưa có giảng viên nào trong hệ thống</td>
+        <td colspan="6" class="text-center text-muted py-3">Chưa có giảng viên nào</td>
       </tr>
       {{/if}}
     </tbody>
@@ -143,66 +185,86 @@
 <div class="table-responsive shadow-sm rounded-3 mb-5">
   <table class="table table-hover table-bordered align-middle mb-0">
     <thead class="table-light">
-      <tr>
+      <tr class="text-center">
         <th>ID</th>
         <th>Tên</th>
         <th>Email</th>
-        <th class="text-center">Hồ sơ</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
       </tr>
     </thead>
     <tbody>
       {{#if students.length}}
-        {{#each students}}
-        <tr>
-          <td>{{student_id}}</td>
-          <td>{{name}}</td>
-          <td>{{email}}</td>
-          <td class="text-center">
-            <a href="/admin/users/view/student/{{student_id}}" class="btn btn-sm btn-outline-primary btn-compact">
-              <i class="bi bi-eye"></i> Xem hồ sơ
-            </a>
-            <form method="POST" action="/admin/users/delete/student/{{student_id}}" class="d-inline">
-              <button type="submit" class="btn btn-sm btn-outline-danger btn-compact"
-                onclick="return confirm('Bạn có chắc muốn xóa học viên này không?')">
-                <i class="bi bi-trash"></i> Xóa
-              </button>
-            </form>
-          </td>
-        </tr>
-        {{/each}}
+      {{#each students}}
+      <tr>
+        <td class="text-center">{{student_id}}</td>
+        <td>{{name}}</td>
+        <td>{{email}}</td>
+        <td class="text-center">
+          {{#if is_active}}
+          <span class="badge bg-success">Hoạt động</span>
+          {{else}}
+          <span class="badge bg-danger">Đã khóa</span>
+          {{/if}}
+        </td>
+        <td class="text-center">
+          <a href="/admin/users/view/student/{{student_id}}" class="btn btn-sm btn-outline-primary btn-compact mb-1">
+            <i class="bi bi-eye"></i> Hồ sơ
+          </a>
+          <form method="POST" action="/admin/users/delete/student/{{student_id}}" class="d-inline">
+            <button type="submit" class="btn btn-sm btn-outline-danger btn-compact mb-1"
+              onclick="return confirm('Bạn có chắc muốn xóa học viên này không?')">
+              <i class="bi bi-trash"></i> Xóa
+            </button>
+          </form>
+          <form method="POST" action="/admin/users/toggle/student/{{student_id}}" class="d-inline">
+            {{#if is_active}}
+            <button type="submit" class="btn btn-sm btn-outline-warning btn-compact mb-1">
+              <i class="bi bi-lock"></i> Khóa
+            </button>
+            {{else}}
+            <button type="submit" class="btn btn-sm btn-outline-success btn-compact mb-1">
+              <i class="bi bi-unlock"></i> Mở
+            </button>
+            {{/if}}
+          </form>
+        </td>
+
+      </tr>
+      {{/each}}
       {{else}}
       <tr>
-        <td colspan="4" class="text-center text-muted py-3">Chưa có học viên nào đăng ký</td>
+        <td colspan="5" class="text-center text-muted py-3">Chưa có học viên nào</td>
       </tr>
       {{/if}}
     </tbody>
   </table>
 </div>
-
+\
 {{#if unregistered.length}}
-<h5 class="fw-semibold text-danger mb-3"><i class="bi bi-exclamation-triangle me-2"></i> Giảng viên chưa có trong danh sách</h5>
+<h5 class="fw-semibold text-danger mb-3"><i class="bi bi-exclamation-triangle me-2"></i> Giảng viên chưa kích hoạt</h5>
 <p class="text-muted mb-3">Các tài khoản có vai trò <strong>instructor</strong> nhưng chưa có hồ sơ giảng viên.</p>
 
 <div class="table-responsive shadow-sm rounded-3 mb-5">
   <table class="table table-hover table-bordered align-middle mb-0">
     <thead class="table-light">
-      <tr>
+      <tr class="text-center">
         <th>ID</th>
         <th>Tên</th>
         <th>Email</th>
-        <th class="text-center">Hành động</th>
+        <th>Hành động</th>
       </tr>
     </thead>
     <tbody>
       {{#each unregistered}}
       <tr>
-        <td>{{account_id}}</td>
+        <td class="text-center">{{account_id}}</td>
         <td>{{name}}</td>
         <td>{{email}}</td>
         <td class="text-center">
           <form method="POST" action="/admin/users/add-instructor/{{account_id}}" class="d-inline">
             <button type="submit" class="btn btn-sm btn-outline-success btn-compact">
-              <i class="bi bi-person-check"></i> Thêm vào danh sách giảng viên
+              <i class="bi bi-person-check"></i> Thêm vào danh sách
             </button>
           </form>
         </td>
