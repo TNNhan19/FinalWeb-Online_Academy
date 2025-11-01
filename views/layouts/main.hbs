@@ -2,27 +2,63 @@
 <html lang="vi" data-bs-theme="light">
 <head>
   <meta charset="utf-8" />
-  <title>{{pageTitle}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{pageTitle}} | Online Academy</title>
+
+  <!-- Swiper CSS (carousel) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+
+  <link rel="stylesheet" href="/css/app.css">
+
   <!-- Google Font (tùy thích) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="stylesheet" href="/css/login.css" />
   {{{_sections.head}}}
 </head>
-<body>
+
+<body style="font-family: 'Inter', sans-serif; background-color: #fff;">
+  <!-- Header / Navbar -->
   {{> navbar}}
 
-  <!-- mở rộng khung hiển thị -->
-<main class="container-fluid px-lg-5 py-4">
+  <!-- Nội dung chính -->
+  <main class="container-fluid px-lg-5 py-4">
+  <!-- Modal hiển thị chi tiết khóa học -->
+  <div class="modal fade" id="courseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 rounded-5 shadow-lg overflow-hidden" style="max-width:900px;margin:auto;">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="modalContent">
+          <div class="text-center text-muted py-5">Đang tải thông tin khóa học...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
     {{{body}}}
   </main>
 
+  <!-- Footer -->
   {{> footer}}
+
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/app.js"></script>
+  
+  <!-- Custom JS -->
+  <script src="/js/main.js"></script>
+
+ 
+
   {{{_sections.js}}}
 </body>
 </html>

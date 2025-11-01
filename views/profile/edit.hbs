@@ -1,0 +1,75 @@
+{{#section 'css'}}
+<style>
+  .edit-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+</style>
+{{/section}}
+
+<div class="container py-5">
+  <div class="edit-form">
+    <h3 class="mb-4">Chỉnh sửa thông tin</h3>
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    {{#if success}}
+    <div class="alert alert-success">{{success}}</div>
+    {{/if}}
+
+    <div class="card">
+      <div class="card-body">
+        <form action="/profile/update" method="POST" autocomplete="off">
+          <!-- Hidden dummy fields to prevent browser autofill of the real password fields -->
+          <input type="text" name="fake_username" id="fake_username" style="display:none" autocomplete="username">
+          <input type="password" name="fake_password" id="fake_password" style="display:none" autocomplete="current-password">
+          <div class="mb-4">
+            <label class="form-label">Họ và tên</label>
+            <input type="text" name="full_name" class="form-control" 
+                   value="{{profile.full_name}}" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" value="{{profile.email}}" readonly>
+            <small class="text-muted">Email không thể thay đổi</small>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="mb-4">
+            <label class="form-label d-flex justify-content-between">
+              <span>Đổi mật khẩu</span>
+              <small class="text-muted">(không bắt buộc)</small>
+            </label>
+
+            <div class="mb-3">
+              <label class="form-label">Mật khẩu hiện tại</label>
+              <!-- explicit autocomplete off and empty value to force user input -->
+              <input type="password" name="old_password" class="form-control" autocomplete="off" value="">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Mật khẩu mới</label>
+              <input type="password" name="new_password" class="form-control"
+                     minlength="6" autocomplete="new-password" value="">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Xác nhận mật khẩu mới</label>
+              <input type="password" name="confirm_password" class="form-control"
+                     minlength="6" autocomplete="new-password" value="">
+            </div>
+          </div>
+
+          <div class="text-center">
+            <a href="/profile" class="btn btn-outline-secondary me-2">Hủy</a>
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
