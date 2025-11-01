@@ -1,25 +1,24 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-
 import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import hbs_sections from "express-handlebars-sections";
 import session from "express-session";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 import homeRoute from "./routes/home.route.js";
 import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
-import coursesRoutes from './routes/courses.route.js';
+import coursesRoutes from "./routes/courses.route.js";
 
 import profileRoutes from "./routes/profile.route.js";
 import courseRoutes from "./routes/courses.route.js";
 import categoryRoutes from "./routes/category.route.js";
-import categoryRoute from "./routes/category.route.js"
+import categoryRoute from "./routes/category.route.js";
 
 import searchApi from "./routes/search.api.js";
 
@@ -51,7 +50,13 @@ const hbsEngine = engine({
     math: (lvalue, operator, rvalue) => {
       lvalue = parseFloat(lvalue);
       rvalue = parseFloat(rvalue);
-      return { "+": lvalue + rvalue, "-": lvalue - rvalue, "*": lvalue * rvalue, "/": lvalue / rvalue, "%": lvalue % rvalue }[operator];
+      return {
+        "+": lvalue + rvalue,
+        "-": lvalue - rvalue,
+        "*": lvalue * rvalue,
+        "/": lvalue / rvalue,
+        "%": lvalue % rvalue,
+      }[operator];
     },
     stars: (rating) => {
       const r = Math.round(parseFloat(rating || 0) * 2) / 2;
@@ -59,40 +64,57 @@ const hbsEngine = engine({
       const halfStar = r % 1 !== 0;
       const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
       let classes = [];
-      for(let i=0; i<fullStars; i++) classes.push('bi-star-fill');
-      if(halfStar) classes.push('bi-star-half');
-      for(let i=0; i<emptyStars; i++) classes.push('bi-star');
+      for (let i = 0; i < fullStars; i++) classes.push("bi-star-fill");
+      if (halfStar) classes.push("bi-star-half");
+      for (let i = 0; i < emptyStars; i++) classes.push("bi-star");
       return classes; // Return array of classes
     },
     formatDate: (date) => {
-       if (!date) return 'N/A';
-       try { return format(new Date(date), 'dd/MM/yyyy'); }
-       catch(e) { console.error("Date format error:", e); return date.toString(); }
+      if (!date) return "N/A";
+      try {
+        return format(new Date(date), "dd/MM/yyyy");
+      } catch (e) {
+        console.error("Date format error:", e);
+        return date.toString();
+      }
     },
-    formatDuration: (durationInSeconds) => { // Assuming DB stores seconds now
-      if (durationInSeconds === null || durationInSeconds === undefined) return '';
+    formatDuration: (durationInSeconds) => {
+      // Assuming DB stores seconds now
+      if (durationInSeconds === null || durationInSeconds === undefined)
+        return "";
       const totalSeconds = Number(durationInSeconds);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      return `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
     },
-    firstLetter: (str) => str ? str.charAt(0).toUpperCase() : '?',
+    firstLetter: (str) => (str ? str.charAt(0).toUpperCase() : "?"),
+    // Slice helper (moved here so engine is defined once)
+    slice: (arr, start, end) =>
+      Array.isArray(arr) ? arr.slice(start, end) : [],
   },
   layoutsDir: path.join(__dirname, "views", "layouts"),
   partialsDir: path.join(__dirname, "views", "partials"),
-  defaultLayout: "main"
+  defaultLayout: "main",
 });
 
 // Log registered helpers for debugging (dev only)
 try {
-  console.log('Handlebars helpers:', Object.keys(hbsEngine.handlebars.helpers || {}).join(', '));
+  const helpersObj =
+    hbsEngine && hbsEngine.handlebars && hbsEngine.handlebars.helpers;
+  if (helpersObj && typeof helpersObj === "object") {
+    console.log("Handlebars helpers:", Object.keys(helpersObj).join(", "));
+  } else {
+    console.log("Handlebars helpers not available on engine object yet.");
+  }
 } catch (e) {
-  console.warn('Could not list handlebars helpers:', e && e.message);
+  console.warn("Could not list handlebars helpers:", e && e.message);
 }
 
-app.engine('hbs', hbsEngine);
+app.engine("hbs", hbsEngine);
 // Disable view cache in development to avoid stale compiled templates
-if (process.env.NODE_ENV !== 'production') app.set('view cache', false);
+if (process.env.NODE_ENV !== "production") app.set("view cache", false);
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
@@ -107,7 +129,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "supersecretkey",
     resave: false,
     saveUninitialized: false, // Don't save empty sessions
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // Session duration
+    cookie: { maxAge: 24 * 60 * 60 * 1000 }, // Session duration
   })
 );
 
@@ -117,7 +139,6 @@ app.use((req, res, next) => {
   res.locals.isAuthenticated = !!req.session.user;
   next();
 });
-
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -132,7 +153,6 @@ app.use("/admin", adminRoutes);
 // Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
 
-;
 app.use("/category", categoryRoute);
 
 app.use(express.static("Public"));
@@ -140,24 +160,6 @@ app.use(express.static("Public"));
 app.use("/profile", profileRoutes);
 app.use("/courses", courseRoutes);
 app.use("/categories", categoryRoutes);
-
-app.engine("hbs", engine({
-  extname: ".hbs",
-  helpers: {
-    slice: function (arr, start, end) {
-      if (!Array.isArray(arr)) return [];
-      return arr.slice(start, end);
-    },
-  }
-}));
-app.engine("hbs", engine({
-  extname: ".hbs",
-  partialsDir: path.join(__dirname, "views/partials"),
-  helpers: {
-    slice: (arr, start, end) => Array.isArray(arr) ? arr.slice(start, end) : [],
-  },
-}));
-
 
 app.use("/api/search", searchApi);
 
@@ -170,9 +172,15 @@ const server = app.listen(PORT, () => {
 
 server.on("error", (err) => {
   if (err && err.code === "EADDRINUSE") {
-    console.error(`❌ Port ${PORT} is already in use. Please stop the process using this port or set a different PORT environment variable.`);
+    console.error(
+      `❌ Port ${PORT} is already in use. Please stop the process using this port or set a different PORT environment variable.`
+    );
     console.error("Useful commands:");
-    console.error("  - Windows PowerShell: Get-Process -Id (Get-NetTCPConnection -LocalPort " + PORT + ").OwningProcess");
+    console.error(
+      "  - Windows PowerShell: Get-Process -Id (Get-NetTCPConnection -LocalPort " +
+        PORT +
+        ").OwningProcess"
+    );
     console.error("  - Windows cmd: netstat -ano | findstr :" + PORT);
     console.error("  - Kill (Windows): taskkill /PID <pid> /F");
     process.exit(1);

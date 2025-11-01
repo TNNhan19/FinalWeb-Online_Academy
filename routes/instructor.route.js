@@ -138,6 +138,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
   const accountId = req.session.user.account_id;
 
   try {
+    // Lấy instructor_id theo account
     const { rows: inst } = await pool.query(
       "SELECT instructor_id FROM instructors WHERE account_id = $1",
       [accountId]
@@ -156,18 +157,21 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       total_lectures,
       current_price,
       original_price,
+      structure_json, // ✅ Thêm phần này để nhận chương & bài giảng
     } = req.body;
 
     const image_url = req.file
       ? `/uploads/${req.file.filename}`
       : req.body.image_url || null;
 
-    await pool.query(
+    // ✅ 1️⃣ Thêm khóa học trước
+    const newCourse = await pool.query(
       `
       INSERT INTO courses 
         (title, description, detail_html, image_url, instructor_id, category_id, 
          total_hours, total_lectures, current_price, original_price, status, created_at)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'incomplete',NOW())
+      RETURNING course_id
       `,
       [
         title,
@@ -183,6 +187,48 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       ]
     );
 
+    const courseId = newCourse.rows[0].course_id;
+
+    // ✅ 2️⃣ Nếu có dữ liệu chương & bài giảng thì lưu luôn
+    if (structure_json) {
+      const sections = JSON.parse(structure_json);
+
+      for (let sIndex = 0; sIndex < sections.length; sIndex++) {
+        const section = sections[sIndex];
+        const sectionRes = await pool.query(
+          `INSERT INTO course_sections (course_id, title, order_index)
+           VALUES ($1, $2, $3)
+           RETURNING section_id`,
+          [courseId, section.title, sIndex + 1]
+        );
+        const sectionId = sectionRes.rows[0].section_id;
+
+        for (let lIndex = 0; lIndex < section.lectures.length; lIndex++) {
+          const lec = section.lectures[lIndex];
+          await pool.query(
+            `INSERT INTO lectures (section_id, title, video_url, duration, is_preview, order_index)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [sectionId, lec.title, lec.video_url, lec.duration || 0, lec.is_preview, lIndex + 1]
+          );
+        }
+      }
+
+      // ✅ Nếu có ít nhất một bài giảng thì đánh dấu là “complete”
+      await pool.query(
+        `
+        UPDATE courses 
+        SET status = 'complete'
+        WHERE course_id = $1 
+        AND EXISTS (
+          SELECT 1 FROM course_sections cs
+          JOIN lectures l ON cs.section_id = l.section_id
+          WHERE cs.course_id = $1
+        )
+        `,
+        [courseId]
+      );
+    }
+
     res.redirect("/instructor/dashboard");
   } catch (err) {
     console.error("Lỗi khi đăng khóa học:", err.message);
@@ -194,6 +240,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
     });
   }
 });
+
 
 // Chỉnh sửa khoá học
 router.get("/edit/:id", requireInstructor, async (req, res) => {
@@ -568,6 +615,34 @@ router.post("/courses/delete/:id", requireInstructor, async (req, res) => {
   } catch (err) {
     console.error("Lỗi khi xóa khóa học:", err.message);
     res.status(500).send("Không thể xóa khóa học. Vui lòng thử lại.");
+  }
+});
+const videoDir = path.join(process.cwd(), "Public", "uploads", "videos");
+if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
+
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, videoDir),
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+const uploadVideo = multer({
+  storage: videoStorage,
+  limits: { fileSize: 1024 * 1024 * 200 },
+  fileFilter: (req, file, cb) => {
+    const ok = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"].includes(file.mimetype);
+    cb(ok ? null : new Error("UNSUPPORTED_VIDEO_TYPE"), ok);
+  },
+});
+
+router.post("/upload-video", requireInstructor, uploadVideo.single("video_file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file" });
+    const url = `/uploads/videos/${req.file.filename}`;
+    return res.json({ url });
+  } catch (e) {
+    return res.status(500).json({ message: "Upload failed" });
   }
 });
 

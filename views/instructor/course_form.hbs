@@ -14,7 +14,7 @@
   </a>
 </div>
 
-<form method="POST" action="" enctype="multipart/form-data" class="row g-4">
+<form method="POST" action="" enctype="multipart/form-data" class="row g-4" id="courseForm">
   <div class="col-lg-8">
     <div class="card border-0 shadow-sm p-4">
       <div class="mb-3">
@@ -125,22 +125,16 @@
         </select>
       </div>
       {{/unless}}
-
-      <button type="submit" class="btn btn-primary mt-4 w-100 d-flex align-items-center justify-content-center gap-2">
-        <i class="bi bi-save2"></i> Lưu khóa học
-      </button>
     </div>
   </div>
-</form>
 
-{{#unless isNew}}
-<hr class="my-5">
-<h5 class="fw-semibold mb-3 d-flex align-items-center gap-2">
-  <i class="bi bi-film"></i> Quản lý chương & bài giảng
-</h5>
+  <hr class="my-5">
+  <h5 class="fw-semibold mb-3 d-flex align-items-center gap-2">
+    <i class="bi bi-film"></i> Quản lý chương & bài giảng
+  </h5>
 
-<form id="structureForm">
-  <input type="hidden" name="course_id" value="{{course.course_id}}">
+  <input type="hidden" name="structure_json" id="structure_json">
+
   <div id="sectionsContainer">
     {{#each sections}}
     <div class="card mb-4 border-0 shadow-sm section-item" data-section-id="{{section_id}}">
@@ -158,6 +152,7 @@
           <div class="form-check">
             <input class="form-check-input lecture-preview" type="checkbox" {{#if is_preview}}checked{{/if}}>
           </div>
+          <input type="file" class="form-control form-control-sm lecture-file" accept="video/*" style="max-width:220px">
           <button type="button" class="btn btn-sm btn-outline-danger remove-lecture d-flex align-items-center gap-1">
             <i class="bi bi-trash3"></i> Xóa
           </button>
@@ -180,31 +175,31 @@
   </div>
 
   <div class="text-end">
-    <button type="submit" class="btn btn-success px-4 d-flex align-items-center justify-content-center gap-2">
-      <i class="bi bi-save"></i> Lưu tất cả thay đổi
+    <button type="submit" class="btn btn-primary px-5 d-flex align-items-center justify-content-center gap-2">
+      <i class="bi bi-save2"></i> Lưu khóa học
     </button>
   </div>
 </form>
-{{/unless}}
 
 {{#section "js"}}
 <script>
-  tinymce.init({
-    selector: '#editor',
-    height: 400,
-    menubar: false,
-    branding: false,
-    plugins: 'lists link image media table code help wordcount',
-    toolbar:
-      'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
-  });
+tinymce.init({
+  selector: '#editor',
+  height: 400,
+  menubar: false,
+  branding: false,
+  plugins: 'lists link image media table code help wordcount',
+  toolbar:
+    'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
+});
 
-  document.getElementById("addSectionBtn")?.addEventListener("click", () => {
-    const title = document.getElementById("newSectionTitle").value.trim();
-    if (!title) return alert("Vui lòng nhập tên chương!");
-    const div = document.createElement("div");
-    div.className = "card mb-4 border-0 shadow-sm section-item";
-    div.innerHTML = `
+// Thêm chương
+document.getElementById("addSectionBtn")?.addEventListener("click", () => {
+  const title = document.getElementById("newSectionTitle").value.trim();
+  if (!title) return alert("Vui lòng nhập tên chương!");
+  const div = document.createElement("div");
+  div.className = "card mb-4 border-0 shadow-sm section-item";
+  div.innerHTML = `
     <div class="card-header bg-light d-flex align-items-center gap-2">
       <i class="bi bi-list-task text-secondary"></i>
       <input class="form-control form-control-sm fw-semibold section-title" value="${title}">
@@ -214,55 +209,74 @@
         <i class="bi bi-plus-lg"></i> Thêm bài giảng
       </button>
     </div>`;
-    document.getElementById("sectionsContainer").appendChild(div);
-    document.getElementById("newSectionTitle").value = "";
-  });
+  document.getElementById("sectionsContainer").appendChild(div);
+  document.getElementById("newSectionTitle").value = "";
+});
 
-  document.addEventListener("click", (e) => {
-    if (e.target.closest(".add-lecture")) {
-      const container = e.target.closest(".lectures-container");
-      const div = document.createElement("div");
-      div.className = "d-flex align-items-center gap-2 mb-2 lecture-item";
-      div.innerHTML = `
-        <input class="form-control form-control-sm flex-fill lecture-title" placeholder="Tên bài giảng">
-        <input class="form-control form-control-sm flex-fill lecture-video" placeholder="Video URL">
-        <input class="form-control form-control-sm lecture-duration" type="number" placeholder="Thời lượng (s)">
-        <div class="form-check">
-          <input class="form-check-input lecture-preview" type="checkbox">
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-danger remove-lecture d-flex align-items-center gap-1">
-          <i class="bi bi-trash3"></i> Xóa
-        </button>`;
-      container.insertBefore(div, e.target);
-    }
+// Thêm bài giảng
+document.addEventListener("click", (e) => {
+  if (e.target.closest(".add-lecture")) {
+    const container = e.target.closest(".lectures-container");
+    const div = document.createElement("div");
+    div.className = "d-flex align-items-center gap-2 mb-2 lecture-item";
+    div.innerHTML = `
+      <input class="form-control form-control-sm flex-fill lecture-title" placeholder="Tên bài giảng">
+      <input class="form-control form-control-sm flex-fill lecture-video" placeholder="Video URL">
+      <input class="form-control form-control-sm lecture-duration" type="number" placeholder="Thời lượng (s)">
+      <div class="form-check">
+        <input class="form-check-input lecture-preview" type="checkbox">
+      </div>
+      <input type="file" class="form-control form-control-sm lecture-file" accept="video/*" style="max-width:220px">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-lecture d-flex align-items-center gap-1">
+        <i class="bi bi-trash3"></i> Xóa
+      </button>`;
+    container.insertBefore(div, e.target);
+  }
 
-    if (e.target.closest(".remove-lecture")) {
-      e.target.closest(".lecture-item").remove();
-    }
-  });
+  if (e.target.closest(".remove-lecture")) {
+    e.target.closest(".lecture-item").remove();
+  }
+});
 
-  document.getElementById("structureForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const courseId = e.target.querySelector("[name='course_id']").value;
-    const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
-      section_id: section.dataset.sectionId || null,
-      title: section.querySelector(".section-title").value,
-      lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({
-        lecture_id: lec.dataset.lectureId || null,
-        title: lec.querySelector(".lecture-title").value,
-        video_url: lec.querySelector(".lecture-video").value,
-        duration: lec.querySelector(".lecture-duration").value,
-        is_preview: lec.querySelector(".lecture-preview").checked,
-      })),
-    }));
+// Upload video khi chọn file
+document.addEventListener("change", async (e) => {
+  const fileInput = e.target.closest(".lecture-file");
+  if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+  const fd = new FormData();
+  fd.append("video_file", fileInput.files[0]);
+  const status = document.createElement("small");
+  status.textContent = "Đang tải lên...";
+  status.style.opacity = "0.7";
+  fileInput.parentElement.appendChild(status);
 
-    const res = await fetch(`/instructor/update-structure/${courseId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sections }),
-    });
+  try {
+    const res = await fetch("/instructor/upload-video", { method: "POST", body: fd });
     const data = await res.json();
-    alert(data.message || "Đã lưu thay đổi!");
-  });
+    if (!res.ok) throw new Error(data.message || "Upload thất bại");
+    const urlInput = fileInput.parentElement.querySelector(".lecture-video");
+    if (urlInput) urlInput.value = data.url;
+    status.textContent = "Hoàn tất";
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Lỗi upload";
+    alert("Không thể tải video. Vui lòng thử lại.");
+  } finally {
+    setTimeout(() => status.remove(), 2000);
+  }
+});
+
+// Khi submit form -> đóng gói cấu trúc chương & bài giảng
+document.getElementById("courseForm")?.addEventListener("submit", (e) => {
+  const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
+    title: section.querySelector(".section-title").value,
+    lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({
+      title: lec.querySelector(".lecture-title").value,
+      video_url: lec.querySelector(".lecture-video").value,
+      duration: lec.querySelector(".lecture-duration").value,
+      is_preview: lec.querySelector(".lecture-preview").checked,
+    })),
+  }));
+  document.getElementById("structure_json").value = JSON.stringify(sections);
+});
 </script>
 {{/section}}
