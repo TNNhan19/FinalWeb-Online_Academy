@@ -14,7 +14,6 @@ import authRoute from "./routes/auth.route.js";
 import instructorRoutes from "./routes/instructor.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import coursesRoutes from "./routes/courses.route.js";
-
 import profileRoutes from "./routes/profile.route.js";
 import categoryRoute from "./routes/category.route.js";
 import enrollmentRoutes from "./routes/enrollment.route.js";

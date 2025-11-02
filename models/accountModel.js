@@ -33,7 +33,8 @@ export async function createFromOAuth({ email, full_name, role = "student", prov
         INSERT INTO students (account_id, name, created_at)
         VALUES ($1, $2, NOW());
       `;
-      await client.query(studentQuery, [newAccount.account_id, newAccount.full_name]);
+      const studentName = newAccount.full_name || full_name || (email ? email.split('@')[0] : `Student_${newAccount.account_id}`);
+      await client.query(studentQuery, [newAccount.account_id, studentName]);
       console.log(`✅ Created student record for OAuth account_id: ${newAccount.account_id}`);
     }
 
@@ -70,8 +71,9 @@ export async function createAccount(full_name, email, password_hash, otp, role =
         INSERT INTO students (account_id, name, created_at)
         VALUES ($1, $2, NOW());
       `;
-      // Use the full_name from the account as the initial student name
-      await client.query(studentQuery, [newAccount.account_id, newAccount.full_name]);
+      // Use the full_name from the account or fallback to provided full_name or email local-part
+      const studentName = newAccount.full_name || full_name || (email ? email.split('@')[0] : `Student_${newAccount.account_id}`);
+      await client.query(studentQuery, [newAccount.account_id, studentName]);
       console.log(`✅ Created student record for account_id: ${newAccount.account_id}`);
     }
      // ✨ Add similar logic here for 'instructor' if needed

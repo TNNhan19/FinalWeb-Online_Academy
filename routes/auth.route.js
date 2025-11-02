@@ -20,7 +20,11 @@ router.get("/register", (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const { full_name, email, password } = req.body;
+    let { full_name, email, password } = req.body;
+    // Ensure we have a sensible display name for the account/student
+    if (!full_name || !full_name.trim()) {
+      full_name = (email && email.includes('@')) ? email.split('@')[0] : `Student_${Date.now()}`;
+    }
     const existing = await accountModel.findByEmail(email);
     if (existing) {
       return res.render("auth/register", { error: "Email đã được sử dụng!" });
