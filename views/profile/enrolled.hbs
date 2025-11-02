@@ -8,7 +8,6 @@
         </div>
     </div>
 
-    <!-- Tab content -->
     <div id="allCourses">
         {{#if courses.length}}
         <div class="row mt-3">
@@ -76,7 +75,7 @@
     <div id="watchlistCourses" style="display: none;">
       {{#if watchlistCourses.length}}
 
-      {{!-- ====== NHÓM: ĐÃ ĐĂNG KÝ (ưu tiên hiển thị trước) ====== --}}
+      {{!--  NHÓM: ĐÃ ĐĂNG KÝ (ưu tiên hiển thị trước)  --}}
       <h4 class="mt-2 mb-3">Đã đăng ký</h4>
       <div class="row">
         {{#each watchlistCourses}}
@@ -137,8 +136,7 @@
 
               <p class="text-muted small mb-2"><i class="fas fa-user-tie me-1"></i> {{this.instructor_name}}</p>
               <p class="text-muted small mb-2"><i class="fas a-folder me-1"></i> {{this.category_name}}</p>
-
-              {{!-- Giá: an toàn, không NaN --}}
+              
               <p class="text-danger fw-bold mb-3">
                 {{#if this.discount_price}}
                 {{formatPrice this.discount_price}} ₫
@@ -155,7 +153,6 @@
               <div class="d-flex justify-content-between">
                 <a href="/courses/{{this.course_id}}" class="btn btn-outline-primary">Xem chi tiết</a>
 
-                {{!-- POST đúng route enrollments --}}
                 <form method="POST" action="/enrollments/{{this.course_id}}/enroll">
                   <button type="submit" class="btn btn-primary">Đăng ký học</button>
                 </form>
@@ -177,7 +174,6 @@
     </div>
 </div>
 
-<!-- Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
 <script>
@@ -187,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const allBtn = document.getElementById('showAllBtn');
     const watchlistBtn = document.getElementById('showWatchlistBtn');
 
-    // Switch tabs
     allBtn.addEventListener('click', () => {
         allCoursesTab.style.display = 'block';
         watchlistTab.style.display = 'none';
@@ -202,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
         allBtn.classList.remove('active');
     });
 
-    // Toggle watchlist
     document.querySelectorAll('.toggle-watchlist').forEach(button => {
         button.addEventListener('click', async function() {
             const courseId = this.dataset.courseId;
@@ -217,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.ok) {
-                    // Toggle heart icon
                     const icon = this.querySelector('i');
                     if (isWatchlisted) {
                         icon.classList.remove('fa-heart');

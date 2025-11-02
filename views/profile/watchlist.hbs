@@ -63,8 +63,6 @@
 
                 <p class="text-muted small mb-2"><i class="fas fa-user-tie me-1"></i> {{this.instructor_name}}</p>
                 <p class="text-muted small mb-2"><i class="fas fa-folder me-1"></i> {{this.category_name}}</p>
-
-                {{!-- Giá hiển thị an toàn, không NaN --}}
                 <p class="text-danger fw-bold mb-3">
                   {{#if this.discount_price}}
                     {{formatPrice this.discount_price}} ₫
