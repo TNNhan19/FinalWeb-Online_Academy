@@ -96,6 +96,7 @@ export const getEnrolledCourses = async (account_id) => {
       LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
       LEFT JOIN categories cat ON c.category_id = cat.category_id
       WHERE s.account_id = $1
+      AND c.status <> 'suspended'
       ORDER BY e.enrolled_at DESC
     `;
     const result = await db.query(query, [account_id]);

@@ -17,6 +17,7 @@ export async function findPopular(limit = 4) {
     FROM courses c
     LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
     LEFT JOIN categories  cat ON c.category_id = cat.category_id
+    WHERE c.status <> 'suspended'
     ORDER BY c.is_bestseller DESC, c.student DESC, c.created_at DESC
     LIMIT $1;
   `;
@@ -41,6 +42,7 @@ export async function findAll() {
     FROM courses c
     LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
     LEFT JOIN categories  cat ON c.category_id = cat.category_id
+    WHERE c.status <> 'suspended'
     ORDER BY c.created_at DESC;
   `;
   const rows = await db.query(query);
@@ -63,6 +65,7 @@ export async function getAllCourses() {
     FROM courses c
     LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
     LEFT JOIN categories  cat ON c.category_id = cat.category_id
+    WHERE c.status <> 'suspended'
     ORDER BY c.created_at DESC;
   `;
   const rows = await db.query(query);
@@ -91,6 +94,7 @@ export async function findBestSellers(limit = 8, categoryName = null) {
     LEFT JOIN categories cat ON c.category_id = cat.category_id
     WHERE c.is_bestseller = TRUE
       AND c.is_published = TRUE
+        AND c.status <> 'suspended'
   `;
 
   if (
@@ -129,6 +133,7 @@ export async function findWeeklyHighlights(limit = 4) {
     LEFT JOIN course_views v ON c.course_id = v.course_id 
         AND v.viewed_at >= NOW() - INTERVAL '7 days'
     WHERE c.is_published = TRUE
+      AND c.status <> 'suspended'
     GROUP BY c.course_id, i.name, cat.name
     ORDER BY 
       weekly_views DESC,      -- lượt xem trong tuần
@@ -186,6 +191,7 @@ export async function getCoursesByCategory(categoryName) {
         JOIN categories cat ON c.category_id = cat.category_id
         LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
         WHERE cat.parent_id = $1
+          AND c.status <> 'suspended'
         ORDER BY c.course_id DESC
         `,
         [category_id]
@@ -200,6 +206,7 @@ export async function getCoursesByCategory(categoryName) {
         JOIN categories cat ON c.category_id = cat.category_id
         LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
         WHERE cat.category_id = $1
+          AND c.status <> 'suspended'
         ORDER BY c.course_id DESC
         `,
         [category_id]
@@ -239,6 +246,7 @@ export async function findNewestCourses(limit = 10) {
     LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
     LEFT JOIN categories cat ON c.category_id = cat.category_id
     WHERE c.is_published = TRUE
+      AND c.status <> 'suspended'
     ORDER BY c.created_at DESC
     LIMIT $1;
   `;
@@ -256,9 +264,10 @@ export async function findTopCategoriesByStudentsAndRating(limit = 6) {
       COALESCE(parent.name, '') AS parent_name,
       ROUND(AVG(COALESCE(c.star, 0))::numeric, 1) AS avg_star,   -- trung bình sao
       COALESCE(SUM(COALESCE(c.student, 0)), 0) AS total_students  -- tổng học viên
-    FROM courses c
-    JOIN categories cat ON c.category_id = cat.category_id
+  FROM courses c
+  JOIN categories cat ON c.category_id = cat.category_id
     LEFT JOIN categories parent ON cat.parent_id = parent.category_id
+  WHERE c.status <> 'suspended'
     GROUP BY cat.category_id, cat.name, parent.name
     ORDER BY total_students DESC, avg_star DESC
     LIMIT $1;
@@ -288,6 +297,7 @@ export async function findTopViewed(limit = 10) {
     LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
     LEFT JOIN categories cat ON c.category_id = cat.category_id
     WHERE c.is_published = TRUE
+      AND c.status <> 'suspended'
     ORDER BY c.view DESC, c.star DESC, c.student DESC
     LIMIT $1;
   `;
@@ -311,9 +321,10 @@ export async function getCourseDetailsById(courseId) {
       LEFT JOIN categories  cat ON c.category_id = cat.category_id
       LEFT JOIN reviews     r   ON c.course_id = r.course_id
       WHERE c.course_id = $1
+        AND c.status <> 'suspended'
       GROUP BY c.course_id, i.instructor_id, cat.category_id;
     `;
-    const courseResult = await db.query(courseQuery, [courseId]);
+  const courseResult = await db.query(courseQuery, [courseId]);
     const course = courseResult[0];
     if (!course) return null;
 
@@ -347,7 +358,7 @@ export async function getCourseDetailsById(courseId) {
     const relatedCoursesQuery = `
       SELECT rc.course_id, rc.title, rc.image_url, rc.current_price
       FROM courses rc
-      WHERE rc.category_id = $1 AND rc.course_id != $2
+      WHERE rc.category_id = $1 AND rc.course_id != $2 AND rc.status <> 'suspended'
       ORDER BY (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = rc.course_id) DESC
       LIMIT 5;
     `;

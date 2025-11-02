@@ -33,6 +33,11 @@ router.get("/detail/:id", async (req, res) => {
       return res.status(404).json({ error: "Khóa học không tồn tại" });
     }
 
+    // Không trả chi tiết cho khóa học đã bị suspend
+    if (course.status === 'suspended') {
+      return res.status(404).json({ error: "Khóa học không tồn tại" });
+    }
+
     // ✅ Trả dữ liệu JSON cho front-end (dùng trong modal)
     res.json(course);
   } catch (error) {
@@ -186,6 +191,9 @@ router.post('/:id/enroll', async (req, res) => {
     // Kiểm tra khóa học tồn tại
     const course = await findById(courseId);
     if (!course) {
+      return res.status(404).json({ error: 'Không tìm thấy khóa học' });
+    }
+    if (course.status === 'suspended') {
       return res.status(404).json({ error: 'Không tìm thấy khóa học' });
     }
 

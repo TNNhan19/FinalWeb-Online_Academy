@@ -164,6 +164,7 @@ export const getEnrolledCourses = async (account_id) => {
     JOIN courses c ON e.course_id = c.course_id
     JOIN students s ON e.student_id = s.student_id
     WHERE s.account_id = $1
+      AND c.status <> 'suspended'
   `;
   return await db.query(query, [account_id]);
 };

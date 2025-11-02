@@ -314,7 +314,7 @@ if (topCategoryCards.length) {
                 class="btn btn-outline-primary rounded-3 px-3 py-2">
                 Xem chi tiết
               </a>
-              <button class="btn btn-primary rounded-3 px-3 py-2">
+              <button class="btn btn-primary rounded-3 px-3 py-2" id="modalEnrollButton" data-course-id="${course.course_id}">
                 Đăng ký học
               </button>
             </div>
@@ -327,6 +327,40 @@ if (topCategoryCards.length) {
         modalInstance = new bootstrap.Modal(modalEl, { backdrop: true, focus: false });
       }
       modalInstance.show();
+
+      // Attach enroll handler for the modal's enroll button so the popup Đăng ký works
+      try {
+        const modalEnrollBtn = modalBody.querySelector('#modalEnrollButton');
+        if (modalEnrollBtn) {
+          modalEnrollBtn.addEventListener('click', async () => {
+            try {
+              const cid = modalEnrollBtn.dataset.courseId || course.course_id;
+              const response = await fetch(`/courses/${cid}/enroll`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin'
+              });
+              const data = await response.json();
+              if (response.ok) {
+                alert('Đăng ký khóa học thành công!');
+                if (data.redirect) window.location.href = data.redirect;
+                else window.location.reload();
+              } else {
+                if (data.error === 'Vui lòng đăng nhập để đăng ký khóa học') {
+                  window.location.href = `/auth/login?redirect=/courses/${cid}`;
+                } else {
+                  alert(data.error || 'Có lỗi xảy ra khi đăng ký khóa học');
+                }
+              }
+            } catch (err) {
+              console.error('Error enrolling from modal:', err);
+              alert('Có lỗi xảy ra khi đăng ký khóa học');
+            }
+          });
+        }
+      } catch (attachErr) {
+        console.warn('Could not attach modal enroll handler:', attachErr);
+      }
 
       modalEl.addEventListener("hidden.bs.modal", () => {
         document.body.classList.remove("modal-open");

@@ -51,6 +51,18 @@ body {
     transition: var(--transition);
 }
 
+/* Fix: ensure the site header and profile dropdown appear above embedded videos/iframes */
+header.main-header {
+    position: sticky; /* keep behavior but ensure stacking context */
+    top: 0;
+    z-index: 3000; /* higher than video/modal so dropdowns sit on top */
+}
+
+/* Make sure bootstrap dropdown menus from the header are above other content */
+.main-header .dropdown-menu {
+    z-index: 3100 !important;
+}
+
 .logo h1 {
     font-size: 24px;
     font-weight: 700;

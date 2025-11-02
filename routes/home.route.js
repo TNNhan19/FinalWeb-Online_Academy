@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
   try {
     // 🧮 Lấy thống kê tổng số lượng
     const [courseCountRes, studentCountRes, instructorCountRes] = await Promise.all([
-      db.query("SELECT COUNT(*) FROM courses"),
+    db.query("SELECT COUNT(*) FROM courses WHERE status <> 'suspended'"),
       db.query("SELECT COUNT(*) FROM students"),
       db.query("SELECT COUNT(*) FROM instructors"),
     ]);
