@@ -1,0 +1,31 @@
+<div class="container mt-4">
+    <h2 class="mb-4">Hồ sơ cá nhân</h2>
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    <form action="/profile/update" method="POST">
+        <div class="mb-3">
+            <label>Họ tên</label>
+            <input type="text" name="full_name" value="{{profile.full_name}}" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" value="{{profile.email}}" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>Mật khẩu cũ</label>
+            <input type="password" name="old_password" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>Mật khẩu mới</label>
+            <input type="password" name="new_password" class="form-control">
+        </div>
+
+        <button class="btn btn-primary">Cập nhật</button>
+    </form>
+</div>

@@ -1,0 +1,50 @@
+{{#section 'css'}}
+<style>
+  .profile-info {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .form-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+  }
+  .info-value {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+</style>
+{{/section}}
+
+<div class="container py-5">
+  <div class="profile-info">
+    <h3 class="mb-4">Thông tin cá nhân</h3>
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    {{#if success}}
+    <div class="alert alert-success">{{success}}</div>
+    {{/if}}
+
+    <div class="card">
+      <div class="card-body">
+        <div class="mb-4">
+          <label class="form-label">Họ và tên</label>
+          <p class="info-value fw-medium">{{profile.full_name}}</p>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Email</label>
+          <p class="info-value">{{profile.email}}</p>
+        </div>
+
+        <div class="text-end">
+          <a href="/profile/edit" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i> Chỉnh sửa thông tin
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,75 @@
+<div class="text-center mb-5">
+  <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-light border">
+    <i class="bi bi-mortarboard text-primary"></i>
+    <span class="text-secondary">Bảng điều khiển giảng viên</span>
+  </div>
+  <h3 class="fw-bold mt-3">Xin chào, {{instructor.name}}!</h3>
+  <p class="text-muted">Chào mừng bạn đến với bảng điều khiển của <strong>Online Academy</strong>.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4 col-md-6">
+    <div class="card border-0 shadow-sm h-100 p-4 text-center">
+      <div class="rounded-circle bg-light mx-auto mb-3 d-flex align-items-center justify-content-center"
+        style="width:64px;height:64px;">
+        <i class="bi bi-journal-bookmark fs-3 text-primary"></i>
+      </div>
+      <h5 class="fw-semibold mb-1">Khóa học của tôi</h5>
+      <p class="text-muted mb-3">Xem và chỉnh sửa các khóa học bạn đã đăng.</p>
+      <a href="/instructor/dashboard" class="btn-gradient btn-blue btn-floating">
+        <i class="bi bi-grid me-2"></i>Xem khóa học
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-4 col-md-6">
+    <div class="card border-0 shadow-sm h-100 p-4 text-center elevate">
+      <div class="rounded-circle bg-light mx-auto mb-3 d-flex align-items-center justify-content-center"
+        style="width:64px;height:64px;">
+        <i class="bi bi-plus-circle fs-3 text-success"></i>
+      </div>
+      <h5 class="fw-semibold mb-1">Đăng khóa học mới</h5>
+      <p class="text-muted mb-3">Tạo và xuất bản một khóa học mới cho học viên.</p>
+      <a href="/instructor/new" class="btn-gradient btn-green btn-floating">
+        <i class="bi bi-upload me-2"></i>Đăng khóa học
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-4 col-md-6">
+    <div class="card border-0 shadow-sm h-100 p-4 text-center elevate">
+      <div class="rounded-circle bg-light mx-auto mb-3 d-flex align-items-center justify-content-center"
+        style="width:64px;height:64px;">
+        <i class="bi bi-person-badge fs-3 text-info"></i>
+      </div>
+      <h5 class="fw-semibold mb-1">Hồ sơ giảng viên</h5>
+      <p class="text-muted mb-3">Xem và chỉnh sửa thông tin cá nhân của bạn.</p>
+      <a href="/instructor/profile" class="btn-gradient btn-cyan btn-floating">
+        <i class="bi bi-person-lines-fill me-2"></i>Xem hồ sơ
+      </a>
+    </div>
+  </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+  <div class="col">
+    <div class="card border-0 shadow-sm p-4 stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="fw-semibold text-secondary mb-0">Tổng số khóa học</h6>
+        <i class="bi bi-collection fs-4 text-primary"></i>
+      </div>
+      <div class="display-6 fw-bold text-primary">{{stats.courses}}</div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card border-0 shadow-sm p-4 stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="fw-semibold text-secondary mb-0">Tổng số học viên</h6>
+        <i class="bi bi-people fs-4 text-success"></i>
+      </div>
+      <div class="display-6 fw-bold text-success">{{stats.students}}</div>
+    </div>
+  </div>
+</div>

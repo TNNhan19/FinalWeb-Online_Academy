@@ -1,0 +1,23 @@
+<section class="auth-hero">
+  <div class="auth-container">
+    <div class="auth-card">
+      <h3 class="text-center mb-3 fw-bold">Enter OTP</h3>
+      <p class="text-muted small text-center mb-3">We have sent a code to {{email}}.</p>
+
+      {{#if message}}<div class="alert alert-success small text-center">{{message}}</div>{{/if}}
+      {{#if error}}<div class="alert alert-danger small text-center">{{error}}</div>{{/if}}
+
+      <form method="get" action="/auth/reset-password">
+        <input type="hidden" name="email" value="{{email}}">
+        <label class="field">
+          <span>OTP Code</span>
+          <div class="control">
+            <i class="bi bi-shield-lock"></i>
+            <input type="text" name="otp" placeholder="Enter 6-digit OTP" required>
+          </div>
+        </label>
+        <button class="btn-primary w-100 mt-3" type="submit">Continue</button>
+      </form>
+    </div>
+  </div>
+</section>
