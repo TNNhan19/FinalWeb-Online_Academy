@@ -4,69 +4,176 @@
         <div class="btn-group" role="group">
             <button class="btn btn-outline-primary" id="showAllBtn">Tất cả khóa học</button>
             <button class="btn btn-outline-primary" id="showWatchlistBtn">Khóa yêu thích</button>
-            <a href="/courses" class="btn btn-success">Thêm khóa học mới</a>
+            <a href="/#courses" class="btn btn-success">Thêm khóa học mới</a>
         </div>
     </div>
 
-    <!-- Tab content -->
     <div id="allCourses">
+        {{#if courses.length}}
         <div class="row mt-3">
             {{#each courses}}
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{this.thumbnail_url}}" class="card-img-top">
+                    <img src="{{this.thumbnail_url}}" class="card-img-top" style="height: 160px; object-fit: cover;" alt="{{this.title}}">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="card-title mb-0">{{this.title}}</h5>
-                            <button class="btn btn-link toggle-watchlist" data-course-id="{{this.course_id}}"
+                            <button class="btn btn-link toggle-watchlist p-0" data-course-id="{{this.course_id}}"
                                 data-is-watchlisted="{{this.is_in_watchlist}}">
                                 <i class="fas fa-heart{{#unless this.is_in_watchlist}}-o{{/unless}}"
                                     style="color: {{#if this.is_in_watchlist}}red{{else}}grey{{/if}};"></i>
                             </button>
                         </div>
-                        <div class="progress mb-3">
-                            <div class="progress-bar" role="progressbar" style="width: {{this.progress}}%;"
-                                aria-valuenow="{{this.progress}}" aria-valuemin="0" aria-valuemax="100">
-                                {{this.progress}}%
+                        
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-user-tie me-1"></i> {{this.instructor_name}}
+                        </p>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-folder me-1"></i> {{this.category_name}}
+                        </p>
+                        <p class="text-muted small mb-3">
+                            <i class="fas fa-book-open me-1"></i> {{this.total_lectures}} bài học
+                        </p>
+
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                style="width: {{this.progress}}%;" 
+                                aria-valuenow="{{this.progress}}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="/courses/{{this.course_id}}" class="btn btn-primary">Vào học</a>
-                            <small class="text-muted">Đã đăng ký: {{formatDate this.enrolled_at}}</small>
+                        <p class="small text-center text-muted mb-3">
+                            Hoàn thành: {{this.progress}}%
+                        </p>
+
+                        <div class="d-flex flex-column gap-2">
+                            <a href="/learn/{{this.course_id}}" class="btn btn-primary">
+                                <i class="fas fa-play-circle me-1"></i> Tiếp tục học
+                            </a>
+                            <small class="text-muted text-center">
+                                Đăng ký: {{formatDate this.enrolled_at}}
+                            </small>
                         </div>
                     </div>
                 </div>
             </div>
             {{/each}}
         </div>
+        {{else}}
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-graduation-cap fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted">Bạn chưa có khóa học nào</h3>
+            <p class="text-muted mb-4">Hãy khám phá các khóa học hấp dẫn của chúng tôi</p>
+            <a href="/" class="btn btn-primary btn-lg">Khám phá ngay</a>
+        </div>
+        {{/if}}
     </div>
 
     <div id="watchlistCourses" style="display: none;">
-        <div class="row mt-3">
-            {{#each watchlistCourses}}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{this.thumbnail_url}}" class="card-img-top">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">{{this.title}}</h5>
-                            <button class="btn btn-link toggle-watchlist" data-course-id="{{this.course_id}}" data-is-watchlisted="true">
-                                <i class="fas fa-heart" style="color: red;"></i>
-                            </button>
-                        </div>
-                        <p class="card-text text-danger">{{formatPrice this.discount_price}} ₫ 
-                            <span class="text-muted text-decoration-line-through">{{formatPrice this.price}} ₫</span>
-                        </p>
-                        <a href="/courses/{{this.course_id}}" class="btn btn-outline-primary">Xem chi tiết</a>
-                    </div>
-                </div>
+      {{#if watchlistCourses.length}}
+
+      {{!--  NHÓM: ĐÃ ĐĂNG KÝ (ưu tiên hiển thị trước)  --}}
+      <h4 class="mt-2 mb-3">Đã đăng ký</h4>
+      <div class="row">
+        {{#each watchlistCourses}}
+        {{#if this.is_enrolled}}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <img src="{{this.thumbnail_url}}" class="card-img-top" style="height:160px;object-fit:cover;"
+              alt="{{this.title}}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">{{this.title}}</h5>
+                <button class="btn btn-link toggle-watchlist p-0" data-course-id="{{this.course_id}}"
+                  data-is-watchlisted="true">
+                  <i class="fas fa-heart" style="color:red;"></i>
+                </button>
+              </div>
+
+              <p class="text-muted small mb-2"><i class="fas fa-user-tie me-1"></i> {{this.instructor_name}}</p>
+              <p class="text-muted small mb-2"><i class="fas fa-folder me-1"></i> {{this.category_name}}</p>
+              <p class="text-muted small mb-3"><i class="fas fa-book-open me-1"></i> {{this.total_lectures}} bài học</p>
+
+              <div class="progress mb-2" style="height:8px;">
+                <div class="progress-bar bg-success" style="width: {{this.progress}}%;"
+                  aria-valuenow="{{this.progress}}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <p class="small text-center text-muted mb-3">Hoàn thành: {{this.progress}}%</p>
+
+              <div class="d-flex flex-column gap-2">
+                <a href="/learn/{{this.course_id}}" class="btn btn-primary">
+                  <i class="fas fa-play-circle me-1"></i> Tiếp tục học
+                </a>
+                <small class="text-muted text-center">Đăng ký: {{formatDate this.enrolled_at}}</small>
+              </div>
             </div>
-            {{/each}}
+          </div>
         </div>
+        {{/if}}
+        {{/each}}
+      </div>
+
+      {{!-- ====== NHÓM: CHƯA ĐĂNG KÝ ====== --}}
+      <h4 class="mt-4 mb-3">Chưa đăng ký</h4>
+      <div class="row">
+        {{#each watchlistCourses}}
+        {{#unless this.is_enrolled}}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <img src="{{this.thumbnail_url}}" class="card-img-top" style="height:160px;object-fit:cover;"
+              alt="{{this.title}}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">{{this.title}}</h5>
+                <button class="btn btn-link toggle-watchlist p-0" data-course-id="{{this.course_id}}"
+                  data-is-watchlisted="true">
+                  <i class="fas fa-heart" style="color:red;"></i>
+                </button>
+              </div>
+
+              <p class="text-muted small mb-2"><i class="fas fa-user-tie me-1"></i> {{this.instructor_name}}</p>
+              <p class="text-muted small mb-2"><i class="fas a-folder me-1"></i> {{this.category_name}}</p>
+              
+              <p class="text-danger fw-bold mb-3">
+                {{#if this.discount_price}}
+                {{formatPrice this.discount_price}} ₫
+                {{#if this.price}}
+                <span class="text-muted text-decoration-line-through">{{formatPrice this.price}} ₫</span>
+                {{/if}}
+                {{else if this.price}}
+                {{formatPrice this.price}} ₫
+                {{else}}
+                <span class="text-muted">Miễn phí</span>
+                {{/if}}
+              </p>
+
+              <div class="d-flex justify-content-between">
+                <a href="/courses/{{this.course_id}}" class="btn btn-outline-primary">Xem chi tiết</a>
+
+                <form method="POST" action="/enrollments/{{this.course_id}}/enroll">
+                  <button type="submit" class="btn btn-primary">Đăng ký học</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/unless}}
+        {{/each}}
+      </div>
+
+      {{else}}
+      <div class="text-center py-5">
+        <i class="fas fa-heart fa-4x text-muted mb-3"></i>
+        <h4>Chưa có khóa học yêu thích</h4>
+        <a href="/#courses" class="btn btn-primary mt-3">Khám phá khóa học</a>
+      </div>
+      {{/if}}
     </div>
 </div>
 
-<!-- Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
 <script>
@@ -76,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const allBtn = document.getElementById('showAllBtn');
     const watchlistBtn = document.getElementById('showWatchlistBtn');
 
-    // Switch tabs
     allBtn.addEventListener('click', () => {
         allCoursesTab.style.display = 'block';
         watchlistTab.style.display = 'none';
@@ -91,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
         allBtn.classList.remove('active');
     });
 
-    // Toggle watchlist
     document.querySelectorAll('.toggle-watchlist').forEach(button => {
         button.addEventListener('click', async function() {
             const courseId = this.dataset.courseId;
@@ -106,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.ok) {
-                    // Toggle heart icon
                     const icon = this.querySelector('i');
                     if (isWatchlisted) {
                         icon.classList.remove('fa-heart');

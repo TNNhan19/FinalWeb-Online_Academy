@@ -14,7 +14,8 @@ router.get("/", async (req, res) => {
   else if (sort === "bestseller") orderBy = "c.student DESC";
 
   const params = [];
-  let where = "WHERE TRUE";
+  // Exclude soft-suspended courses from public search results
+  let where = "WHERE c.status <> 'suspended'";
 
   // ✅ FULL-TEXT SEARCH + FUZZY SEARCH (pg_trgm)
   if (q) {

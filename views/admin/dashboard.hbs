@@ -1,7 +1,16 @@
-<h4 class="mb-4">Bảng điều khiển quản trị</h4>
+<h4 class="fw-bold mb-4 text-center" style="color: var(--primary-color);">
+  <i class="bi bi-speedometer2 me-2"></i>Thông tin chung
+</h4>
+
+<div class="text-center mb-5">
+  <a href="/admin" class="btn-back">
+    <i class="bi bi-arrow-left"></i> Quay lại Trang chủ
+  </a>
+</div>
+
 <div class="row text-center g-3">
-  <div class="col-md-3"><div class="card"><div class="card-body"><h5>{{stats.categories}}</h5><p>Lĩnh vực</p></div></div></div>
-  <div class="col-md-3"><div class="card"><div class="card-body"><h5>{{stats.courses}}</h5><p>Khóa học</p></div></div></div>
-  <div class="col-md-3"><div class="card"><div class="card-body"><h5>{{stats.instructors}}</h5><p>Giảng viên</p></div></div></div>
-  <div class="col-md-3"><div class="card"><div class="card-body"><h5>{{stats.students}}</h5><p>Học viên</p></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h5 class="fw-bold" style="color:var(--success-color);">{{stats.categories}}</h5><p>Lĩnh vực</p></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h5 class="fw-bold" style="color:var(--warning-color);">{{stats.courses}}</h5><p>Khóa học</p></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h5 class="fw-bold" style="color:var(--primary-color);">{{stats.instructors}}</h5><p>Giảng viên</p></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h5 class="fw-bold" style="color:var(--secondary-color);">{{stats.students}}</h5><p>Học viên</p></div></div></div>
 </div>

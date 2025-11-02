@@ -1,29 +1,86 @@
-<h4 class="mb-3">Quản lý lĩnh vực</h4>
+<a href="/admin" class="btn-back mb-4 d-inline-flex align-items-center gap-2">
+  <i class="bi bi-arrow-left"></i> Quay lại Bảng điều khiển
+</a>
 
-<form method="POST" class="row g-2 mb-4">
-  <div class="col-md-6"><input name="name" class="form-control" placeholder="Tên lĩnh vực mới" required></div>
-  <div class="col-md-3"><input name="parent_id" type="number" class="form-control" placeholder="ID cha (nếu có)"></div>
-  <div class="col-md-3"><button class="btn btn-primary w-100">Thêm</button></div>
+<h4 class="fw-bold mb-3" style="color: var(--primary-color);">
+  <i class="bi bi-diagram-3 me-2"></i>Quản lý lĩnh vực
+</h4>
+
+<p class="text-secondary mb-4">
+  Danh sách các lĩnh vực hiện có trong hệ thống. Bạn có thể thêm lĩnh vực mới, chỉnh sửa tên hoặc xem các khóa học thuộc
+  lĩnh vực đó.
+</p>
+
+<form method="POST" class="row g-3 align-items-center mb-5 mt-3 p-3 border rounded-3 shadow-sm">
+  <div class="col-md-5">
+    <input name="name" class="form-control" placeholder="Tên lĩnh vực mới" required>
+  </div>
+  <div class="col-md-4">
+    <input name="parent_id" type="number" class="form-control" placeholder="ID lĩnh vực thuộc (nếu có)">
+  </div>
+  <div class="col-md-3 text-end">
+    <button class="btn-gradient btn-blue w-100">
+      <i class="bi bi-plus-circle me-1"></i> Thêm lĩnh vực
+    </button>
+  </div>
 </form>
 
-<table class="table table-striped">
-  <thead><tr><th>ID</th><th>Tên</th><th>Cha</th><th>Hành động</th></tr></thead>
-  <tbody>
-    {{#each categories}}
-    <tr>
-      <td>{{category_id}}</td>
-      <td>{{name}}</td>
-      <td>{{parent_id}}</td>
-      <td>
-        <form method="POST" action="/admin/categories/update/{{category_id}}" class="d-inline">
-          <input name="name" placeholder="Tên mới" class="form-control d-inline w-auto" required>
-          <button class="btn btn-sm btn-outline-success">Sửa</button>
-        </form>
-        <form method="POST" action="/admin/categories/delete/{{category_id}}" class="d-inline">
-          <button class="btn btn-sm btn-outline-danger">Xóa</button>
-        </form>
-      </td>
-    </tr>
-    {{/each}}
-  </tbody>
-</table>
+
+<div class="table-responsive shadow-sm rounded-3">
+  <table class="table table-hover align-middle mb-0 table-clean">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Tên lĩnh vực</th>
+        <th scope="col">Lĩnh vực thuộc</th>
+        <th scope="col" class="text-center">Số khóa học</th>
+        <th scope="col" class="text-center">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if categories.length}}
+      {{#each categories}}
+      <tr>
+        <td class="fw-medium">{{category_id}}</td>
+        <td class="fw-semibold">{{category_name}}</td>
+        <td>{{#if parent_name}}{{parent_name}}{{else}}—{{/if}}</td>
+        <td class="text-center">
+          <span class="badge bg-info text-dark">{{total_courses}}</span>
+        </td>
+        <td class="text-center">
+          <div class="d-inline-flex align-items-center justify-content-center gap-2 flex-wrap">
+
+            <a href="/admin/courses?category={{category_id}}" class="btn btn-sm btn-outline-primary btn-compact">
+              <i class="bi bi-eye"></i> Xem
+            </a>
+
+            <form method="POST" action="/admin/categories/update/{{category_id}}"
+              class="d-inline-flex align-items-center gap-2">
+              <input name="name" placeholder="Tên mới" class="form-control form-control-sm" style="width: 130px;">
+              <button class="btn btn-sm btn-outline-success btn-compact">
+                <i class="bi bi-pencil"></i> Sửa
+              </button>
+            </form>
+
+            <form method="POST" action="/admin/categories/delete/{{category_id}}" class="d-inline">
+              <button class="btn btn-sm btn-outline-danger btn-compact">
+                <i class="bi bi-trash"></i> Xóa
+              </button>
+            </form>
+          </div>
+        </td>
+
+      </tr>
+      {{/each}}
+      {{else}}
+      <tr>
+        <td colspan="5" class="text-center text-muted py-4">
+          <i class="bi bi-inbox"></i> Chưa có lĩnh vực nào trong hệ thống.
+        </td>
+      </tr>
+      {{/if}}
+    </tbody>
+  </table>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">

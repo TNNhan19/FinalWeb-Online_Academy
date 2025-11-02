@@ -1,11 +1,8 @@
 import db from '../configs/db.js';
 
-// ========= Profile =========
 export const getProfileById = async (account_id) => {
   try {
     console.log('Fetching profile for account_id:', account_id);
-    
-    // Query trực tiếp từ bảng accounts
     const query = `
       SELECT 
         account_id,
@@ -84,16 +81,30 @@ export const updateProfile = async (account_id, data) => {
   return true;
 };
 
-// ========= Lấy student_id từ account_id (mock) =========
 export const getStudentId = async (account_id) => 1;
-
-// ========= Watchlist =========
 export const getWatchlist = async (account_id) => {
   const query = `
-    SELECT c.* FROM watchlist w
-    JOIN courses c ON w.course_id = c.course_id
+    SELECT 
+      c.course_id,
+      c.title,
+      c.image_url AS thumbnail_url,
+      c.current_price,
+      c.original_price,
+      i.name AS instructor_name,
+      cat.name AS category_name,
+      (SELECT COUNT(*) FROM lectures l JOIN course_sections cs ON l.section_id = cs.section_id WHERE cs.course_id = c.course_id) AS total_lectures,
+      EXISTS(
+        SELECT 1 FROM enrollments e
+        JOIN students s2 ON e.student_id = s2.student_id
+        WHERE s2.account_id = $1 AND e.course_id = c.course_id
+      ) AS is_enrolled
+    FROM watchlist w
     JOIN students s ON w.student_id = s.student_id
+    JOIN courses c ON w.course_id = c.course_id
+    LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
+    LEFT JOIN categories cat ON c.category_id = cat.category_id
     WHERE s.account_id = $1
+      AND c.status <> 'suspended'
   `;
   return await db.query(query, [account_id]);
 };
@@ -134,14 +145,32 @@ export const isInWatchlist = async (account_id, course_id) => {
   return result[0]?.exists || false;
 };
 
-// ========= Enrolled =========
 export const getEnrolledCourses = async (account_id) => {
   const query = `
-    SELECT c.*, e.progress, e.enrolled_at
+    SELECT
+      c.course_id,
+      c.title,
+      c.image_url AS thumbnail_url,
+      c.current_price,
+      c.original_price,
+      e.progress,
+      e.enrolled_at,
+      i.name AS instructor_name,
+      cat.name AS category_name,
+      (SELECT COUNT(*) FROM lectures l JOIN course_sections cs ON l.section_id = cs.section_id WHERE cs.course_id = c.course_id) AS total_lectures,
+      EXISTS(
+        SELECT 1 FROM watchlist w
+        JOIN students s2 ON w.student_id = s2.student_id
+        WHERE s2.account_id = $1 AND w.course_id = c.course_id
+      ) AS is_in_watchlist
     FROM enrollments e
-    JOIN courses c ON e.course_id = c.course_id
     JOIN students s ON e.student_id = s.student_id
+    JOIN courses c ON e.course_id = c.course_id
+    LEFT JOIN instructors i ON c.instructor_id = i.instructor_id
+    LEFT JOIN categories cat ON c.category_id = cat.category_id
     WHERE s.account_id = $1
+      AND c.status <> 'suspended'
+    ORDER BY e.enrolled_at DESC
   `;
   return await db.query(query, [account_id]);
 };
