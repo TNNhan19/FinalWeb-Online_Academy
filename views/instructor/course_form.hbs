@@ -146,9 +146,12 @@
         {{#each ../lectures}}
         {{#if (eq section_id ../section_id)}}
         <div class="d-flex align-items-center gap-2 mb-2 lecture-item" data-lecture-id="{{lecture_id}}">
-          <input class="form-control form-control-sm flex-fill lecture-title" value="{{title}}" placeholder="Tên bài giảng">
-          <input class="form-control form-control-sm flex-fill lecture-video" value="{{video_url}}" placeholder="Video URL">
-          <input class="form-control form-control-sm lecture-duration" type="number" value="{{duration}}" placeholder="Thời lượng (s)">
+          <input class="form-control form-control-sm flex-fill lecture-title" value="{{title}}"
+            placeholder="Tên bài giảng">
+          <input class="form-control form-control-sm flex-fill lecture-video" value="{{video_url}}"
+            placeholder="Video URL">
+          <input class="form-control form-control-sm lecture-duration" type="number" value="{{duration}}"
+            placeholder="Thời lượng (s)">
           <div class="form-check">
             <input class="form-check-input lecture-preview" type="checkbox" {{#if is_preview}}checked{{/if}}>
           </div>
@@ -183,23 +186,23 @@
 
 {{#section "js"}}
 <script>
-tinymce.init({
-  selector: '#editor',
-  height: 400,
-  menubar: false,
-  branding: false,
-  plugins: 'lists link image media table code help wordcount',
-  toolbar:
-    'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
-});
+  tinymce.init({
+    selector: '#editor',
+    height: 400,
+    menubar: false,
+    branding: false,
+    plugins: 'lists link image media table code help wordcount',
+    toolbar:
+      'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | code',
+  });
 
-// Thêm chương
-document.getElementById("addSectionBtn")?.addEventListener("click", () => {
-  const title = document.getElementById("newSectionTitle").value.trim();
-  if (!title) return alert("Vui lòng nhập tên chương!");
-  const div = document.createElement("div");
-  div.className = "card mb-4 border-0 shadow-sm section-item";
-  div.innerHTML = `
+  // Thêm chương
+  document.getElementById("addSectionBtn")?.addEventListener("click", () => {
+    const title = document.getElementById("newSectionTitle").value.trim();
+    if (!title) return alert("Vui lòng nhập tên chương!");
+    const div = document.createElement("div");
+    div.className = "card mb-4 border-0 shadow-sm section-item";
+    div.innerHTML = `
     <div class="card-header bg-light d-flex align-items-center gap-2">
       <i class="bi bi-list-task text-secondary"></i>
       <input class="form-control form-control-sm fw-semibold section-title" value="${title}">
@@ -209,17 +212,17 @@ document.getElementById("addSectionBtn")?.addEventListener("click", () => {
         <i class="bi bi-plus-lg"></i> Thêm bài giảng
       </button>
     </div>`;
-  document.getElementById("sectionsContainer").appendChild(div);
-  document.getElementById("newSectionTitle").value = "";
-});
+    document.getElementById("sectionsContainer").appendChild(div);
+    document.getElementById("newSectionTitle").value = "";
+  });
 
-// Thêm bài giảng
-document.addEventListener("click", (e) => {
-  if (e.target.closest(".add-lecture")) {
-    const container = e.target.closest(".lectures-container");
-    const div = document.createElement("div");
-    div.className = "d-flex align-items-center gap-2 mb-2 lecture-item";
-    div.innerHTML = `
+  // Thêm bài giảng
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".add-lecture")) {
+      const container = e.target.closest(".lectures-container");
+      const div = document.createElement("div");
+      div.className = "d-flex align-items-center gap-2 mb-2 lecture-item";
+      div.innerHTML = `
       <input class="form-control form-control-sm flex-fill lecture-title" placeholder="Tên bài giảng">
       <input class="form-control form-control-sm flex-fill lecture-video" placeholder="Video URL">
       <input class="form-control form-control-sm lecture-duration" type="number" placeholder="Thời lượng (s)">
@@ -230,53 +233,81 @@ document.addEventListener("click", (e) => {
       <button type="button" class="btn btn-sm btn-outline-danger remove-lecture d-flex align-items-center gap-1">
         <i class="bi bi-trash3"></i> Xóa
       </button>`;
-    container.insertBefore(div, e.target);
-  }
+      container.insertBefore(div, e.target);
+    }
 
-  if (e.target.closest(".remove-lecture")) {
-    e.target.closest(".lecture-item").remove();
-  }
-});
+    if (e.target.closest(".remove-lecture")) {
+      e.target.closest(".lecture-item").remove();
+    }
+  });
 
-// Upload video khi chọn file
-document.addEventListener("change", async (e) => {
-  const fileInput = e.target.closest(".lecture-file");
-  if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
-  const fd = new FormData();
-  fd.append("video_file", fileInput.files[0]);
-  const status = document.createElement("small");
-  status.textContent = "Đang tải lên...";
-  status.style.opacity = "0.7";
-  fileInput.parentElement.appendChild(status);
+  // Upload video khi chọn file
+  document.addEventListener("change", async (e) => {
+    const fileInput = e.target.closest(".lecture-file");
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+    const fd = new FormData();
+    fd.append("video_file", fileInput.files[0]);
+    const status = document.createElement("small");
+    status.textContent = "Đang tải lên...";
+    status.style.opacity = "0.7";
+    fileInput.parentElement.appendChild(status);
 
-  try {
-    const res = await fetch("/instructor/upload-video", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Upload thất bại");
-    const urlInput = fileInput.parentElement.querySelector(".lecture-video");
-    if (urlInput) urlInput.value = data.url;
-    status.textContent = "Hoàn tất";
-  } catch (err) {
-    console.error(err);
-    status.textContent = "Lỗi upload";
-    alert("Không thể tải video. Vui lòng thử lại.");
-  } finally {
-    setTimeout(() => status.remove(), 2000);
-  }
-});
+    try {
+      const res = await fetch("/instructor/upload-video", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Upload thất bại");
+      const urlInput = fileInput.parentElement.querySelector(".lecture-video");
+      if (urlInput) urlInput.value = data.url;
+      status.textContent = "Hoàn tất";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Lỗi upload";
+      alert("Không thể tải video. Vui lòng thử lại.");
+    } finally {
+      setTimeout(() => status.remove(), 2000);
+    }
+  });
 
-// Khi submit form -> đóng gói cấu trúc chương & bài giảng
-document.getElementById("courseForm")?.addEventListener("submit", (e) => {
-  const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
-    title: section.querySelector(".section-title").value,
-    lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({
-      title: lec.querySelector(".lecture-title").value,
-      video_url: lec.querySelector(".lecture-video").value,
-      duration: lec.querySelector(".lecture-duration").value,
-      is_preview: lec.querySelector(".lecture-preview").checked,
-    })),
-  }));
-  document.getElementById("structure_json").value = JSON.stringify(sections);
-});
+  // Khi submit form -> đóng gói cấu trúc chương & bài giảng và gửi đi
+  document.getElementById("courseForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Thu thập thông tin chương & bài giảng
+    const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
+      title: section.querySelector(".section-title").value.trim(),
+      lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({
+        title: lec.querySelector(".lecture-title").value.trim(),
+        video_url: lec.querySelector(".lecture-video").value.trim(),
+        duration: lec.querySelector(".lecture-duration").value,
+        is_preview: lec.querySelector(".lecture-preview").checked,
+      })),
+    }));
+
+    document.getElementById("structure_json").value = JSON.stringify(sections);
+
+    const formData = new FormData(e.target);
+
+    try {
+      const res = await fetch(e.target.action || window.location.pathname, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else {
+        const text = await res.text();
+        if (text.includes("thành công") || text.includes("Cập nhật")) {
+          alert("Đã lưu khóa học thành công!");
+        } else {
+          alert("Không thể lưu khóa học. Vui lòng thử lại.");
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi khi gửi form:", err);
+      alert("Lỗi không mong muốn khi lưu khóa học.");
+    }
+  });
+
 </script>
 {{/section}}
