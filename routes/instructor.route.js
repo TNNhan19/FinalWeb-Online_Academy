@@ -157,7 +157,7 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
       total_lectures,
       current_price,
       original_price,
-      structure_json, 
+      structure_json,
     } = req.body;
 
     const image_url = req.file
@@ -237,7 +237,6 @@ router.post("/new", requireInstructor, upload.single("image_file"), async (req, 
     });
   }
 });
-
 
 // Chỉnh sửa khoá học
 router.get("/edit/:id", requireInstructor, async (req, res) => {
@@ -361,6 +360,41 @@ router.post("/edit/:id", requireInstructor, upload.single("image_file"), async (
         id,
       ]
     );
+
+    if (req.body.structure_json) {
+      try {
+        const sections = JSON.parse(req.body.structure_json);
+
+        await pool.query(
+          "DELETE FROM lectures WHERE section_id IN (SELECT section_id FROM course_sections WHERE course_id = $1)",
+          [id]
+        );
+        await pool.query("DELETE FROM course_sections WHERE course_id = $1", [id]);
+
+        for (let sIndex = 0; sIndex < sections.length; sIndex++) {
+          const s = sections[sIndex];
+          const sectionRes = await pool.query(
+            `INSERT INTO course_sections (course_id, title, order_index)
+         VALUES ($1, $2, $3) RETURNING section_id`,
+            [id, s.title, sIndex + 1]
+          );
+          const sectionId = sectionRes.rows[0].section_id;
+
+          for (let lIndex = 0; lIndex < s.lectures.length; lIndex++) {
+            const lec = s.lectures[lIndex];
+            await pool.query(
+              `INSERT INTO lectures (section_id, title, video_url, duration, is_preview, order_index)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+              [sectionId, lec.title, lec.video_url, lec.duration || 0, lec.is_preview, lIndex + 1]
+            );
+          }
+        }
+
+        console.log(`ã cập nhật chương & bài giảng cho khóa học ${id}`);
+      } catch (err) {
+        console.error("Lỗi khi cập nhật chương & bài giảng:", err.message);
+      }
+    }
 
     console.log(`Khóa học ${id} đã được cập nhật bởi ${req.session.user.full_name}`);
     res.redirect("/instructor/dashboard");
