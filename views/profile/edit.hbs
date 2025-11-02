@@ -22,7 +22,6 @@
     <div class="card">
       <div class="card-body">
         <form action="/profile/update" method="POST" autocomplete="off">
-          <!-- Hidden dummy fields to prevent browser autofill of the real password fields -->
           <input type="text" name="fake_username" id="fake_username" style="display:none" autocomplete="username">
           <input type="password" name="fake_password" id="fake_password" style="display:none" autocomplete="current-password">
           <div class="mb-4">
@@ -47,7 +46,6 @@
 
             <div class="mb-3">
               <label class="form-label">Mật khẩu hiện tại</label>
-              <!-- explicit autocomplete off and empty value to force user input -->
               <input type="password" name="old_password" class="form-control" autocomplete="off" value="">
             </div>
 
