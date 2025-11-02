@@ -4,7 +4,6 @@ import * as enrollmentModel from '../models/enrollmentModel.js';
 
 const router = express.Router();
 
-// Đăng ký khóa học mới
 router.post('/:courseId/enroll', async (req, res) => {
   try {
     if (!req.user) {
@@ -18,13 +17,11 @@ router.post('/:courseId/enroll', async (req, res) => {
       return res.status(404).json({ error: 'Không tìm thấy khóa học' });
     }
 
-    // Kiểm tra xem đã đăng ký chưa
     const isAlreadyEnrolled = await enrollmentModel.isEnrolled(req.user.account_id, courseId);
     if (isAlreadyEnrolled) {
       return res.status(400).json({ error: 'Bạn đã đăng ký khóa học này rồi' });
     }
 
-    // Thực hiện đăng ký
     await enrollmentModel.enrollCourse(req.user.account_id, courseId);
     
     return res.json({ 
@@ -38,7 +35,6 @@ router.post('/:courseId/enroll', async (req, res) => {
   }
 });
 
-// Cập nhật tiến độ học
 router.post('/:courseId/progress', async (req, res) => {
   try {
     if (!req.user) {

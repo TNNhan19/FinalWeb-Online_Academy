@@ -21,7 +21,6 @@ router.get("/register", (req, res) => {
 router.post("/register", async (req, res) => {
   try {
     let { full_name, email, password } = req.body;
-    // Ensure we have a sensible display name for the account/student
     if (!full_name || !full_name.trim()) {
       full_name = (email && email.includes('@')) ? email.split('@')[0] : `Student_${Date.now()}`;
     }
@@ -51,7 +50,7 @@ router.post("/register", async (req, res) => {
     await accountModel.createAccount(full_name, email, password_hash, otp);
     res.render("auth/verify", { email });
   } catch (error) {
-    console.error("❌ Lỗi khi đăng ký:", error);
+    console.error(" Lỗi khi đăng ký:", error);
     res.render("auth/register", {
       error: "Đăng ký thất bại. Vui lòng thử lại sau!",
     });
@@ -74,7 +73,7 @@ router.post("/verify", async (req, res) => {
       success: "Xác nhận thành công! Bạn có thể đăng nhập ngay.",
     });
   } catch (error) {
-    console.error("❌ Lỗi khi xác minh OTP:", error);
+    console.error(" Lỗi khi xác minh OTP:", error);
     res.render("auth/verify", {
       email: req.body.email,
       error: "Có lỗi xảy ra khi xác minh OTP.",
@@ -153,7 +152,7 @@ router.get("/logout", (req, res) => {
     res.redirect("/auth/login");
   });
 });
-console.log("[auth] router loaded"); // <-- log để biết file này đã được nạp
+console.log("[auth] router loaded"); 
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -165,28 +164,21 @@ const supabase = createClient(
   }
 );
 
-// 🟢 Route login bằng Google (server-side PKCE) — we generate PKCE pair, store verifier in session,
-// then redirect user to Supabase authorize URL carrying the code_challenge.
 router.get("/google", async (req, res) => {
   try {
     const redirectTo = "http://localhost:3000/auth/callback";
 
-    // Generate a code_verifier (random URL-safe string)
     const code_verifier = crypto.randomBytes(64).toString("base64url");
 
-    // Compute code_challenge = BASE64URL(SHA256(code_verifier))
     const hash = crypto.createHash("sha256").update(code_verifier).digest();
     const code_challenge = Buffer.from(hash).toString("base64url");
 
-    // Store code_verifier in session so we can use it on callback
     req.session.code_verifier = code_verifier;
 
-    // Construct the authorize URL manually
     const authorizeUrl = `${process.env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(
       redirectTo
     )}&code_challenge=${encodeURIComponent(code_challenge)}&code_challenge_method=s256&access_type=offline`;
 
-    // Save session before redirect to ensure the cookie/session is persisted
     req.session.save((err) => {
       if (err) {
         console.error("Failed to save session before OAuth redirect:", err);
@@ -202,20 +194,16 @@ router.get("/google", async (req, res) => {
 });
 
 router.get("/callback", async (req, res) => {
-  // Log the incoming query for debugging (helps diagnose malformed 'code')
   console.log("/auth/callback req.query:", req.query);
 
   const { code } = req.query;
   if (!code) return res.redirect("/auth/login");
 
-  // Ensure `code` is a string (sometimes parsers can turn it into an object/array)
   let authCode;
   if (Array.isArray(code)) authCode = code[0];
   else if (code && typeof code === "object") {
-    // If it's an object, try common nested shapes
     authCode = code.auth_code || code.code || code[""] || null;
     if (!authCode) {
-      // Fallback: log and attempt JSON->string coercion (will likely fail server-side, but gives more info)
       console.warn("Warning: received non-string 'code' in query:", code);
       authCode = String(code);
     }
@@ -223,13 +211,11 @@ router.get("/callback", async (req, res) => {
 
   console.log("Resolved authCode (first 64 chars):", authCode ? authCode.substring(0, 64) : authCode);
 
-  // Use Supabase client library to exchange the authorization code for a session
   let sUser = null;
   try {
     console.log("Using code_verifier from session:", !!req.session.code_verifier);
     console.log("Code verifier value:", req.session.code_verifier ? req.session.code_verifier.substring(0, 20) + '...' : 'null');
 
-    // Manual token exchange using fetch/axios to avoid client library parameter issues
     if (req.session.code_verifier) {
       const tokenUrl = `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=pkce`;
       const tokenBody = {
@@ -250,7 +236,6 @@ router.get("/callback", async (req, res) => {
       sUser = tokenResp.data?.user;
       console.log("OAuth token exchange successful, user:", sUser?.email);
 
-      // Clear code_verifier from session
       delete req.session.code_verifier;
     } else {
       console.error("No code_verifier in session - cannot complete PKCE flow");
@@ -271,10 +256,8 @@ router.get("/callback", async (req, res) => {
 
   console.log("OAuth user:", email, name);
 
-  // 🔹 1. Tìm user theo email
   let account = await findByEmail(email);
 
-  // 🔹 2. Nếu chưa có thì tạo mới
   if (!account) {
     account = await createFromOAuth({
       email,
@@ -284,10 +267,8 @@ router.get("/callback", async (req, res) => {
     });
   }
 
-  // 🔹 3. Lấy lại user để chắc chắn có account_id
   const found = await findById(account.account_id);
 
-  // 🔹 4. Lưu vào session
   req.session.user = {
     account_id: found.account_id,
     email: found.email,
@@ -295,7 +276,7 @@ router.get("/callback", async (req, res) => {
     role: found.role,
   };
 
-  console.log("✅ User logged in:", req.session.user);
+  console.log("User logged in:", req.session.user);
 
   res.redirect("/");
 });

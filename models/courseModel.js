@@ -1,6 +1,5 @@
 import db from "../configs/db.js";
 
-// ========================= POPULAR (mặc định 4) =========================
 export async function findPopular(limit = 4) {
   const query = `
     SELECT 
@@ -25,7 +24,6 @@ export async function findPopular(limit = 4) {
   return rows;
 }
 
-// ========================= ALL COURSES =========================
 export async function findAll() {
   const query = `
     SELECT 
@@ -72,7 +70,6 @@ export async function getAllCourses() {
   return rows;
 }
 
-// ========================= BEST SELLERS (mặc định 8) =========================
 export async function findBestSellers(limit = 8, categoryName = null) {
   let idx = 1;
   const params = [];
@@ -112,7 +109,6 @@ export async function findBestSellers(limit = 8, categoryName = null) {
   const rows = await db.query(query, params);
   return rows;
 }
-// 🟢 Lấy các khóa học nổi bật nhất trong tuần qua
 export async function findWeeklyHighlights(limit = 4) {
   const query = `
     SELECT 
@@ -146,8 +142,6 @@ export async function findWeeklyHighlights(limit = 4) {
   return rows;
 }
 
-
-// ========================= BY ID =========================
 export async function findById(id) {
   const query = `
     SELECT 
@@ -164,25 +158,22 @@ export async function findById(id) {
 }
 
 
-// ========================= BY CATEGORY (tất cả khóa học trong danh mục) =========================
 
 export async function getCoursesByCategory(categoryName) {
   try {
-    // 1️⃣ Lấy ID & parent_id của danh mục được click
     const categories = await db.query(
       `SELECT category_id, parent_id FROM categories WHERE LOWER(name) = LOWER($1)`,
       [categoryName.trim()]
     );
 
     if (!categories || categories.length === 0) {
-      console.warn(`⚠️ Không tìm thấy danh mục: ${categoryName}`);
+      console.warn(`Không tìm thấy danh mục: ${categoryName}`);
       return [];
     }
 
     const { category_id, parent_id } = categories[0];
     let courses = [];
 
-    // 2️⃣ Nếu là danh mục CHA → lấy tất cả KHÓA HỌC của các danh mục CON
     if (parent_id === null) {
       courses = await db.query(
         `
@@ -197,7 +188,6 @@ export async function getCoursesByCategory(categoryName) {
         [category_id]
       );
     }
-    // 3️⃣ Nếu là danh mục CON → chỉ lấy khóa học thuộc mục con đó
     else {
       courses = await db.query(
         `
@@ -214,19 +204,18 @@ export async function getCoursesByCategory(categoryName) {
     }
 
     if (!courses || courses.length === 0) {
-      console.warn(`⚠️ Không có khóa học thuộc danh mục: ${categoryName}`);
+      console.warn(`Không có khóa học thuộc danh mục: ${categoryName}`);
       return [];
     }
 
     return courses;
   } catch (error) {
-    console.error("❌ Lỗi khi lấy khóa học theo danh mục:", error);
+    console.error(" Lỗi khi lấy khóa học theo danh mục:", error);
     return [];
   }
 }
 
 
-// 🆕 Lấy 10 khóa học mới nhất (mọi lĩnh vực)
 export async function findNewestCourses(limit = 10) {
   const query = `
     SELECT 
@@ -255,7 +244,6 @@ export async function findNewestCourses(limit = 10) {
 }
 
 
-// 🟢 Lĩnh vực có nhiều học viên và đánh giá cao nhất (dựa trên bảng courses)
 export async function findTopCategoriesByStudentsAndRating(limit = 6) {
   const query = `
     SELECT 
@@ -278,7 +266,6 @@ export async function findTopCategoriesByStudentsAndRating(limit = 6) {
 
 
 
-// 🟢 Lấy 10 khóa học có lượt xem nhiều nhất
 export async function findTopViewed(limit = 10) {
   const query = `
     SELECT 

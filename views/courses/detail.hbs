@@ -1,5 +1,5 @@
 <hr class="my-4">
-<h5>👨‍🏫 Giảng viên</h5>
+<h5> Giảng viên</h5>
 <div class="mt-3">
   <h6 class="fw-semibold">{{instructor.name}}</h6>
   <p class="text-muted mb-1">👥 {{instructor.total_students}} học viên</p>
@@ -125,7 +125,6 @@
       </div>
 
 
-      {{!-- Student Feedback / Reviews --}}
       <h4 class="fw-bold mb-3">Đánh giá của học viên</h4>
        <div class="d-flex align-items-baseline mb-3 p-3 bg-light rounded-3">
            <span class="display-4 fw-bold text-warning me-3">{{course.average_rating}}</span>
@@ -160,13 +159,10 @@
 
     </div> {{!-- End Left Column --}}
 
-    {{!-- --- Right Column: Purchase Box & Related Courses --- --}}
     <div class="col-lg-4">
       <div class="sticky-top" style="top: 80px;">
 
-        {{!-- Purchase Card --}}
         <div class="card shadow border-0 mb-4 overflow-hidden">
-          {{!-- Video Preview Placeholder --}}
            <div class="ratio ratio-16x9">
               <iframe src="https://www.youtube.com/embed/xBrD8dgfvBg?si=tUHdDxh7lD3a7q4g" title="Mock video preview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
           </div>
@@ -211,7 +207,7 @@
                 const response = await fetch(`/courses/{{course.course_id}}/enroll`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  credentials: 'same-origin' // Include cookies for authentication
+                  credentials: 'same-origin' 
                 });
                 
                 const data = await response.json();
@@ -266,7 +262,6 @@
             </script>
             <p class="small text-center text-muted mb-3">Đảm bảo hoàn tiền trong 30 ngày</p>
 
-            {{!-- Course Includes List --}}
              <h6 class="fw-semibold small">Khóa học này bao gồm:</h6>
             <ul class="list-unstyled small text-muted mb-0">
               <li class="mb-1"><i class="bi bi-camera-video me-2 text-primary"></i> {{course.total_hours}} giờ video theo yêu cầu</li>
@@ -279,7 +274,6 @@
           </div>
         </div>
 
-        {{!-- Related Courses Card --}}
         {{#if relatedCourses.length}}
         <div class="card shadow-sm border-0">
           <div class="card-header bg-light fw-semibold">Khóa học liên quan</div>
@@ -299,23 +293,19 @@
         </div>
         {{/if}}
 
-      </div> {{!-- End Sticky Top --}}
-    </div> {{!-- End Right Column --}}
+      </div> 
+    </div> 
 
-  </div> {{!-- End Row --}}
-</div> {{!-- End Container --}}
+  </div>
+</div> 
 
-{{!-- Section for JavaScript --}}
 {{#section "js"}}
 <script>
-  // Script for instant favorite button update
   document.addEventListener('DOMContentLoaded', () => {
-    // console.log("✅ Detail page JS loaded."); // Optional: Keep for debugging
 
     const favoriteContainer = document.getElementById('favorite-button-container');
 
     if (favoriteContainer) {
-      // console.log("✅ Favorite container (#favorite-button-container) found."); // Optional
 
       const initialForm = favoriteContainer.querySelector('form');
       let courseId = null;
@@ -324,20 +314,17 @@
          if (actionParts.length >= 3) { courseId = actionParts[actionParts.length - 2]; }
       }
       if (!courseId) {
-           console.error("❌ ERROR: Could not extract course ID from form action.");
+           console.error(" ERROR: Could not extract course ID from form action.");
            courseId = '{{course.course_id}}'; // Fallback
            if (!courseId || courseId === 'undefined' || courseId === '') {
-                console.error("❌ ERROR: Fallback course ID is also invalid."); return;
+                console.error(" ERROR: Fallback course ID is also invalid."); return;
            }
-           console.warn("⚠️ Falling back to Handlebars variable for course ID:", courseId);
+           console.warn("Falling back to Handlebars variable for course ID:", courseId);
       }
-      // console.log("➡️ Course ID for favorite logic:", courseId); // Optional
 
 
-      // Function to update button appearance instantly
       const updateButtonAppearance = (isNowFavorite) => {
-        // console.log("🔄 Updating button appearance. Is now favorite:", isNowFavorite); // Optional
-        favoriteContainer.style.opacity = '0.5'; // Dim while processing
+        favoriteContainer.style.opacity = '0.5'; 
         favoriteContainer.style.pointerEvents = 'none';
 
         if (isNowFavorite) {
@@ -357,74 +344,57 @@
             </form>
           `;
         }
-        // console.log("✅ Button HTML updated."); // Optional
-        setTimeout(() => { // Re-enable after short delay
+        setTimeout(() => { 
             favoriteContainer.style.opacity = '1';
             favoriteContainer.style.pointerEvents = 'auto';
         }, 300);
       };
 
-      // Use event delegation on the container for form submissions
       favoriteContainer.addEventListener('submit', async (event) => {
-         event.preventDefault(); // Prevent default form submission
-         // console.log("🚫 Default form submission prevented."); // Optional
+         event.preventDefault(); 
 
          if (event.target.matches('#favorite-form, #unfavorite-form')) {
-              // console.log('🖱️ Submit event detected on form:', event.target.id); // Optional
 
               const form = event.target;
               const url = form.action;
               const method = form.method.toUpperCase();
               let isAddingFavorite = (form.id === 'favorite-form');
 
-              // Show loading state / disable button immediately
               const submitButton = form.querySelector('button');
               if(submitButton) submitButton.disabled = true;
               favoriteContainer.style.opacity = '0.5';
               favoriteContainer.style.pointerEvents = 'none';
 
 
-              // --- MANUALLY SEND REQUEST USING FETCH ---
               try {
-                  // console.log(`📡 Sending ${method} request to: ${url}`); // Optional
                   const response = await fetch(url, {
                       method: method,
-                      headers: { 'Accept': 'application/json' }, // Tell server we prefer JSON
+                      headers: { 'Accept': 'application/json' }, 
                   });
 
-                  // console.log(`🚦 Server response status: ${response.status}`); // Optional
 
                   if (response.ok) {
-                      // console.log(`✅ Request to ${url} successful.`); // Optional
-                      // Update button appearance AFTER successful request
                       updateButtonAppearance(isAddingFavorite);
                   } else {
-                      // Handle server errors
-                      console.error(`❌ Request to ${url} failed with status ${response.status}.`);
+                      console.error(` Request to ${url} failed with status ${response.status}.`);
                       alert(`Lỗi ${response.status}: Không thể cập nhật danh sách yêu thích. Trang sẽ được tải lại.`);
-                      window.location.reload(); // Reload page on error to reset state
+                      window.location.reload(); 
                   }
               } catch (error) {
-                  // Handle network errors
-                  console.error(`❌ Network error during fetch to ${url}:`, error);
+             
+                  console.error(` Network error during fetch to ${url}:`, error);
                   alert("Lỗi mạng: Không thể kết nối. Trang sẽ được tải lại.");
-                  window.location.reload(); // Reload page on error to reset state
+                  window.location.reload(); 
               } finally {
-                  // Re-enable button/container in case update failed visually but request went through
-                  // (updateButtonAppearance already handles re-enabling on success)
                  if(submitButton) submitButton.disabled = false;
-                 // Ensure container is re-enabled if updateButtonAppearance didn't run on error
                  favoriteContainer.style.opacity = '1';
                  favoriteContainer.style.pointerEvents = 'auto';
               }
-          } else {
-              // console.warn("⚠️ Submit event detected, but not on recognized form."); // Optional
-          }
+          } 
       });
-      // console.log("✅ Submit listener (using fetch) attached."); // Optional
 
     } else {
-      console.error("❌ ERROR: Favorite button container (#favorite-button-container) was NOT found.");
+      console.error(" ERROR: Favorite button container (#favorite-button-container) was NOT found.");
     }
   });
 </script>

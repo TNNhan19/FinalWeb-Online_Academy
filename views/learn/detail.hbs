@@ -1,6 +1,5 @@
 <div class="container my-4">
 
-  {{!-- ======= VIDEO PLAYER SECTION ======= --}}
   <div class="video-player-container shadow-lg mb-4 rounded-3 overflow-hidden">
     <div id="plyr-root" class="position-relative w-100"></div>
     <div id="video-overlay-info"
@@ -13,7 +12,6 @@
     </div>
   </div>
 
-  {{!-- ======= COURSE NAVIGATION TABS ======= --}}
   <ul class="nav nav-tabs mb-4 border-0 shadow-sm rounded-3 overflow-hidden bg-white" id="learnTabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active fw-semibold" id="tab-course" data-bs-toggle="tab" data-bs-target="#pane-course"
@@ -30,10 +28,8 @@
   </ul>
 
   <div class="tab-content">
-    {{!-- ==================== TAB 1: KHÓA HỌC ==================== --}}
     <div class="tab-pane fade show active" id="pane-course" role="tabpanel" aria-labelledby="tab-course">
 
-      {{!-- Accordion: Danh sách chương & bài học --}}
       <div class="accordion mb-4" id="courseAccordion">
         {{#each courseData.sections}}
         <div class="accordion-item shadow-sm mb-3 border-0 rounded-3">
@@ -47,13 +43,12 @@
             data-bs-parent="#courseAccordion">
             <div class="accordion-body p-0">
               <ul class="list-group list-group-flush">
-                {{!-- ⭐ 1. MODIFIED LECTURE LINK --}}
                 {{#each lectures}}
                 <li
                   class="list-group-item list-group-item-action lecture-link d-flex justify-content-between align-items-center {{#if is_completed}}list-group-item-success{{/if}}"
                   data-video-url="{{video_url}}" 
                   data-lecture-title="{{title}}"
-                  data-lecture-id="{{lecture_id}}" {{!-- Added lecture ID --}}
+                  data-lecture-id="{{lecture_id}}" 
                   style="cursor:pointer;">
                   <span class="text-truncate">
                     {{#if is_completed}}
@@ -66,7 +61,6 @@
                   <small class="text-muted">{{formatDuration duration}}</small>
                 </li>
                 {{/each}}
-                {{!-- ⭐ END MODIFIED LECTURE LINK --}}
               </ul>
             </div>
           </div>
@@ -76,14 +70,12 @@
         {{/each}}
       </div>
 
-      {{!-- Mô tả khóa học --}}
       <h5 class="fw-semibold mt-5 mb-3">Mô tả khóa học</h5>
       <div class="bg-light p-4 rounded-3">
         {{{courseData.course.detail_html}}}
       </div>
     </div>
 
-    {{!-- ==================== TAB 2: ĐÁNH GIÁ ==================== --}}
     <div class="tab-pane fade" id="pane-reviews" role="tabpanel" aria-labelledby="tab-reviews">
       <h5 class="fw-semibold mb-3">Viết đánh giá của bạn</h5>
       {{#if isEnrolled}}
@@ -141,7 +133,6 @@
 </div>
 
 
-{{!-- ==================== CSS ==================== --}}
 {{#section 'css'}}
 <style>
   .video-player-container {
@@ -171,7 +162,6 @@
     color: #ffc107;
   }
 
-  /* ⭐ ADDED: Style for completed lectures */
   .list-group-item.list-group-item-success {
       background-color: #f0fdf4; /* Light green */
       color: #3f621e; /* Dark green text */
@@ -183,7 +173,6 @@
 {{/section}}
 
 
-{{!-- ==================== PLYR + JS ==================== --}}
 {{#section 'js'}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.css" />
 <script src="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.polyfilled.min.js"></script>
@@ -198,12 +187,10 @@
     let player = null;
     let hls = null;
     
-    // ⭐ 2. ADDED: Variables to track state
     let currentLectureId = null;
     let currentLectureElement = null;
     const currentCourseId = {{courseData.course.course_id}}; // Get course ID from Handlebars
 
-    // --- Helper functions ---
     const isYouTube = u => /youtu\.?be/.test(u || '');
     const isVimeo = u => /vimeo\.com/.test(u || '');
     const isHls = u => (u || '').includes('.m3u8');
@@ -212,16 +199,12 @@
     const toVimeoId = u => (u || '').match(/vimeo\.com\/(\d+)/)?.[1];
 
 
-    // ⭐ 3. ADDED: Function to send "complete" signal to server
     async function markLectureAsComplete() {
       if (!currentLectureId || !currentCourseId) return;
 
-      // Find the lecture element in the list
       const lectureEl = document.querySelector(`.lecture-link[data-lecture-id="${currentLectureId}"]`);
       
-      // If already marked as complete, do nothing
       if (lectureEl && lectureEl.classList.contains('list-group-item-success')) {
-        // console.log(`Lecture ${currentLectureId} already complete.`);
         return; 
       }
 
@@ -245,7 +228,6 @@
         
         if (result.success) {
           console.log(`Successfully marked complete. New progress: ${result.newProgress}%`);
-          // Update UI
           if (lectureEl) {
             lectureEl.classList.add('list-group-item-success');
             const icon = lectureEl.querySelector('.lecture-icon');
@@ -267,7 +249,6 @@
       if (player?.destroy) player.destroy();
       if (hls) { hls.destroy(); hls = null; }
 
-      // (Store lecture ID and element)
       currentLectureId = element.dataset.lectureId;
       currentLectureElement = element;
 
@@ -312,7 +293,6 @@
         root.innerHTML = `<div class="p-5 bg-dark text-white text-center rounded-3">Không thể tải video. Định dạng không được hỗ trợ.</div>`;
       }
       
-      // ⭐ 4. ADDED: Event listener for when video finishes
       if(player) {
         player.on('ended', () => {
           console.log('Video ended, marking as complete.');
@@ -329,7 +309,6 @@
         const url = li.dataset.videoUrl;
         const title = li.dataset.lectureTitle;
         
-        // Pass the clicked <li> element to mountPlayer
         mountPlayer(url, li); 
         
         titleEl.textContent = `Đang xem: ${title}`;
@@ -339,12 +318,10 @@
     const first = document.querySelector('.lecture-link');
     if (first) {
       first.classList.add('active', 'bg-light');
-      // Pass the first <li> element to mountPlayer
       mountPlayer(first.dataset.videoUrl, first); 
       titleEl.textContent = `Đang xem: ${first.dataset.lectureTitle}`;
     }
 
-    // --- Star Rating JS ---
     const ratingInput = document.getElementById('ratingInput');
     const stars = document.querySelectorAll('.star-rating-input > i');
 
@@ -377,7 +354,7 @@
 
         star.addEventListener('mouseout', () => {
           stars.forEach(s => s.classList.remove('hover'));
-          setRating(ratingInput.value); // Reset to current selected rating
+          setRating(ratingInput.value); 
         });
 
         star.addEventListener('click', () => {
@@ -386,8 +363,6 @@
       });
     }
 
-    // --- Handle Review Tab Anchor ---
-    // If the URL has #pane-reviews, switch to that tab
     if(window.location.hash === '#pane-reviews') {
       const tab = document.getElementById('tab-reviews');
       if (tab) {

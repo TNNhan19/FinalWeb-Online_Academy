@@ -39,7 +39,6 @@ router.get("/", async (req, res) => {
 });
 
 
-//chỉnh sửa hồ sơ
 router.get("/edit", async (req, res) => {
   if (!req.user) return res.redirect("/auth/login");
   if (!req.session.isVerified) {
@@ -47,7 +46,6 @@ router.get("/edit", async (req, res) => {
       const profile = await getProfileById(req.user.account_id);
       const otpInfo = await createOTP(profile.email);
 
-      // Gửi email chứa OTP 
       try {
         if (!process.env.MAIL_USER || !process.env.MAIL_PASS) throw new Error('Mail config missing');
         const transporter = nodemailer.createTransport({
@@ -79,7 +77,6 @@ router.get("/edit", async (req, res) => {
     }
   }
 
-  // hiển thị form edit
   const profile = await getProfileById(req.user.account_id);
   res.render("profile/edit", {
     title: "Chỉnh sửa hồ sơ",
@@ -87,7 +84,6 @@ router.get("/edit", async (req, res) => {
   });
 });
 
-// Xác thực OTP
 router.post("/verify-otp", async (req, res) => {
   if (!req.user) return res.redirect("/auth/login");
 
@@ -103,12 +99,10 @@ router.post("/verify-otp", async (req, res) => {
     });
   }
 
-  // Lưu trạng thái đã xác thực vào session
   req.session.isVerified = true;
   res.redirect("/profile/edit");
 });
 
-// Gửi lại OTP
 router.post("/resend-otp", async (req, res) => {
   if (!req.user) return res.redirect("/auth/login");
 
@@ -149,7 +143,6 @@ router.post("/resend-otp", async (req, res) => {
     }
 });
 
-// Cập nhật thông tin
 router.post("/update", async (req, res) => {
   if (!req.user) return res.redirect("/auth/login");
   if (!req.session.isVerified) return res.redirect("/profile/edit");
@@ -160,7 +153,6 @@ router.post("/update", async (req, res) => {
   try {
     let updateData = { full_name };
 
-    // Nếu có nhập mật khẩu
     if (new_password) {
       if (!old_password) {
         return res.render("profile/edit", {
@@ -178,7 +170,6 @@ router.post("/update", async (req, res) => {
         });
       }
 
-      // Kiểm tra mật khẩu cũ
       const match = await bcrypt.compare(old_password, profile.password_hash);
       if (!match) {
         return res.render("profile/edit", {
@@ -188,19 +179,14 @@ router.post("/update", async (req, res) => {
         });
       }
 
-      // Hash mật khẩu mới
       updateData.password_hash = await bcrypt.hash(new_password, 10);
     }
 
-    // Cập nhật thông tin
     await updateProfile(req.user.account_id, updateData);
     
-  // Xóa trạng thái xác thực sau khi cập nhật thành công
   delete req.session.isVerified;
-  // Xóa trạng thái xác thực mật khẩu tạm thời để bắt buộc nhập lại lần sau
   delete req.session.pwVerified;
 
-    // Cập nhật session user nếu có thay đổi tên
     req.session.user.full_name = full_name;
     
     res.redirect("/profile");
@@ -225,7 +211,6 @@ router.get("/watchlist", async (req, res) => {
     enrolledCourses.forEach(c => {
       enrolledById[c.course_id] = c; 
     });
-    // Phân loại favorites thành đã đăng ký và chưa đăng ký
     const enrolledFavs = [];
     const notEnrolledFavs = [];
 
@@ -295,9 +280,7 @@ router.get("/enrolled", async (req, res) => {
   if (!user) return res.redirect("/auth/login");
 
   try {
-    // Lấy ds khóa đã đăng ký
     const enrolledCourses = await getEnrolledCourses(user.account_id);
-    // Lấy ds khóa yêu thích
     const watchlistCourses = await getWatchlist(user.account_id);
     const enrolledWithWatchlist = await Promise.all(enrolledCourses.map(async course => ({
       ...course,

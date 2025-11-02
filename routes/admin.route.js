@@ -127,7 +127,6 @@ router.post("/categories/update/:id", async (req, res) => {
 router.post("/categories/delete/:id", async (req, res) => {
   const { id } = req.params;
 
-  // Không được xóa lĩnh vực đã có khóa học
   const { rows } = await pool.query("SELECT 1 FROM courses WHERE category_id=$1 LIMIT 1", [id]);
   if (rows.length > 0) {
     return res.send("<h3 style='color:red;text-align:center;margin-top:40px;'>Không thể xóa lĩnh vực đã có khóa học!</h3>");
@@ -137,7 +136,6 @@ router.post("/categories/delete/:id", async (req, res) => {
   res.redirect("/admin/categories");
 });
 
-// Quản lý khoá học
 router.get("/courses", async (req, res) => {
   try {
     const { category, instructor } = req.query;
@@ -188,7 +186,6 @@ router.get("/courses", async (req, res) => {
   }
 });
 
-// Gỡ bỏ khoá học
 router.post("/courses/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -215,7 +212,6 @@ router.post("/courses/delete/:id", async (req, res) => {
   }
 });
 
-// Cập nhật trạng thái khóa học
 router.post("/courses/update-status/:id", async (req, res) => {
   const { id } = req.params;
   const { newStatus } = req.body;
@@ -240,7 +236,6 @@ router.post("/courses/update-status/:id", async (req, res) => {
   }
 });
 
-// Thêm khóa học mới
 router.post("/courses/add", upload.single("image"), async (req, res) => {
   try {
     const {
@@ -361,7 +356,6 @@ router.post("/users/add-instructor/:account_id", async (req, res) => {
   }
 });
 
-// Xem và cập nhật hồ sơ người dùng
 router.get("/users/view/:role/:id", async (req, res) => {
   const { role, id } = req.params;
   let profile;
@@ -508,7 +502,6 @@ router.post("/users/delete/:role/:id", async (req, res) => {
   }
 });
 
-//Khóa / Mở tài khoản học viên, giảng viên hoặc admin
 router.post("/users/toggle/:role/:id", async (req, res) => {
   const { role, id } = req.params;
 
@@ -543,7 +536,6 @@ router.post("/users/toggle/:role/:id", async (req, res) => {
 });
 
 
-// Tao người dùng mới (Admin)
 router.post("/users/add-new", async (req, res) => {
   try {
     const { full_name, email, password, role } = req.body;
@@ -579,7 +571,6 @@ router.post("/users/add-new", async (req, res) => {
   }
 });
 
-// Thêm khoá học ở admin
 router.post("/users/add-course/:instructor_id", upload.single("image"), async (req, res) => {
   try {
     const { instructor_id } = req.params;
@@ -623,7 +614,6 @@ router.post("/users/add-course/:instructor_id", upload.single("image"), async (r
   }
 });
 
-// Xoá khoá học ở admin
 router.delete("/users/delete-course/:course_id", async (req, res) => {
   const { course_id } = req.params;
   try {

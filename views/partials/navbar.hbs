@@ -1,14 +1,11 @@
-<!-- 🌟 MAIN HEADER -->
 <header class="main-header sticky-top bg-white shadow-sm border-bottom">
   <div class="container-xxl py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
 
-    <!-- ===== Logo ===== -->
     <a href="/" class="d-flex align-items-center text-decoration-none me-auto me-md-3">
       <span class="fs-4 fw-bold text-primary">Online</span>
       <span class="fs-4 fw-bold text-dark ms-1">Academy</span>
     </a>
 
-    <!-- ===== Search (ẩn trên mobile) ===== -->
     <form id="globalSearchForm" class="d-none d-md-flex align-items-center flex-grow-1 mx-md-3" role="search" style="max-width: 380px;">
       <div class="input-group position-relative w-100">
         <input type="search" name="q" id="globalSearchInput" class="form-control rounded-pill ps-3 pe-5" placeholder="Tìm khóa học hoặc lĩnh vực..." />
@@ -19,7 +16,6 @@
     </form>
 
 
-    <!-- ===== User / Auth Buttons ===== -->
     <div class="d-flex align-items-center gap-2">
       {{#if user}}
         <div class="dropdown">
@@ -43,7 +39,6 @@
   </div>
 </header>
 
-<!-- 🌟 SECOND NAVIGATION BAR -->
 <nav class="navbar navbar-expand-lg bg-light border-bottom" style="--bs-navbar-padding-y: 0.25rem;">
   <div class="container-xxl">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavLinks"

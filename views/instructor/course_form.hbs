@@ -268,11 +268,9 @@
     }
   });
 
-  // Khi submit form -> đóng gói cấu trúc chương & bài giảng và gửi đi
   document.getElementById("courseForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Thu thập thông tin chương & bài giảng
     const sections = [...document.querySelectorAll(".section-item")].map((section) => ({
       title: section.querySelector(".section-title").value.trim(),
       lectures: [...section.querySelectorAll(".lecture-item")].map((lec) => ({

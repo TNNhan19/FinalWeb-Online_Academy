@@ -14,10 +14,8 @@ router.get("/", async (req, res) => {
   else if (sort === "bestseller") orderBy = "c.student DESC";
 
   const params = [];
-  // Exclude soft-suspended courses from public search results
   let where = "WHERE c.status <> 'suspended'";
 
-  // ✅ FULL-TEXT SEARCH + FUZZY SEARCH (pg_trgm)
   if (q) {
     params.push(q);
     params.push(`%${q}%`);
@@ -69,7 +67,7 @@ router.get("/", async (req, res) => {
       totalPages,
     });
   } catch (error) {
-    console.error("❌ Lỗi khi thực hiện truy vấn:", error);
+    console.error(" Lỗi khi thực hiện truy vấn:", error);
     res.status(500).json({ error: "Không thể tải kết quả tìm kiếm." });
   }
 });

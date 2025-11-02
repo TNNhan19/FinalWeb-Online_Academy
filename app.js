@@ -6,6 +6,7 @@ import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import hbs_sections from "express-handlebars-sections";
+import Handlebars from "handlebars";
 import session from "express-session";
 import { format } from "date-fns";
 
@@ -68,20 +69,17 @@ const hbsEngine = engine({
       for (let i = 0; i < fullStars; i++) classes.push("bi-star-fill");
       if (halfStar) classes.push("bi-star-half");
       for (let i = 0; i < emptyStars; i++) classes.push("bi-star");
-      return classes; // Return array of classes
+      return classes;
     },
-    // Check whether URL is a YouTube link
     isYouTube: (url) => {
       if (!url || typeof url !== "string") return false;
       return /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)/i.test(
         url
       );
     },
-    // Convert various YouTube URLs to embed URL
     youtubeEmbed: (url) => {
       if (!url || typeof url !== "string") return "";
       try {
-        // Extract video id from multiple YouTube URL formats
         const match = url.match(
           /(?:youtu\.be\/([\w-]{11})|v=([\w-]{11})|embed\/([\w-]{11}))/i
         );
@@ -102,7 +100,6 @@ const hbsEngine = engine({
       }
     },
     formatDuration: (durationInSeconds) => {
-      // Assuming DB stores seconds now
       if (durationInSeconds === null || durationInSeconds === undefined)
         return "";
       const totalSeconds = Number(durationInSeconds);
@@ -113,7 +110,6 @@ const hbsEngine = engine({
         .padStart(2, "0")}`;
     },
     firstLetter: (str) => (str ? str.charAt(0).toUpperCase() : "?"),
-    // Slice helper (from new file)
     slice: (arr, start, end) =>
       Array.isArray(arr) ? arr.slice(start, end) : [],
   },
@@ -122,7 +118,39 @@ const hbsEngine = engine({
   defaultLayout: "main",
 });
 
-// Log registered helpers for debugging (dev only)
+try {
+  if (Handlebars && typeof Handlebars.registerHelper === "function") {
+    Handlebars.registerHelper("section", hbs_sections());
+    Handlebars.registerHelper("formatDate", (date) => {
+      if (!date) return "N/A";
+      try {
+        return format(new Date(date), "dd/MM/yyyy");
+      } catch (e) {
+        return date ? date.toString() : "N/A";
+      }
+    });
+    Handlebars.registerHelper("formatDuration", (durationInSeconds) => {
+      if (durationInSeconds === null || durationInSeconds === undefined)
+        return "";
+      const totalSeconds = Number(durationInSeconds);
+      if (Number.isNaN(totalSeconds)) return "";
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+    });
+    console.log(
+      "Registered fallback helpers on global Handlebars: section, formatDate"
+    );
+  }
+} catch (e) {
+  console.warn(
+    "Could not register fallback helpers on Handlebars:",
+    e && e.message
+  );
+}
+
 try {
   const helpersObj =
     hbsEngine && hbsEngine.handlebars && hbsEngine.handlebars.helpers;
@@ -136,13 +164,11 @@ try {
 }
 
 app.engine("hbs", hbsEngine);
-// Disable view cache in development to avoid stale compiled templates
 if (process.env.NODE_ENV !== "production") app.set("view cache", false);
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
 
-// Log registered helpers for debugging (dev only)
 try {
   const helpersObj =
     hbsEngine && hbsEngine.handlebars && hbsEngine.handlebars.helpers;
@@ -155,10 +181,6 @@ try {
   console.warn("Could not list handlebars helpers:", e && e.message);
 }
 
-// app.engine("hbs", hbsEngine);
-// // Disable view cache in development to avoid stale compiled templates
-// if (process.env.NODE_ENV !== "production") app.set("view cache", false);
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "Public")));
@@ -167,19 +189,17 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
     resave: false,
-    saveUninitialized: false, // Don't save empty sessions
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }, // Session duration
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 },
   })
 );
 
-// Đọc session user và lưu vào res.locals để template có thể truy cập
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.isAuthenticated = !!req.session.user;
   next();
 });
 
-// Đăng ký các routes
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
 app.use("/courses", coursesRoutes);
@@ -191,34 +211,11 @@ app.use("/enrollment", enrollmentRoutes);
 app.use("/profile", profileRoutes);
 app.use("/learn", Learn);
 
-// Redirect /home to /
 app.get("/home", (req, res) => res.redirect("/"));
 app.use("/category", categoryRoute);
 app.use("/categories", categoryRoutes);
 app.use("/search", searchApi);
 app.use("/api/search", searchApi);
-
-app.engine("hbs", engine({
-  extname: ".hbs",
-  helpers: {
-    slice: function (arr, start, end) {
-      if (!Array.isArray(arr)) return [];
-      return arr.slice(start, end);
-    },
-  }
-}));
-app.engine("hbs", engine({
-  extname: ".hbs",
-  partialsDir: path.join(__dirname, "views/partials"),
-  helpers: {
-    slice: (arr, start, end) => Array.isArray(arr) ? arr.slice(start, end) : [],
-  },
-}));
-
-
-app.use("/api/search", searchApi);
-app.use(express.static("Public"));
-
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.listen(PORT, () => {

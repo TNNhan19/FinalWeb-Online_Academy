@@ -8,7 +8,6 @@ import * as enrollmentModel from '../models/enrollmentModel.js';
 
 const router = express.Router();
 
- //API: Lấy chi tiết khóa học + tăng lượt xem (dành cho modal / AJAX)
 
 router.get("/detail/:id", async (req, res) => {
   try {
@@ -18,37 +17,30 @@ router.get("/detail/:id", async (req, res) => {
       return res.status(400).json({ error: "ID khóa học không hợp lệ" });
     }
 
-    // 1️⃣ Tăng view trong bảng "courses"
     await db.query("UPDATE courses SET view = view + 1 WHERE course_id = $1", [courseId]);
 
-    // 2️⃣ Ghi log lượt xem vào bảng "course_views"
     await db.query(
       "INSERT INTO course_views (course_id, viewed_at) VALUES ($1, NOW())",
       [courseId]
     );
 
-    // 3️⃣ Lấy lại thông tin chi tiết khóa học
     const course = await findById(courseId);
     if (!course) {
       return res.status(404).json({ error: "Khóa học không tồn tại" });
     }
 
-    // Không trả chi tiết cho khóa học đã bị suspend
     if (course.status === 'suspended') {
       return res.status(404).json({ error: "Khóa học không tồn tại" });
     }
 
-    // ✅ Trả dữ liệu JSON cho front-end (dùng trong modal)
     res.json(course);
   } catch (error) {
-    console.error("❌ Lỗi khi tải chi tiết khóa học:", error);
+    console.error(" Lỗi khi tải chi tiết khóa học:", error);
     res.status(500).json({ error: "Không thể tải dữ liệu khóa học." });
   }
 });
 
-/* ===========================================================
-   🧱 2️⃣ Trang chi tiết đầy đủ (hiển thị giao diện .hbs)
-   =========================================================== */
+
 router.get('/:id', async (req, res, next) => {
   try {
     const courseId = parseInt(req.params.id);
@@ -60,7 +52,6 @@ router.get('/:id', async (req, res, next) => {
       });
     }
 
-    // Lấy toàn bộ chi tiết (instructor, section, review, gallery,…)
     const courseDetails = await getCourseDetailsById(courseId);
 
     if (!courseDetails || !courseDetails.course) {
@@ -71,7 +62,6 @@ router.get('/:id', async (req, res, next) => {
       });
     }
 
-    // Kiểm tra trạng thái đăng ký và yêu thích nếu user đã đăng nhập
     let isEnrolled = false;
     let isInWatchlist = false;
     let isFavorite = false;
@@ -85,7 +75,6 @@ router.get('/:id', async (req, res, next) => {
       isFavorite = isInWatchlist;
     }
 
-    // Render the full detail page once
     return res.render('courses/detail', {
       layout: 'main',
       pageTitle: courseDetails.course.title,
@@ -96,14 +85,12 @@ router.get('/:id', async (req, res, next) => {
       isFavorite,
     });
   } catch (error) {
-    console.error('❌ Lỗi khi lấy chi tiết khóa học (PAGE):', error);
+    console.error(' Lỗi khi lấy chi tiết khóa học (PAGE):', error);
     next(error);
   }
 });
 
-/* ===========================================================
-   💖 3️⃣ Thêm khóa học vào danh sách yêu thích (Watchlist)
-   =========================================================== */
+
 router.post("/:id/favorite", async (req, res) => {
   try {
     console.log('Favorite request - Params:', req.params);
@@ -119,7 +106,7 @@ router.post("/:id/favorite", async (req, res) => {
     await profileModel.addToWatchlist(user.account_id, courseId);
     res.json({ success: true });
   } catch (err) {
-    console.error('❌ Lỗi add watchlist:', err);
+    console.error(' Lỗi add watchlist:', err);
     res.status(500).json({ 
       error: 'Có lỗi xảy ra khi thêm vào yêu thích',
       message: err.message 
@@ -127,9 +114,7 @@ router.post("/:id/favorite", async (req, res) => {
   }
 });
 
-/* ===========================================================
-   💔 4️⃣ Xóa khóa học khỏi danh sách yêu thích (Watchlist)
-   =========================================================== */
+
 router.post("/:id/unfavorite", async (req, res) => {
   try {
     console.log('Unfavorite request - Params:', req.params);
@@ -145,7 +130,7 @@ router.post("/:id/unfavorite", async (req, res) => {
     await profileModel.removeFromWatchlist(user.account_id, courseId);
     res.json({ success: true });
   } catch (err) {
-    console.error('❌ Lỗi remove watchlist:', err);
+    console.error(' Lỗi remove watchlist:', err);
     res.status(500).json({ 
       error: 'Có lỗi xảy ra khi xóa khỏi yêu thích',
       message: err.message 
@@ -153,7 +138,6 @@ router.post("/:id/unfavorite", async (req, res) => {
   }
 });
 
-// 📚 Đăng ký khóa học
 router.post('/:id/enroll', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -163,14 +147,12 @@ router.post('/:id/enroll', async (req, res) => {
     const user = req.session.user;
     console.log('User from session:', user);
 
-    // Kiểm tra xem user có student record chưa
     const studentQuery = `SELECT student_id FROM students WHERE account_id = $1`;
     const studentResult = await pool.query(studentQuery, [user.account_id]);
     console.log('Student query result:', studentResult.rows);
     
     let studentId;
     if (!studentResult.rows || studentResult.rows.length === 0) {
-      // Tự động tạo student record nếu chưa có
       const insertStudentQuery = `
         INSERT INTO students (account_id, name) 
         VALUES ($1, $2) 
@@ -188,7 +170,6 @@ router.post('/:id/enroll', async (req, res) => {
 
     const courseId = req.params.id;
 
-    // Kiểm tra khóa học tồn tại
     const course = await findById(courseId);
     if (!course) {
       return res.status(404).json({ error: 'Không tìm thấy khóa học' });
@@ -197,7 +178,6 @@ router.post('/:id/enroll', async (req, res) => {
       return res.status(404).json({ error: 'Không tìm thấy khóa học' });
     }
 
-    // Kiểm tra đã đăng ký chưa
     const checkEnrollmentQuery = `
       SELECT * FROM enrollments 
       WHERE student_id = $1 AND course_id = $2
@@ -208,7 +188,6 @@ router.post('/:id/enroll', async (req, res) => {
       return res.status(400).json({ error: 'Bạn đã đăng ký khóa học này rồi' });
     }
 
-    // Thực hiện đăng ký
     const enrollQuery = `
       INSERT INTO enrollments (student_id, course_id, enrolled_at, progress)
       VALUES ($1, $2, CURRENT_TIMESTAMP, 0)
@@ -222,7 +201,7 @@ router.post('/:id/enroll', async (req, res) => {
       redirect: `/profile/enrolled`
     });
   } catch (error) {
-    console.error('❌ Lỗi đăng ký khóa học:', error);
+    console.error(' Lỗi đăng ký khóa học:', error);
     res.status(500).json({ 
       error: 'Có lỗi xảy ra khi đăng ký khóa học',
       details: error.message

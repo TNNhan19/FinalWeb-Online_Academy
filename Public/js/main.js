@@ -4,10 +4,8 @@ function formatStudents(num) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ Script main.js đã sẵn sàng.");
+  console.log(" Script main.js đã sẵn sàng.");
 
-// ===================== 1️⃣ XỬ LÝ CLICK DANH MỤC (CATEGORY - TOÀN BỘ KHÓA HỌC) =====================
-// 🔧 Chỉ chọn các thẻ category-card bên trong section Danh Mục
 const categorySection = document.querySelector(".category-section");
 const categoryCards = categorySection ? categorySection.querySelectorAll(".category-card") : [];
 const categoryList = document.getElementById("categoryList");
@@ -21,7 +19,7 @@ if (categoryCards.length && categoryList) {
         if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
 
         const courses = await res.json();
-        console.log("📦 Dữ liệu khóa học theo danh mục:", courses);
+        console.log("Dữ liệu khóa học theo danh mục:", courses);
 
         // Xóa các khối cũ
         document.querySelectorAll(".course-block").forEach(block => block.remove());
@@ -71,13 +69,12 @@ if (categoryCards.length && categoryList) {
           </div>`;
         categoryList.insertAdjacentElement("afterend", wrapper);
       } catch (err) {
-        console.error("❌ Lỗi khi tải danh mục:", err);
+        console.error("Lỗi khi tải danh mục:", err);
         alert("Không thể tải danh sách khóa học. Vui lòng thử lại!");
       }
     });
   });
 }
-// ===================== 🆕 1.5 XỬ LÝ CLICK TRONG TOP CATEGORIES =====================
 const topCategoryCards = document.querySelectorAll(".top-categories .category-card");
 
 if (topCategoryCards.length) {
@@ -94,7 +91,7 @@ if (topCategoryCards.length) {
         if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
 
         const courses = await res.json();
-        console.log("🔥 Dữ liệu khóa học từ top-categories:", courses);
+        console.log(" Dữ liệu khóa học từ top-categories:", courses);
 
         document.querySelectorAll(".course-block").forEach(block => block.remove());
         const container = card.closest(".top-categories").querySelector(".container");
@@ -161,15 +158,12 @@ if (topCategoryCards.length) {
           window.scrollTo({ top: container.offsetTop - 100, behavior: "smooth" });
         });
       } catch (error) {
-        console.error("❌ Lỗi khi tải lĩnh vực:", error);
+        console.error("Lỗi khi tải lĩnh vực:", error);
       }
     });
   });
 }
 
-
-
-  // ===================== 2️⃣ NÚT LỌC KHÓA HỌC (FILTER - KHÓA HỌC BÁN CHẠY) =====================
   const filterButtons = document.querySelectorAll(".filter-btn");
   const popularGrid = document.getElementById("popularCoursesGrid");
 
@@ -178,13 +172,11 @@ if (topCategoryCards.length) {
       btn.addEventListener("click", async () => {
         const selectedCategory = btn.dataset.category;
 
-        // Đổi màu nút đang chọn
         filterButtons.forEach(b => b.classList.remove("active", "btn-outline-primary"));
         filterButtons.forEach(b => b.classList.add("btn-outline-secondary"));
         btn.classList.add("active", "btn-outline-primary");
         btn.classList.remove("btn-outline-secondary");
 
-        // Hiển thị loading
         popularGrid.innerHTML = `
           <div class="col-12 text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -194,14 +186,12 @@ if (topCategoryCards.length) {
         `;
 
         try {
-          // 🧠 Gọi API khóa học bán chạy
           const res = await fetch(`/category/api/bestseller/${encodeURIComponent(selectedCategory)}`);
           if (!res.ok) throw new Error("Lỗi khi gọi API khóa học bán chạy");
 
           const courses = await res.json();
-          console.log("🔥 Dữ liệu khóa học bán chạy:", courses);
+          console.log(" Dữ liệu khóa học bán chạy:", courses);
 
-          // 🧹 Làm sạch lưới
           popularGrid.innerHTML = "";
 
           if (!courses.length) {
@@ -212,7 +202,6 @@ if (topCategoryCards.length) {
             return;
           }
 
-          // 🔧 Sinh HTML hiển thị
           const html = courses
             .map(
               c => `
@@ -255,7 +244,7 @@ if (topCategoryCards.length) {
 
           popularGrid.innerHTML = html;
         } catch (error) {
-          console.error("❌ Lỗi khi tải khóa học bán chạy:", error);
+          console.error("Lỗi khi tải khóa học bán chạy:", error);
           popularGrid.innerHTML = `
             <div class="col-12 text-center text-danger py-5">
               <p>Không thể tải danh sách khóa học bán chạy. Vui lòng thử lại!</p>
@@ -265,7 +254,6 @@ if (topCategoryCards.length) {
     });
   }
 
-  // ===================== 🟣 MODAL CHI TIẾT KHÓA HỌC - TOÀN TRANG =====================
   document.body.addEventListener("click", async (e) => {
     const card = e.target.closest(".course-card");
     if (!card) return;
@@ -276,7 +264,6 @@ if (topCategoryCards.length) {
     const modalEl = document.getElementById("courseModal");
     const modalBody = document.getElementById("modalContent");
 
-    // Hiển thị loading trước khi fetch
     modalBody.innerHTML = `
       <div class="text-center text-muted py-5">Đang tải thông tin khóa học...</div>
     `;
@@ -331,7 +318,6 @@ if (topCategoryCards.length) {
       }
       modalInstance.show();
 
-      // Attach enroll handler for the modal's enroll button so the popup Đăng ký works
       try {
         const modalEnrollBtn = modalBody.querySelector('#modalEnrollButton');
         if (modalEnrollBtn) {
@@ -371,7 +357,7 @@ if (topCategoryCards.length) {
       });
 
     } catch (error) {
-      console.error("❌ Lỗi khi hiển thị chi tiết khóa học:", error);
+      console.error(" Lỗi khi hiển thị chi tiết khóa học:", error);
       modalBody.innerHTML = `
         <div class="text-center text-danger py-5">
           Không thể tải thông tin khóa học. Vui lòng thử lại sau!
@@ -382,7 +368,6 @@ if (topCategoryCards.length) {
 
 
 
-// ===================== 🔍 TÌM KIẾM KHÓA HỌC TOÀN TRANG (4 khóa/trang) =====================
 const searchForm = document.querySelector("#globalSearchForm");
 const searchInput = document.querySelector("#globalSearchInput");
 const searchResultsSection = document.querySelector("#searchResultsSection");
@@ -393,19 +378,17 @@ const sortSelect = document.querySelector("#sortSelect");
 let currentPage = 1;
 let currentSort = "rating_desc";
 let currentKeyword = "";
-let lastResults = [];     // lưu kết quả thô của lần tìm gần nhất
+let lastResults = [];     
 const PER_PAGE = 4;
 
 function normalizeCoursesPayload(data) {
-  // data có thể là mảng [] hoặc object { courses: [...] }
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.courses)) return data.courses;
-  return []; // fallback an toàn
+  return []; 
 }
 
 async function fetchSearchResults(keyword, page = 1, sort = "rating_desc") {
   try {
-    // loading tối giản
     searchResultsSection.style.display = "block";
     searchResultsContainer.innerHTML = `
       <div class="col-12 text-center py-5">
@@ -417,13 +400,12 @@ async function fetchSearchResults(keyword, page = 1, sort = "rating_desc") {
     const res = await fetch(`/api/search?q=${encodeURIComponent(keyword)}&page=${page}&sort=${sort}`);
     const raw = await res.json();
 
-    // Chuẩn hóa về mảng courses
     lastResults = normalizeCoursesPayload(raw);
 
-    currentPage = 1; // luôn quay về trang 1 khi tìm mới
+    currentPage = 1; 
     renderSearchResults(currentPage);
   } catch (err) {
-    console.error("❌ Lỗi khi tải kết quả tìm kiếm:", err);
+    console.error(" Lỗi khi tải kết quả tìm kiếm:", err);
     searchResultsSection.style.display = "block";
     searchResultsContainer.innerHTML = `
       <div class="col-12 text-center text-danger py-5">
@@ -456,7 +438,7 @@ function renderSearchResults(page) {
   coursesToShow.forEach(c => {
   const isNew = c.is_new;
   const isHot = (c.student || 0) > 2000;
-  const badge = isHot ? "🔥 Best Seller" : (isNew ? "🆕 Mới" : "");
+  const badge = isHot ? " Best Seller" : (isNew ? "🆕 Mới" : "");
 
   searchResultsContainer.innerHTML += `
     <div class="col-12 col-sm-6 col-lg-3 d-flex">
@@ -494,7 +476,6 @@ function renderSearchResults(page) {
 });
 
 
-  // Phân trang
   paginationNav.style.display = totalPages > 1 ? "flex" : "none";
   const curPageEl = document.querySelector("#currentPage");
   if (curPageEl) curPageEl.textContent = `${page}/${totalPages}`;
@@ -504,7 +485,6 @@ function renderSearchResults(page) {
   if (prevBtn) prevBtn.disabled = page <= 1;
   if (nextBtn) nextBtn.disabled = page >= totalPages;
 
-  // Rebind click để dùng cùng dataset đã có
   if (prevBtn) prevBtn.onclick = () => {
     if (currentPage > 1) {
       currentPage--;
@@ -521,14 +501,12 @@ function renderSearchResults(page) {
   };
 }
 
-// Gửi khi nhấn tìm
 searchForm?.addEventListener("submit", e => {
   e.preventDefault();
   currentKeyword = (searchInput?.value || "").trim();
   if (!currentKeyword) return;
   fetchSearchResults(currentKeyword, 1, currentSort);
 
-  // Cuộn xuống phần kết quả
   setTimeout(() => {
     if (searchResultsSection) {
       searchResultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -536,18 +514,14 @@ searchForm?.addEventListener("submit", e => {
   }, 300);
 });
 
-// Thay đổi sắp xếp -> render lại từ trang 1, dùng kết quả cũ nếu có
 sortSelect?.addEventListener("change", e => {
   currentSort = e.target.value;
   if (currentKeyword) {
-    // nếu muốn gọi lại server theo sort, dùng fetchSearchResults
-    // còn nếu chỉ sort client-side, bạn có thể sắp xếp lastResults tại đây
     fetchSearchResults(currentKeyword, 1, currentSort);
   }
 });
 
 
-// ===================== 🆕 CLICK TRONG "LĨNH VỰC ĐĂNG KÝ NHIỀU TRONG TUẦN" =====================
 const topCategorySection = document.querySelector(".top-categories");
 const topCategoryCardsWeekly = topCategorySection ? topCategorySection.querySelectorAll(".category-card") : [];
 
@@ -558,20 +532,18 @@ if (topCategoryCardsWeekly.length) {
 
     card.addEventListener("click", async () => {
       const category = card.dataset.category;
-      console.log("🔎 Click lĩnh vực:", category);
+      console.log("Click lĩnh vực:", category);
 
       try {
         const res = await fetch(`/category/api/all/${encodeURIComponent(category)}`);
         if (!res.ok) throw new Error("Lỗi khi gọi API danh mục");
 
         const courses = await res.json();
-        console.log("📚 Khóa học thuộc lĩnh vực:", courses);
+        console.log(" Khóa học thuộc lĩnh vực:", courses);
 
-        // Xóa phần cũ nếu có
         document.querySelectorAll(".course-block").forEach(block => block.remove());
         const container = topCategorySection.querySelector(".container");
 
-        // Nếu không có khóa học
         if (!courses || !courses.length) {
           const msg = document.createElement("div");
           msg.className = "alert alert-info mt-3 text-center course-block";
@@ -580,12 +552,10 @@ if (topCategoryCardsWeekly.length) {
           return;
         }
 
-        // ===== ⚙️ Biến phân trang =====
         let currentPage = 1;
         const perPage = 4;
         const totalPages = Math.ceil(courses.length / perPage);
 
-        // ===== ⚙️ Hàm render khóa học theo trang =====
         const renderPage = (page) => {
           const start = (page - 1) * perPage;
           const end = start + perPage;
@@ -626,7 +596,6 @@ if (topCategoryCardsWeekly.length) {
           `;
         };
 
-        // ===== ⚙️ Hàm render toàn khối =====
         const renderWrapper = () => {
           wrapper.innerHTML = `
             <div class="section-header text-center mb-5">
@@ -645,14 +614,12 @@ if (topCategoryCardsWeekly.length) {
           `;
         };
 
-        // ===== ⚙️ Tạo wrapper và gắn render =====
         const wrapper = document.createElement("div");
         wrapper.className = "py-5 bg-white course-block";
         renderWrapper();
         container.appendChild(wrapper);
         wrapper.scrollIntoView({ behavior: "smooth" });
 
-        // ===== ⚙️ Gắn sự kiện phân trang =====
         const updateEvents = () => {
           const prevBtn = wrapper.querySelector("#prevPage");
           const nextBtn = wrapper.querySelector("#nextPage");
@@ -680,45 +647,40 @@ if (topCategoryCardsWeekly.length) {
           });
         };
 
-        // Kích hoạt sự kiện ban đầu
         updateEvents();
       } catch (error) {
-        console.error("❌ Lỗi khi tải lĩnh vực:", error);
+        console.error(" Lỗi khi tải lĩnh vực:", error);
         alert("Không thể tải danh sách khóa học. Vui lòng thử lại!");
       }
     });
   });
 }
 
-// ✅ Đóng DOMContentLoaded
 });
 
 
-// ===================== 🟢 XỬ LÝ CLICK DANH MỤC CON (CÓ PHÂN TRANG) =====================
 const subCategoryItems = document.querySelectorAll(".category-section li[data-category]");
 
 if (subCategoryItems.length) {
   subCategoryItems.forEach(item => {
     item.addEventListener("click", async (e) => {
-      e.stopPropagation(); // ❗ Ngăn sự kiện lan lên category-card cha
+      e.stopPropagation(); 
 
       const subCategory = item.dataset.category;
-      console.log("🟢 Click mục con:", subCategory);
+      console.log(" Click mục con:", subCategory);
 
       try {
         const res = await fetch(`/category/api/all/${encodeURIComponent(subCategory)}`);
         if (!res.ok) throw new Error("Lỗi khi gọi API danh mục con");
 
         const courses = await res.json();
-        console.log("📚 Dữ liệu khóa học mục con:", courses);
+        console.log("Dữ liệu khóa học mục con:", courses);
 
-        // Xóa các khối cũ trước đó
         document.querySelectorAll(".course-block").forEach(block => block.remove());
 
         const wrapper = document.createElement("div");
         wrapper.className = "mt-5 course-block container";
 
-        // Nếu không có khóa học
         if (!courses || !courses.length) {
           wrapper.innerHTML = `
             <div class="alert alert-info text-center">
@@ -728,7 +690,6 @@ if (subCategoryItems.length) {
           return;
         }
 
-        // ===================== 🧭 PHÂN TRANG =====================
         let currentPage = 1;
         const itemsPerPage = 4;
 
@@ -789,7 +750,6 @@ if (subCategoryItems.length) {
             </nav>
           `;
 
-          // Điều hướng trang
           const prevBtn = wrapper.querySelector("#prevPage");
           const nextBtn = wrapper.querySelector("#nextPage");
           prevBtn.disabled = page === 1;
@@ -812,12 +772,11 @@ if (subCategoryItems.length) {
           });
         }
 
-        // ✅ Hiển thị trang đầu tiên
         renderCoursesPage(1);
         categoryList.insertAdjacentElement("afterend", wrapper);
 
       } catch (err) {
-        console.error("❌ Lỗi khi tải mục con:", err);
+        console.error(" Lỗi khi tải mục con:", err);
       }
     });
   });

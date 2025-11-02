@@ -1,8 +1,6 @@
-{{!-- views/learn/course.hbs --}}
 <div class="container-fluid mt-4">
   <div class="row g-4">
 
-    {{!-- Cột Trái: Video Player & Review Form --}}
     <div class="col-lg-8">
       <h3 class="mb-3">{{courseData.course.title}}</h3>
 
@@ -18,28 +16,21 @@
         Chưa có bài giảng
         {{/if}}
       </p>
-      {{!-- ⭐ END Khu vực Video Player --}}
 
 
-      {{!-- Course Description --}}
       <div>
         <h4>Mô tả khóa học</h4>
         <p>{{courseData.course.description}}</p>
-        {{!-- Display detailed description if desired --}}
-        {{!-- <div class="card card-body border-0 bg-light mb-4 p-4">
-          <h5>Chi tiết:</h5>{{{courseData.course.detail_html}}}
-        </div> --}}
+ 
       </div>
 
-      {{!-- ⭐ FORM ĐÁNH GIÁ --}}
-      {{#if isEnrolled}} {{!-- Chỉ hiển thị form nếu biến isEnrolled được truyền từ route là true --}}
+      {{#if isEnrolled}} 
       <hr class="my-4">
       <div class="card mt-4 shadow-sm">
         <div class="card-header bg-light">
           <strong>Viết đánh giá của bạn</strong>
         </div>
         <div class="card-body">
-          {{!-- Display success/error messages based on query parameters --}}
           {{#if query.success}}
           <div class="alert alert-success alert-dismissible fade show" role="alert">
             Đã lưu đánh giá của bạn!
@@ -60,7 +51,6 @@
           <form action="/learn/{{courseData.course.course_id}}/review" method="POST">
             <div class="mb-3">
               <label for="rating" class="form-label mb-0">Xếp hạng:</label>
-              {{!-- Star Rating using Radio Buttons and CSS --}}
               <div id="rating" class="fs-4 star-rating mb-2">
                 <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 sao">★</label>
                 <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 sao">★</label>
@@ -80,14 +70,10 @@
         </div>
       </div>
       {{else}}
-      {{!-- Optional: Message if user is not enrolled but somehow got here --}}
-      {{!-- <div class="alert alert-warning">Bạn cần đăng ký khóa học để có thể đánh giá.</div> --}}
       {{/if}}
-      {{!-- KẾT THÚC FORM ĐÁNH GIÁ --}}
 
-    </div> {{!-- Kết thúc Cột Trái --}}
+    </div> 
 
-    {{!-- Cột Phải: Danh sách bài giảng --}}
     <div class="col-lg-4">
       <h5 class="mb-3">Nội dung khóa học</h5>
       <div class="accordion accordion-flush border rounded-3 shadow-sm lecture-list-container" id="learnCourseAccordion"
@@ -100,7 +86,6 @@
               {{order_index}}: {{title}} ({{lectures.length}} bài)
             </button>
           </h2>
-          {{!-- Show first section expanded by default? Add 'show' class below --}}
           <div id="learn-collapse-{{section_id}}"
             class="accordion-collapse collapse {{#if (eq order_index 1)}}show{{/if}}"
             data-bs-parent="#learnCourseAccordion">
@@ -116,11 +101,6 @@
                     </span>
                     <small class="text-muted text-nowrap lecture-duration">({{formatDuration duration}})</small>
                   </div>
-                  {{!-- Optional: Progress indicator per lecture --}}
-                  {{!-- <div class="progress mt-1" style="height: 3px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0"
-                      aria-valuemin="0" aria-valuemax="100"></div>
-                  </div> --}}
                 </li>
                 {{/each}}
               </ul>
@@ -206,18 +186,14 @@
 
   .lecture-list-container .list-group-item-action:hover {
     background-color: #f8f9fa;
-    /* Light grey hover */
   }
 
-  /* Video.js adjustments */
   .video-js {
     font-size: 14px;
-    /* Adjust base font size if needed */
   }
 
   .vjs-fluid {
     padding-top: 56.25%;
-    /* Default 16:9 aspect ratio */
   }
 </style>
 {{/section}}
@@ -292,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
     root.innerHTML = `<div class="text-white p-3">Định dạng video không được hỗ trợ.</div>`;
   }
 
-  // --- Sự kiện click bài học ---
   lectureLinks.forEach(li => {
     li.addEventListener('click', () => {
       const url = li.dataset.videoUrl;
@@ -304,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Render video đầu tiên ---
   const first = document.querySelector('.lecture-link');
   if (first) {
     render(first.dataset.videoUrl);

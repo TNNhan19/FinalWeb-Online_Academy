@@ -1,13 +1,10 @@
-// models/reviewModel.js
 import db, { pool } from '../configs/db.js';
 
 async function getStudentIdFromAccountId(accountId) {
-  // Giả sử bảng students có cột account_id
   const result = await db.query('SELECT student_id FROM students WHERE account_id = $1', [accountId]);
   if (result.length > 0) {
     return result[0].student_id;
   }
-  // Quan trọng: Xử lý trường hợp không tìm thấy student_id
   console.error(`Không tìm thấy student_id cho account_id ${accountId}`);
   return null;
 }
@@ -23,7 +20,7 @@ async function getStudentIdFromAccountId(accountId) {
 export async function addOrUpdateReview(accountId, courseId, rating, feedback) {
   const studentId = await getStudentIdFromAccountId(accountId);
   if (!studentId) {
-    return false; // Không thể lưu nếu không có student_id
+    return false; 
   }
 
   // Kiểm tra xem học viên này đã đánh giá khóa học này chưa
@@ -34,7 +31,7 @@ export async function addOrUpdateReview(accountId, courseId, rating, feedback) {
   try {
     await client.query('BEGIN');
     if (existingReview.length > 0) {
-      // Đã có => Cập nhật
+      // Đã có 
       const reviewId = existingReview[0].review_id;
       const updateQuery = `
         UPDATE reviews
@@ -44,7 +41,7 @@ export async function addOrUpdateReview(accountId, courseId, rating, feedback) {
       await client.query(updateQuery, [rating, feedback, reviewId]);
       console.log(`Updated review ${reviewId} for student ${studentId}, course ${courseId}`);
     } else {
-      // Chưa có => Thêm mới
+      // Chưa có 
       const insertQuery = `
         INSERT INTO reviews (student_id, course_id, rating, feedback, created_at)
         VALUES ($1, $2, $3, $4, NOW())
@@ -57,7 +54,7 @@ export async function addOrUpdateReview(accountId, courseId, rating, feedback) {
   } catch (error) {
     await client.query('ROLLBACK');
     console.error("Lỗi khi lưu/cập nhật review:", error);
-    throw error; // Ném lỗi để route xử lý
+    throw error; 
   } finally {
     client.release();
   }

@@ -10,8 +10,6 @@
 
 </head>
 <body>
-    {{!-- Assuming you have a navbar partial, otherwise integrate it --}}
-    {{!-- {{> navbar}} --}}
 
     {{!-- Hero Section --}}
     <section class="hero" id="home">
@@ -42,7 +40,6 @@
     </section>
 
 
-    <!-- 🔍 KẾT QUẢ TÌM KIẾM KHÓA HỌC -->
     <section id="searchResultsSection" class="py-5 bg-white" style="display:none;">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
@@ -50,7 +47,6 @@
                 Kết Quả Tìm Kiếm
             </h2>
 
-            <!-- Bộ lọc sắp xếp -->
             <div class="d-flex align-items-center gap-2">
                 <label class="text-muted small me-1">Sắp xếp theo:</label>
                 <select id="sortSelect" class="form-select form-select-sm rounded-pill" style="width:180px;">
@@ -62,10 +58,8 @@
             </div>
             </div>
 
-            <!-- Danh sách khóa học -->
             <div id="searchResultsContainer" class="row g-4"></div>
 
-            <!-- Phân trang -->
             <nav id="paginationNav" class="mt-5 d-flex justify-content-center" aria-label="Pagination" style="display:none;">
             <ul class="pagination pagination-rounded mb-0">
                 <li class="page-item"><button class="page-link" id="prevPage">← Trước</button></li>
@@ -79,10 +73,8 @@
 
 
 
-        <!-- 🟢 DANH MỤC KHÓA HỌC -->
     <section class="py-5 bg-light category-section" id="categories">
         <div class="container">
-            <!-- Tiêu đề -->
             <div class="section-header text-center mb-5">
             <h2 class="section-title fw-bold text-primary">Danh Mục Khóa Học</h2>
             <p class="section-subtitle text-muted">
@@ -256,7 +248,6 @@
             </div>
 
             {{#if newestCourses.length}}
-            <!-- TẮT auto-run: data-bs-ride="false" + data-bs-interval="false" -->
             <div id="newestCarousel" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
             <div class="carousel-inner">
                 <div class="carousel-item active">
@@ -276,7 +267,6 @@
                 </div>
             </div>
 
-            <!-- Pagination dạng số -->
             <div class="carousel-indicators indicators-numeric">
                 <button type="button" data-bs-target="#newestCarousel" data-bs-slide-to="0" class="active" aria-current="true">1</button>
                 <button type="button" data-bs-target="#newestCarousel" data-bs-slide-to="1">2</button>
@@ -352,42 +342,42 @@
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4 d-flex">
                     <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
-                        <div class="feature-icon fs-1 text-primary mb-3">📚</div>
+                        <div class="feature-icon fs-1 text-primary mb-3"></div>
                         <h5 class="fw-semibold mb-2">Khóa học đa dạng</h5>
                         <p class="text-muted small">Hàng nghìn khóa học từ cơ bản đến nâng cao trong nhiều lĩnh vực khác nhau</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 d-flex">
                      <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
-                        <div class="feature-icon fs-1 text-primary mb-3">👨‍🏫</div>
+                        <div class="feature-icon fs-1 text-primary mb-3"></div>
                         <h5 class="fw-semibold mb-2">Giảng viên chuyên nghiệp</h5>
                         <p class="text-muted small">Học từ những chuyên gia hàng đầu với kinh nghiệm thực tế phong phú</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 d-flex">
                      <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
-                        <div class="feature-icon fs-1 text-primary mb-3">⏰</div>
+                        <div class="feature-icon fs-1 text-primary mb-3"></div>
                         <h5 class="fw-semibold mb-2">Học linh hoạt</h5>
                         <p class="text-muted small">Học theo tốc độ của bạn, mọi lúc mọi nơi với thiết bị di động hoặc máy tính</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 d-flex">
                      <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
-                        <div class="feature-icon fs-1 text-primary mb-3">🎓</div>
+                        <div class="feature-icon fs-1 text-primary mb-3"></div>
                         <h5 class="fw-semibold mb-2">Chứng chỉ hoàn thành</h5>
                         <p class="text-muted small">Nhận chứng chỉ được công nhận sau khi hoàn thành khóa học</p>
                     </div>
                 </div>
                  <div class="col-md-6 col-lg-4 d-flex">
                      <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
-                        <div class="feature-icon fs-1 text-primary mb-3">💬</div>
+                        <div class="feature-icon fs-1 text-primary mb-3"></div>
                         <h5 class="fw-semibold mb-2">Hỗ trợ 24/7</h5>
                         <p class="text-muted small">Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc của bạn</p>
                     </div>
                 </div>
                  <div class="col-md-6 col-lg-4 d-flex">
                      <div class="feature-card text-center p-4 bg-white rounded-4 border shadow-sm w-100">
-                        <div class="feature-icon fs-1 text-primary mb-3">💰</div>
+                        <div class="feature-icon fs-1 text-primary mb-3"></div>
                         <h5 class="fw-semibold mb-2">Giá cả phải chăng</h5>
                         <p class="text-muted small">Chi phí hợp lý với chất lượng đào tạo cao cấp</p>
                     </div>
@@ -407,10 +397,6 @@
         </div>
     </section>
 
-    {{!-- Footer should be in main.hbs layout --}}
-    {{!-- {{> footer}} --}}
-
-    {{!-- Modals (Consider moving to main layout if used globally) --}}
     <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -419,7 +405,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="loginForm"> {{!-- Needs proper action/method for server-side --}}
+                    <form id="loginForm"> 
                         <div class="mb-3">
                             <label for="loginEmail" class="form-label">Email</label>
                             <input type="email" class="form-control" id="loginEmail" required>
@@ -446,7 +432,7 @@
                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                  <div class="modal-body">
-                    <form id="registerForm"> {{!-- Needs proper action/method for server-side --}}
+                    <form id="registerForm"> 
                         <div class="mb-3">
                             <label for="registerEmail" class="form-label">Email</label>
                             <input type="email" class="form-control" id="registerEmail" required>
@@ -468,12 +454,6 @@
             </div>
         </div>
     </div>
-
-    {{!-- Course Detail Modal Placeholder (Remove if using separate page) --}}
-    {{!-- <div class="modal fade course-modal" id="courseModal" tabindex="-1" aria-hidden="true"> ... </div> --}}
-
-    {{!-- Include Bootstrap JS if not already in main.hbs --}}
-    {{!-- Your custom JS --}}
-    <script type="module" src="/js/main.js"></script> {{!-- Check path --}}
+    <script type="module" src="/js/main.js"></script> 
 </body>
 </html>
