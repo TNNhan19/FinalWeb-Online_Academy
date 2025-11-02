@@ -7,8 +7,23 @@
 
 <div class="row g-4">
   <div class="col-md-5">
-    <form method="POST" action="/instructor/profile/update" class="card border-0 shadow-sm p-4 rounded-4">
+
+    <form method="POST" action="/instructor/profile/update" enctype="multipart/form-data"
+      class="card border-0 shadow-sm p-4 rounded-4">
       <h5 class="fw-semibold mb-3 text-primary"><i class="bi bi-pencil-square me-2"></i>Chỉnh sửa thông tin</h5>
+
+      <div class="mb-3 text-center">
+        {{#if profile.avatar_url}}
+        <img src="{{profile.avatar_url}}" alt="Avatar" class="rounded-circle shadow-sm mb-3"
+          style="width:120px; height:120px; object-fit:cover;">
+        {{else}}
+        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3 shadow-sm"
+          style="width:120px; height:120px;">
+          <i class="bi bi-person-circle fs-1 text-secondary"></i>
+        </div>
+        {{/if}}
+        <input type="file" name="avatar_file" accept="image/*" class="form-control mt-2">
+      </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold">Họ và tên</label>
@@ -22,7 +37,16 @@
 
       <div class="mb-3">
         <label class="form-label fw-semibold">Giới thiệu bản thân</label>
-        <textarea name="bio" class="form-control" rows="4" placeholder="Viết đôi lời giới thiệu về bản thân...">{{profile.bio}}</textarea>
+        <textarea name="bio" class="form-control" rows="4"
+          placeholder="Viết đôi lời giới thiệu về bản thân...">{{profile.bio}}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Tổng khóa học</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="bi bi-journal-text text-primary"></i></span>
+          <input type="text" class="form-control" value="{{profile.total_courses}}" readonly>
+        </div>
       </div>
 
       <div class="mb-3">
@@ -32,6 +56,7 @@
           <input type="text" class="form-control" value="{{profile.total_students}}" readonly>
         </div>
       </div>
+
 
       <div class="text-end">
         <button class="btn btn-primary px-4">
@@ -73,7 +98,8 @@
                 {{#if (eq status "complete")}}
                 <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Hoàn thành</span>
                 {{else}}
-                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Chưa hoàn thành</span>
+                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Chưa hoàn
+                  thành</span>
                 {{/if}}
               </td>
             </tr>

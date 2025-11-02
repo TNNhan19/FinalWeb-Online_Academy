@@ -54,7 +54,7 @@ router.get("/", async (req, res) => {
       admin: { name: adminName },
     });
   } catch (err) {
-    console.error("❌ Lỗi khi tải trang admin:", err);
+    console.error("Lỗi khi tải trang admin:", err);
     res.status(500).send("Không thể tải trang quản trị viên");
   }
 });
@@ -140,29 +140,34 @@ router.post("/categories/delete/:id", async (req, res) => {
 // Quản lý khoá học
 router.get("/courses", async (req, res) => {
   try {
-    const { category } = req.query;
-    let rows;
+    const { category, instructor } = req.query;
+    const params = [];
+    const conditions = [];
 
     if (category) {
-      const result = await pool.query(`
-        SELECT c.course_id, c.title, c.current_price, cat.name AS category, i.name AS instructor
-        FROM courses c
-        LEFT JOIN categories cat ON cat.category_id = c.category_id
-        LEFT JOIN instructors i ON i.instructor_id = c.instructor_id
-        WHERE c.category_id = $1
-        ORDER BY c.course_id ASC
-      `, [category]);
-      rows = result.rows;
-    } else {
-      const result = await pool.query(`
-        SELECT c.course_id, c.title, c.current_price, cat.name AS category, i.name AS instructor
-        FROM courses c
-        LEFT JOIN categories cat ON cat.category_id = c.category_id
-        LEFT JOIN instructors i ON i.instructor_id = c.instructor_id
-        ORDER BY c.course_id ASC
-      `);
-      rows = result.rows;
+      params.push(category);
+      conditions.push(`c.category_id = $${params.length}`);
     }
+
+    if (instructor) {
+      params.push(instructor);
+      conditions.push(`c.instructor_id = $${params.length}`);
+    }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    const query = `
+    SELECT 
+      c.course_id, c.title, c.current_price, c.status,
+      cat.name AS category, i.name AS instructor
+    FROM courses c
+    LEFT JOIN categories cat ON cat.category_id = c.category_id
+    LEFT JOIN instructors i ON i.instructor_id = c.instructor_id
+    ${whereClause}
+    ORDER BY c.course_id ASC
+  `;
+
+    const { rows } = await pool.query(query, params);
 
     const [catRes, instRes] = await Promise.all([
       pool.query("SELECT category_id, name FROM categories ORDER BY name ASC"),
@@ -172,11 +177,11 @@ router.get("/courses", async (req, res) => {
     res.render("admin/courses", {
       layout: "main",
       courses: rows,
-      selectedCategory: category || null,
-      categories: catRes.rows,     
-      instructors: instRes.rows,   
+      selectedCategory: category || "",
+      selectedInstructor: instructor || "",
+      categories: catRes.rows,
+      instructors: instRes.rows,
     });
-
   } catch (err) {
     console.error("Lỗi khi tải khóa học:", err);
     res.status(500).send("Không thể tải danh sách khóa học.");
@@ -189,7 +194,6 @@ router.post("/courses/delete/:id", async (req, res) => {
   try {
     await pool.query('BEGIN');
 
-    // Xóa các dữ liệu liên quan theo thứ tự
     await pool.query("DELETE FROM course_views WHERE course_id=$1", [id]);
     await pool.query("DELETE FROM lectures WHERE section_id IN (SELECT section_id FROM course_sections WHERE course_id=$1)", [id]);
     await pool.query("DELETE FROM course_sections WHERE course_id=$1", [id]);
@@ -211,7 +215,32 @@ router.post("/courses/delete/:id", async (req, res) => {
   }
 });
 
-// Thêm khóa học mới (Admin)
+// Cập nhật trạng thái khóa học
+router.post("/courses/update-status/:id", async (req, res) => {
+  const { id } = req.params;
+  const { newStatus } = req.body;
+
+  try {
+    const validStatuses = ["incomplete", "complete", "active", "suspended"];
+    if (!validStatuses.includes(newStatus)) {
+      return res.status(400).send("Trạng thái không hợp lệ.");
+    }
+
+    await pool.query("UPDATE courses SET status = $1 WHERE course_id = $2", [
+      newStatus,
+      id,
+    ]);
+
+    console.log(`Đã đổi trạng thái khóa học ${id} → ${newStatus}`);
+    const backURL = req.get("Referer") || "/admin/courses";
+    res.redirect(backURL);
+  } catch (err) {
+    console.error("Lỗi khi cập nhật trạng thái khóa học:", err);
+    res.status(500).send("Không thể thay đổi trạng thái khóa học.");
+  }
+});
+
+// Thêm khóa học mới
 router.post("/courses/add", upload.single("image"), async (req, res) => {
   try {
     const {
@@ -259,22 +288,23 @@ router.get("/users", async (req, res) => {
   try {
 
     const admins = await pool.query(`
-      SELECT account_id, full_name, email, role, created_at 
+      SELECT account_id, full_name, email, role, is_active, created_at 
       FROM accounts 
       WHERE role = 'admin' 
       ORDER BY account_id ASC
     `);
 
     const instructors = await pool.query(`
-      SELECT 
-        i.instructor_id, 
-        i.name, 
-        a.email, 
-        i.total_students
-      FROM instructors i
-      JOIN accounts a ON i.account_id = a.account_id
-      ORDER BY i.instructor_id ASC
-    `);
+    SELECT 
+      i.instructor_id, 
+      i.name, 
+      a.email, 
+      i.total_students,
+      a.is_active
+    FROM instructors i
+    JOIN accounts a ON i.account_id = a.account_id
+    ORDER BY i.instructor_id ASC
+`);
 
     const unregistered = await pool.query(`
       SELECT a.account_id, a.full_name AS name, a.email
@@ -285,7 +315,7 @@ router.get("/users", async (req, res) => {
     `);
 
     const students = await pool.query(`
-      SELECT account_id AS student_id, full_name AS name, email, created_at
+      SELECT account_id AS student_id, full_name AS name, email, is_active, created_at
       FROM accounts
       WHERE role = 'student'
       ORDER BY account_id ASC
@@ -341,16 +371,28 @@ router.get("/users/view/:role/:id", async (req, res) => {
       profile = rows[0];
     } else if (role === "instructor") {
       const { rows } = await pool.query(
-        `SELECT i.*, a.email, a.full_name 
-     FROM instructors i 
-     JOIN accounts a ON i.account_id = a.account_id 
-     WHERE i.instructor_id = $1`,
+        `SELECT 
+        i.*, 
+        a.email, 
+        a.full_name, 
+        i.avatar_url AS avatar_url,
+          COALESCE(SUM(e.student_count), 0) AS total_students
+          FROM instructors i
+          JOIN accounts a ON i.account_id = a.account_id
+          LEFT JOIN (
+        SELECT c.instructor_id, COUNT(DISTINCT en.student_id) AS student_count
+        FROM enrollments en
+        JOIN courses c ON en.course_id = c.course_id
+        GROUP BY c.instructor_id
+        ) e ON e.instructor_id = i.instructor_id
+        WHERE i.instructor_id = $1
+        GROUP BY i.instructor_id, a.email, a.full_name, i.avatar_url`,
         [id]
       );
       profile = rows[0];
 
       const { rows: courses } = await pool.query(
-        `SELECT course_id, title, status, total_lectures, total_hours, current_price 
+        `SELECT course_id, title, status, total_lectures, total_hours, current_price, image_url 
      FROM courses WHERE instructor_id = $1 ORDER BY course_id ASC`,
         [id]
       );
@@ -365,7 +407,7 @@ router.get("/users/view/:role/:id", async (req, res) => {
         pageTitle: "Chi tiết người dùng",
         profile,
         role,
-        categories, 
+        categories,
       });
     }
 
@@ -424,7 +466,6 @@ router.post("/users/update/:role/:id", async (req, res) => {
   }
 });
 
-// Xóa Admin
 router.post("/users/delete/:role/:id", async (req, res) => {
   const { role, id } = req.params;
 
@@ -432,27 +473,30 @@ router.post("/users/delete/:role/:id", async (req, res) => {
     await pool.query("BEGIN");
 
     if (role === "admin" || role === "student") {
-
       await pool.query("DELETE FROM accounts WHERE account_id = $1", [id]);
-    } else if (role === "instructor") {
+    }
 
+    else if (role === "instructor") {
       const { rows: inst } = await pool.query(
-        "SELECT instructor_id FROM instructors WHERE instructor_id = $1",
+        "SELECT account_id FROM instructors WHERE instructor_id = $1",
         [id]
       );
 
-      if (inst.length) {
-        const instructorId = inst[0].instructor_id;
-
-        await pool.query("DELETE FROM course_views WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [instructorId]);
-        await pool.query("DELETE FROM lectures WHERE section_id IN (SELECT section_id FROM course_sections WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1))", [instructorId]);
-        await pool.query("DELETE FROM course_sections WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [instructorId]);
-        await pool.query("DELETE FROM reviews WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [instructorId]);
-        await pool.query("DELETE FROM enrollments WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [instructorId]);
-        await pool.query("DELETE FROM courses WHERE instructor_id=$1", [instructorId]);
-
-        await pool.query("DELETE FROM instructors WHERE instructor_id=$1", [instructorId]);
+      const accountId = inst[0]?.account_id;
+      if (!accountId) {
+        await pool.query("ROLLBACK");
+        return res.status(404).send("Không tìm thấy giảng viên để xóa.");
       }
+
+      await pool.query("DELETE FROM course_views WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [id]);
+      await pool.query("DELETE FROM lectures WHERE section_id IN (SELECT section_id FROM course_sections WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1))", [id]);
+      await pool.query("DELETE FROM course_sections WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [id]);
+      await pool.query("DELETE FROM reviews WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [id]);
+      await pool.query("DELETE FROM enrollments WHERE course_id IN (SELECT course_id FROM courses WHERE instructor_id=$1)", [id]);
+      await pool.query("DELETE FROM courses WHERE instructor_id=$1", [id]);
+
+      await pool.query("DELETE FROM instructors WHERE instructor_id=$1", [id]);
+      await pool.query("DELETE FROM accounts WHERE account_id=$1", [accountId]);
     }
 
     await pool.query("COMMIT");
@@ -461,6 +505,40 @@ router.post("/users/delete/:role/:id", async (req, res) => {
     await pool.query("ROLLBACK");
     console.error("Lỗi khi xóa người dùng:", err);
     res.status(500).send("Không thể xóa người dùng. Vui lòng thử lại.");
+  }
+});
+
+//Khóa / Mở tài khoản học viên, giảng viên hoặc admin
+router.post("/users/toggle/:role/:id", async (req, res) => {
+  const { role, id } = req.params;
+
+  try {
+    let accountId;
+    if (role === "instructor") {
+      const { rows } = await pool.query(
+        "SELECT account_id FROM instructors WHERE instructor_id=$1",
+        [id]
+      );
+      accountId = rows[0]?.account_id;
+    } else {
+      accountId = id;
+    }
+
+    if (!accountId) {
+      return res.status(404).send("Không tìm thấy tài khoản để khóa/mở.");
+    }
+
+    const updated = await pool.query(
+      "UPDATE accounts SET is_active = NOT COALESCE(is_active, TRUE) WHERE account_id=$1 RETURNING is_active",
+      [accountId]
+    );
+
+    console.log(`Toggled user ${accountId}: is_active = ${updated.rows[0].is_active}`);
+
+    res.redirect("/admin/users");
+  } catch (err) {
+    console.error("Lỗi khi khóa/mở tài khoản:", err);
+    res.status(500).send("Không thể cập nhật trạng thái tài khoản.");
   }
 });
 

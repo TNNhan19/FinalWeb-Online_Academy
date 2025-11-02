@@ -104,7 +104,13 @@ router.post("/login", async (req, res) => {
       return res.render("auth/login", { error: "Mật khẩu không chính xác!" });
     }
 
-    // ✅ Thêm instructor_id nếu là giảng viên
+    if (user.is_active === false) {
+      return res.render("auth/login", {
+        error: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+      });
+    }
+
+
     let instructor_id = null;
     if (user.role === "instructor") {
       const { pool } = await import("../configs/db.js");
@@ -115,7 +121,6 @@ router.post("/login", async (req, res) => {
       instructor_id = result.rows[0]?.instructor_id || null;
     }
 
-    // ✅ Lưu session đầy đủ
     req.session.user = {
       account_id: user.account_id,
       email: user.email,
@@ -124,7 +129,6 @@ router.post("/login", async (req, res) => {
       instructor_id,
     };
 
-    // ✅ Điều hướng theo role
     if (user.role === "instructor") {
       return res.redirect("/instructor");
     } else if (user.role === "admin") {
@@ -133,7 +137,7 @@ router.post("/login", async (req, res) => {
       return res.redirect("/");
     }
   } catch (error) {
-    console.error("❌ Lỗi khi đăng nhập:", error);
+    console.error("Lỗi khi đăng nhập:", error);
     res.render("auth/login", {
       error: "Đăng nhập thất bại. Vui lòng thử lại!",
     });
@@ -220,7 +224,7 @@ router.get("/callback", async (req, res) => {
   try {
     console.log("Using code_verifier from session:", !!req.session.code_verifier);
     console.log("Code verifier value:", req.session.code_verifier ? req.session.code_verifier.substring(0, 20) + '...' : 'null');
-    
+
     // Manual token exchange using fetch/axios to avoid client library parameter issues
     if (req.session.code_verifier) {
       const tokenUrl = `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=pkce`;
@@ -228,9 +232,9 @@ router.get("/callback", async (req, res) => {
         auth_code: authCode,
         code_verifier: req.session.code_verifier
       };
-      
+
       console.log("Token exchange request body:", JSON.stringify(tokenBody));
-      
+
       const tokenResp = await axios.post(tokenUrl, tokenBody, {
         headers: {
           'Content-Type': 'application/json',
@@ -238,10 +242,10 @@ router.get("/callback", async (req, res) => {
           'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
         }
       });
-      
+
       sUser = tokenResp.data?.user;
       console.log("OAuth token exchange successful, user:", sUser?.email);
-      
+
       // Clear code_verifier from session
       delete req.session.code_verifier;
     } else {
@@ -255,7 +259,7 @@ router.get("/callback", async (req, res) => {
       stack: exchangeErr?.stack,
     });
     return res.status(500).send("OAuth callback error: " + (exchangeErr?.response?.data?.msg || exchangeErr.message));
-  }  if (!sUser) return res.redirect("/auth/login");
+  } if (!sUser) return res.redirect("/auth/login");
   if (!sUser) return res.redirect("/auth/login");
 
   const email = sUser.email;
