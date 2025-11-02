@@ -220,14 +220,66 @@ router.post("/update", async (req, res) => {
   }
 });
 
-// 🧩 Xem danh sách yêu thích
 router.get("/watchlist", async (req, res) => {
   const user = req.user;
-  const list = await getWatchlist(user.account_id);
-  res.render("profile/watchlist", {
-    title: "Khoá học yêu thích",
-    courses: list,
-  });
+  if (!user) return res.redirect("/auth/login");
+
+  try {
+    // Lấy toàn bộ khóa yêu thích
+    const favorites = await getWatchlist(user.account_id);
+
+    // Lấy danh sách khóa học mà user đã đăng ký
+    const enrolledCourses = await getEnrolledCourses(user.account_id);
+    const enrolledById = {};
+    enrolledCourses.forEach(c => {
+      enrolledById[c.course_id] = c; // includes progress, enrolled_at
+    });
+
+    // Phân loại favorites thành đã đăng ký và chưa đăng ký, đồng thời gắn dữ liệu enrollment nếu có
+    const enrolledFavs = [];
+    const notEnrolledFavs = [];
+
+    for (const fav of favorites) {
+      const enroll = enrolledById[fav.course_id];
+      if (enroll) {
+        // Merge course info with enrollment metadata (progress, enrolled_at)
+        enrolledFavs.push({
+          ...fav,
+          is_enrolled: true,
+          progress: enroll.progress != null ? enroll.progress : 0,
+          enrolled_at: enroll.enrolled_at || enroll.created_at,
+          price: fav.price || 0,
+          discount_price: fav.discount_price || 0
+        });
+      } else {
+        notEnrolledFavs.push({
+          ...fav,
+          is_enrolled: false,
+          price: fav.price || 0,
+          discount_price: fav.discount_price || 0
+        });
+      }
+    }
+
+    // Debug logs: print counts and a sample of data sent to template
+    console.log('Watchlist totals -> favorites:', favorites.length, 'enrolledFavorites:', enrolledFavs.length, 'notEnrolledFavorites:', notEnrolledFavs.length);
+    if (enrolledFavs.length > 0) console.log('Sample enrolledFav:', enrolledFavs[0]);
+    if (notEnrolledFavs.length > 0) console.log('Sample notEnrolledFav:', notEnrolledFavs[0]);
+
+    // Render watchlist with enrolled favorites first, then non-enrolled
+    res.render("profile/watchlist", {
+      title: "Khóa học yêu thích",
+      enrolledCourses: enrolledFavs,
+      notEnrolledCourses: notEnrolledFavs,
+      helpers: {
+        formatDate: date => date ? new Date(date).toLocaleDateString("vi-VN") : "",
+        formatPrice: p => p != null && !isNaN(p) ? new Intl.NumberFormat("vi-VN").format(p) : ""
+      }
+    });
+  } catch (err) {
+    console.error("Error fetching watchlist:", err);
+    res.status(500).send("Có lỗi xảy ra khi tải danh sách khóa học yêu thích.");
+  }
 });
 
 // 🧩 Thêm/Xóa khóa học yêu thích (API endpoints)
@@ -253,7 +305,6 @@ router.post("/watchlist/remove/:id", async (req, res) => {
   }
 });
 
-// 🧩 Danh sách khóa học đã đăng ký
 router.get("/enrolled", async (req, res) => {
   const user = req.user;
   if (!user) return res.redirect("/auth/login");
@@ -271,19 +322,53 @@ router.get("/enrolled", async (req, res) => {
       is_in_watchlist: await isInWatchlist(user.account_id, course.course_id)
     })));
 
+    // Merge enrollment metadata into watchlist view so favorite list shows enrolled courses first
+    const enrolledById = {};
+    enrolledCourses.forEach(c => {
+      enrolledById[c.course_id] = c; // includes progress, enrolled_at
+    });
+
+    const enrolledFavs = [];
+    const notEnrolledFavs = [];
+
+    for (const fav of watchlistCourses) {
+      const enroll = enrolledById[fav.course_id];
+      if (enroll) {
+        enrolledFavs.push({
+          ...fav,
+          is_enrolled: true,
+          progress: enroll.progress != null ? enroll.progress : 0,
+          enrolled_at: enroll.enrolled_at || enroll.created_at,
+          price: fav.price || 0,
+          discount_price: fav.discount_price || 0
+        });
+      } else {
+        notEnrolledFavs.push({
+          ...fav,
+          is_enrolled: false,
+          price: fav.price || 0,
+          discount_price: fav.discount_price || 0
+        });
+      }
+    }
+
+    const watchlistMerged = enrolledFavs.concat(notEnrolledFavs);
+
     res.render("profile/enrolled", {
       title: "Khoá học của tôi",
       courses: enrolledWithWatchlist,
-      watchlistCourses: watchlistCourses,
+      watchlistCourses: watchlistMerged,
       helpers: {
-        formatDate: function(date) {
-          return new Date(date).toLocaleDateString('vi-VN');
+        formatDate: function (date) {
+          return date ? new Date(date).toLocaleDateString("vi-VN") : "";
         },
-        formatPrice: function(price) {
-          return new Intl.NumberFormat('vi-VN').format(price);
-        }
-      }
+        formatPrice: function (price) {
+          if (price == null || isNaN(price)) return "";
+          return new Intl.NumberFormat("vi-VN").format(price);
+        },
+      },
     });
+
   } catch (error) {
     console.error("Error fetching courses:", error);
     res.status(500).send("Có lỗi xảy ra khi tải danh sách khóa học");
