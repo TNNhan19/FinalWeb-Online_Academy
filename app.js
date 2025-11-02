@@ -195,6 +195,27 @@ app.use("/learn", Learn);
 app.get("/home", (req, res) => res.redirect("/"));
 app.use("/category", categoryRoute);
 app.use("/categories", categoryRoutes);
+app.use("/search", searchApi);
+app.use("/api/search", searchApi);
+
+app.engine("hbs", engine({
+  extname: ".hbs",
+  helpers: {
+    slice: function (arr, start, end) {
+      if (!Array.isArray(arr)) return [];
+      return arr.slice(start, end);
+    },
+  }
+}));
+app.engine("hbs", engine({
+  extname: ".hbs",
+  partialsDir: path.join(__dirname, "views/partials"),
+  helpers: {
+    slice: (arr, start, end) => Array.isArray(arr) ? arr.slice(start, end) : [],
+  },
+}));
+
+
 app.use("/api/search", searchApi);
 app.use(express.static("Public"));
 
