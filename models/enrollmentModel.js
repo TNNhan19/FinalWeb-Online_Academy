@@ -3,7 +3,6 @@ import db from "../configs/db.js";
 // Đăng ký khóa học mới
 export const enrollCourse = async (account_id, course_id) => {
   try {
-    // Lấy student_id từ account_id
     const studentQuery = `
       SELECT student_id FROM students 
       WHERE account_id = $1
@@ -12,8 +11,6 @@ export const enrollCourse = async (account_id, course_id) => {
     if (!student.length) {
       throw new Error('Student not found');
     }
-
-    // Kiểm tra xem đã đăng ký chưa
     const checkQuery = `
       SELECT * FROM enrollments 
       WHERE student_id = $1 AND course_id = $2
@@ -22,8 +19,6 @@ export const enrollCourse = async (account_id, course_id) => {
     if (existing.length > 0) {
       throw new Error('Already enrolled');
     }
-
-    // Thêm vào enrollments
     const enrollQuery = `
       INSERT INTO enrollments (student_id, course_id, enrolled_at, progress)
       VALUES ($1, $2, CURRENT_TIMESTAMP, 0)
@@ -36,8 +31,7 @@ export const enrollCourse = async (account_id, course_id) => {
     throw error;
   }
 };
-
-// Kiểm tra người dùng đã đăng ký khóa học chưa
+// Kiểm tra đăng ký khóa học
 export const isEnrolled = async (account_id, course_id) => {
   try {
     const query = `
@@ -54,7 +48,6 @@ export const isEnrolled = async (account_id, course_id) => {
     throw error;
   }
 };
-
 // Cập nhật tiến độ học
 export const updateProgress = async (account_id, course_id, progress) => {
   try {
@@ -74,8 +67,7 @@ export const updateProgress = async (account_id, course_id, progress) => {
     throw error;
   }
 };
-
-// Lấy tất cả khóa học đã đăng ký của user
+// Lấy tất cả khóa học đã đăng ký
 export const getEnrolledCourses = async (account_id) => {
   try {
     const query = `

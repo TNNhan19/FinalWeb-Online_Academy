@@ -1,13 +1,10 @@
 import db, { pool } from '../configs/db.js';
 
 async function getStudentId(accountId) {
-  // Check if account_id exists in students table
   const result = await db.query('SELECT student_id FROM students WHERE account_id = $1', [accountId]);
   if (result.length > 0) {
     return result[0].student_id;
   }
-
-  // Fallback: Check if account_id exists in accounts table with role 'student', then find the student_id. This is a safety check.
   const accountResult = await db.query('SELECT account_id FROM accounts WHERE account_id = $1 AND role = $2', [accountId, 'student']);
   if (accountResult.length > 0) {  
     console.warn(`[learnModel] No student_id found for account_id ${accountId} in students table.`);
@@ -46,8 +43,6 @@ export async function updateCourseProgress(studentId, courseId) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-
-    // 1. Get total number of lectures in the course by counting lectures
     const totalLecturesResult = await client.query(
       `
       SELECT COUNT(l.lecture_id) AS total
@@ -68,8 +63,6 @@ export async function updateCourseProgress(studentId, courseId) {
       console.log(`[learnModel] Course ${courseId} has 0 lectures. Progress set to 0.`);
       return 0;
     }
-
-    // 2. Count completed lectures for this student in this course
     const completedLecturesResult = await client.query(
       `
       SELECT COUNT(DISTINCT lp.lecture_id)
@@ -81,11 +74,7 @@ export async function updateCourseProgress(studentId, courseId) {
       [studentId, courseId]
     );
     const completedLectures = parseInt(completedLecturesResult.rows[0].count, 10);
-
-    // 3. Calculate new progress percentage
     const newProgress = Math.round((completedLectures / totalLectures) * 100);
-
-    // 4. Update the enrollments table
     const updateResult = await client.query(
       `
       UPDATE enrollments
@@ -112,7 +101,6 @@ export async function updateCourseProgress(studentId, courseId) {
 
 export async function getCompletedLectures(studentId, courseId) {
   if (!studentId || !courseId) return [];
-
   const query = `
     SELECT lp.lecture_id
     FROM lecture_progress lp
@@ -122,7 +110,6 @@ export async function getCompletedLectures(studentId, courseId) {
   `;
   
   const results = await db.query(query, [studentId, courseId]);
-  return results.map(row => row.lecture_id); // Return just an array of IDs
+  return results.map(row => row.lecture_id); 
 }
-
 export { getStudentId };
