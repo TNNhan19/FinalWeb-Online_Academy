@@ -1,33 +1,77 @@
 import express from "express";
 import * as courseModel from "../models/courseModel.js";
 import db from "../configs/db.js";
+import { getTopCategoriesByEnrollment } from "../models/categoryModel.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const categories = await db.query(`
-      SELECT c1.category_id, c1.name AS category_name, c2.name AS parent_name
-      FROM categories c1
-      LEFT JOIN categories c2 ON c1.parent_id = c2.category_id
-      ORDER BY c2.name NULLS FIRST, c1.name;
+    // 🧮 Lấy thống kê tổng số lượng
+    const [courseCountRes, studentCountRes, instructorCountRes] = await Promise.all([
+    db.query("SELECT COUNT(*) FROM courses WHERE status <> 'suspended'"),
+      db.query("SELECT COUNT(*) FROM students"),
+      db.query("SELECT COUNT(*) FROM instructors"),
+    ]);
+
+    // ✅ Với kiểu trả về mảng (không có .rows)
+    const courseCount = Number(courseCountRes[0]?.count || 0);
+    const studentCount = Number(studentCountRes[0]?.count || 0);
+    const instructorCount = Number(instructorCountRes[0]?.count || 0);
+
+    // 🏷️ Lấy danh mục và gom nhóm cha - con
+    const allCategories = await db.query(`
+      SELECT category_id, name, parent_id
+      FROM categories
+      ORDER BY parent_id NULLS FIRST, name;
     `);
 
-    const popularCourses = await courseModel.findPopular(10);
-    const newCourses = await courseModel.findAll();
-    const newestCourses = newCourses.slice(0, 10);
+    // 🧩 Gom nhóm thành 2 cấp
+    const categories = allCategories
+      .filter(cat => !cat.parent_id)
+      .map(parent => ({
+        ...parent,
+        subcategories: allCategories.filter(c => c.parent_id === parent.category_id),
+      }));
 
+    // 🔥 Các danh sách khóa học
+    const [
+      bestSellers,
+      topViewedCourses,
+      weeklyHighlights,
+      newestCourses,
+      topCategories
+    ] = await Promise.all([
+      courseModel.findBestSellers(4),
+      courseModel.findTopViewed(10),
+      courseModel.findWeeklyHighlights(4),
+      courseModel.findNewestCourses(10),
+      getTopCategoriesByEnrollment()
+    ]);
+
+    // 🖼️ Render ra view
     res.render("home/index", {
       pageTitle: "Online Academy",
-      categories,
-      popularCourses,
-      newestCourses,
+      layout: "main",
       user: req.session.user || null,
+      categories,           // ✅ danh mục 2 cấp
+      bestSellers,
+      topViewedCourses,
+      weeklyHighlights,
+      newestCourses,
+      topCategories,
+      stats: {
+        courses: courseCount,
+        students: studentCount,
+        instructors: instructorCount,
+      },
     });
+
   } catch (error) {
     console.error("❌ Lỗi khi tải trang chủ:", error);
     res.render("home/index", {
       pageTitle: "Online Academy",
+      layout: "main",
       error: "Không thể tải dữ liệu từ cơ sở dữ liệu!",
     });
   }
